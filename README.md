@@ -1,5 +1,7 @@
 # ⚡ howaiworks.io
 
+*Open source education on how AI works (NVIDIA GTC 2026 submission)*
+
 ### What Does AI Actually See?
 
 An open-source, interactive lesson where students discover how AI really works — by typing their own words and watching what happens.
