@@ -1,0 +1,91 @@
+import { useCallback, useRef, useState } from 'react'
+
+/**
+ * useTokenizer — client-side BPE tokenization via js-tiktoken
+ * 
+ * js-tiktoken is a JavaScript port of OpenAI's tiktoken.
+ * It loads the cl100k_base encoding (used by GPT-4) and gives us
+ * real token IDs and boundaries — no backend needed.
+ * 
+ * We lazy-load the encoder on first use since the vocab file is ~3MB.
+ */
+
+let encoderPromise = null
+
+async function getEncoder() {
+  if (!encoderPromise) {
+    encoderPromise = (async () => {
+      // js-tiktoken exports getEncoding for standard encodings
+      const { getEncoding } = await import('js-tiktoken')
+      return getEncoding('cl100k_base')
+    })()
+  }
+  return encoderPromise
+}
+
+export function useTokenizer() {
+  const [tokens, setTokens] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isReady, setIsReady] = useState(false)
+  const encoderRef = useRef(null)
+
+  const initialize = useCallback(async () => {
+    if (encoderRef.current) return
+    setIsLoading(true)
+    try {
+      encoderRef.current = await getEncoder()
+      setIsReady(true)
+    } catch (err) {
+      console.error('Failed to load tokenizer:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const tokenize = useCallback(async (text) => {
+    if (!text) {
+      setTokens([])
+      return []
+    }
+
+    // Ensure encoder is loaded
+    if (!encoderRef.current) {
+      await initialize()
+    }
+
+    const encoder = encoderRef.current
+    if (!encoder) return []
+
+    // Get token IDs
+    const ids = encoder.encode(text)
+
+    // Decode each token individually to get the text for each one
+    const result = []
+    let byteOffset = 0
+
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i]
+      // Decode single token to get its text representation
+      const decoded = encoder.decode([id])
+      
+      result.push({
+        id,
+        text: decoded,
+        // Display version: show space indicator for leading spaces
+        display: decoded.startsWith(' ') ? '⎵' + decoded.slice(1) : decoded,
+        index: i,
+      })
+    }
+
+    setTokens(result)
+    return result
+  }, [initialize])
+
+  return {
+    tokens,
+    tokenize,
+    initialize,
+    isLoading,
+    isReady,
+  }
+}

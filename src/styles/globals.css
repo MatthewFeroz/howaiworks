@@ -1,0 +1,71 @@
+:root {
+  --bg-deep: #0a0a0b;
+  --bg-surface: #141416;
+  --bg-elevated: #1c1c20;
+  --nvidia-green: #76B900;
+  --nvidia-green-dim: rgba(118, 185, 0, 0.15);
+  --nvidia-green-glow: rgba(118, 185, 0, 0.4);
+  --text-primary: #e8e8ed;
+  --text-secondary: #8a8a96;
+  --text-dim: #55555f;
+  --border: #2a2a30;
+  --font-body: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Fira Code', monospace;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(118, 185, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(118, 185, 0, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── TOKEN COLORS ── */
+.token-color-0  { background: rgba(118,185,0,0.12);  border-color: rgba(118,185,0,0.3);  color: #a8d86e; }
+.token-color-1  { background: rgba(0,163,255,0.12);  border-color: rgba(0,163,255,0.3);  color: #6ec0e8; }
+.token-color-2  { background: rgba(255,107,53,0.12);  border-color: rgba(255,107,53,0.3);  color: #e8956e; }
+.token-color-3  { background: rgba(189,85,236,0.12); border-color: rgba(189,85,236,0.3); color: #c58ee8; }
+.token-color-4  { background: rgba(255,198,0,0.12);  border-color: rgba(255,198,0,0.3);  color: #e8d06e; }
+.token-color-5  { background: rgba(0,210,178,0.12);  border-color: rgba(0,210,178,0.3);  color: #6ee8cc; }
+.token-color-6  { background: rgba(255,82,119,0.12); border-color: rgba(255,82,119,0.3); color: #e87a96; }
+.token-color-7  { background: rgba(130,148,255,0.12);border-color: rgba(130,148,255,0.3);color: #94a0e8; }
+.token-color-8  { background: rgba(255,159,243,0.12);border-color: rgba(255,159,243,0.3);color: #e8a0d6; }
+.token-color-9  { background: rgba(162,221,90,0.12); border-color: rgba(162,221,90,0.3); color: #b0d87a; }
+.token-color-10 { background: rgba(255,138,101,0.12);border-color: rgba(255,138,101,0.3);color: #e8a07a; }
+.token-color-11 { background: rgba(73,190,255,0.12); border-color: rgba(73,190,255,0.3); color: #7ac0e8; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .container { padding: 0 16px; }
+}
