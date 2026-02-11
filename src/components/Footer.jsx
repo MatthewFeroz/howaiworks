@@ -1,10 +1,19 @@
 export default function Footer() {
+  const linkStyle = {
+    color: 'var(--nvidia-green)',
+    textDecoration: 'none',
+  }
+
   return (
-    <div style={{
+    <footer style={{
       textAlign: 'center',
       padding: '60px 0 40px',
       fontSize: 13,
       color: 'var(--text-dim)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 12,
     }}>
       <div style={{
         display: 'inline-flex',
@@ -17,7 +26,6 @@ export default function Footer() {
         fontFamily: 'var(--font-mono)',
         fontSize: 12,
         color: 'var(--text-dim)',
-        marginBottom: 16,
       }}>
         <span style={{
           width: 6, height: 6,
@@ -28,15 +36,19 @@ export default function Footer() {
         Powered by NVIDIA · Ollama
       </div>
 
-      <div>
-        <a
-          href="https://howaiworks.io"
-          style={{ color: 'var(--nvidia-green)', textDecoration: 'none' }}
-        >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <a href="https://youtube.com/MatthewFeroz" target="_blank" rel="noopener noreferrer" style={linkStyle}>
+          YouTube
+        </a>
+        <span>·</span>
+        <a href="https://howaiworks.io" style={linkStyle}>
           howaiworks.io
         </a>
-        {' · Open Source · MIT License'}
       </div>
-    </div>
+
+      <div style={{ fontSize: 12 }}>
+        This project is open source — built to make AI education accessible to everyone.
+      </div>
+    </footer>
   )
 }

@@ -1,13 +1,32 @@
 import { motion } from 'framer-motion'
 
-export default function TokenBlock({ token, index, showId }) {
+export default function TokenBlock({ token, index, showId, isAutoTyping }) {
   const colorClass = `token-color-${index % 12}`
+
+  // During auto-type: simple fade, no layout thrashing, no stagger delay.
+  // Content updates in place since keys are index-based.
+  // After auto-type: subtle scale+fade entrance for new tokens.
+  const variants = isAutoTyping
+    ? {
+        initial: { opacity: 0, y: 4 },
+        animate: { opacity: 1, y: 0 },
+      }
+    : {
+        initial: { opacity: 0, scale: 0.85 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.85 },
+      }
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8, y: 8 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: index * 0.04, ease: 'easeOut' }}
+      layout={!isAutoTyping}
+      initial={variants.initial}
+      animate={variants.animate}
+      exit={variants.exit}
+      transition={isAutoTyping
+        ? { duration: 0.18, ease: 'easeOut' }
+        : { duration: 0.2, ease: 'easeOut' }
+      }
       style={{
         display: 'inline-flex',
         flexDirection: 'column',
@@ -30,27 +49,10 @@ export default function TokenBlock({ token, index, showId }) {
         }}
         onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        title={`Token ID: ${token.id.toLocaleString()}`}
+        title={showId ? token.display : `Token ID: ${token.id.toLocaleString()}`}
       >
-        {token.display}
+        {showId ? token.id.toLocaleString() : token.display}
       </div>
-
-      <motion.div
-        initial={false}
-        animate={{
-          opacity: showId ? 1 : 0,
-          y: showId ? 0 : -4,
-        }}
-        transition={{ duration: 0.3 }}
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          color: 'var(--text-dim)',
-          marginTop: 4,
-        }}
-      >
-        #{token.id.toLocaleString()}
-      </motion.div>
     </motion.div>
   )
 }

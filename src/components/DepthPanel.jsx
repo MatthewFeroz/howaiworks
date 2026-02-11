@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
  * - A mini challenge
  * - Real-world connection
  */
-export default function DepthPanel({ concept, code, challenge, realWorld, visible }) {
+export default function DepthPanel({ concept, code, challenge, realWorld, visible, delay = 0 }) {
   const [isOpen, setIsOpen] = useState(false)
 
   if (!visible) return null
@@ -20,7 +20,7 @@ export default function DepthPanel({ concept, code, challenge, realWorld, visibl
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, delay }}
       style={{ margin: '24px 0' }}
     >
       {/* Toggle button */}

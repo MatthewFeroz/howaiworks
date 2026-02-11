@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
 import Hero from './components/Hero'
 import TokenizerPhase from './components/TokenizerPhase'
 import NumbersPhase from './components/NumbersPhase'
@@ -10,58 +9,45 @@ import { useTokenizer } from './hooks/useTokenizer'
 export default function App() {
   const { tokens, tokenize, initialize, isLoading, isReady } = useTokenizer()
   const [inputText, setInputText] = useState('')
-  const [showIds, setShowIds] = useState(false)
-  const [interactionCount, setInteractionCount] = useState(0)
-  const [phase2Visible, setPhase2Visible] = useState(false)
-  const [phase3Visible, setPhase3Visible] = useState(false)
-  const debounceRef = useRef(null)
+  const [showIds, setShowIds] = useState(true)
+  const [userHasTyped, setUserHasTyped] = useState(false)
 
   // Initialize tokenizer on mount
   useEffect(() => {
     initialize()
   }, [initialize])
 
-  // Debounced tokenization
+  // Tokenize immediately for live feedback (no debounce)
   const handleInputChange = useCallback((text) => {
     setInputText(text)
-    
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      tokenize(text)
-      if (text.length > 0) {
-        setInteractionCount(prev => prev + 1)
-      }
-    }, 120)
+    tokenize(text)
   }, [tokenize])
 
-  // Progressive reveals based on interaction
-  useEffect(() => {
-    if (interactionCount >= 2 && !phase2Visible) {
-      setPhase2Visible(true)
-    }
-    if (interactionCount >= 5 && !phase3Visible) {
-      setPhase3Visible(true)
-    }
-  }, [interactionCount, phase2Visible, phase3Visible])
+  const handleUserTyped = useCallback(() => {
+    setUserHasTyped(true)
+  }, [])
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
-      <Hero />
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Hero />
 
-      <TokenizerPhase
-        inputText={inputText}
-        onInputChange={handleInputChange}
-        tokens={tokens}
-        showIds={showIds}
-        isLoading={isLoading}
-        isReady={isReady}
-        interactionCount={interactionCount}
-      />
+        <TokenizerPhase
+          inputText={inputText}
+          onInputChange={handleInputChange}
+          tokens={tokens}
+          showIds={showIds}
+          onToggleIds={() => setShowIds(prev => !prev)}
+          isLoading={isLoading}
+          isReady={isReady}
+          onUserTyped={handleUserTyped}
+        />
+      </div>
 
       <Divider />
 
       <NumbersPhase
-        visible={phase2Visible}
+        visible={userHasTyped}
         tokens={tokens}
         inputText={inputText}
         showIds={showIds}
@@ -70,7 +56,7 @@ export default function App() {
 
       <Divider />
 
-      <EmbeddingTeaser visible={phase3Visible} />
+      <EmbeddingTeaser visible={userHasTyped} />
 
       <Footer />
     </div>
