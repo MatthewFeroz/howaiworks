@@ -34,6 +34,9 @@ export default function TokenizerPhase({
   const [revealedCount, setRevealedCount] = useState(0)
   const inputRef = useRef(null)
   const prevTokensRef = useRef([])
+  // Track whether user is actively typing to disable heavy animations
+  const [isActivelyTyping, setIsActivelyTyping] = useState(false)
+  const typingTimeoutRef = useRef(null)
 
   // Auto-type animation on load
   useEffect(() => {
@@ -67,8 +70,20 @@ export default function TokenizerPhase({
       setIsAutoTyping(false)
       onUserTyped?.()
     }
+    // Mark as actively typing — disables heavy animations
+    setIsActivelyTyping(true)
+    clearTimeout(typingTimeoutRef.current)
+    typingTimeoutRef.current = setTimeout(() => setIsActivelyTyping(false), 300)
     onInputChange(text)
   }, [onInputChange, userHasTyped, onUserTyped])
+
+  // Auto-resize textarea when text changes programmatically (auto-type, nudges)
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+  }, [inputText])
 
   // Handle nudge clicks
   const handleNudge = (text) => {
@@ -182,13 +197,18 @@ export default function TokenizerPhase({
           ref={inputRef}
           value={inputText}
           placeholder={!isAutoTyping ? "Type anything here..." : ""}
-          rows={2}
-          maxLength={80}
-          onChange={handleInput}
+          rows={1}
+          onChange={(e) => {
+            handleInput(e)
+            // Auto-resize: reset height then set to scrollHeight
+            e.target.style.height = 'auto'
+            e.target.style.height = e.target.scrollHeight + 'px'
+          }}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           style={{
             width: '100%',
+            minHeight: 59,
             padding: '16px 20px',
             background: 'var(--bg-surface)',
             border: `1px solid ${isFocused ? 'var(--nvidia-green)' : 'var(--border)'}`,
@@ -226,21 +246,35 @@ export default function TokenizerPhase({
         display: 'flex',
         flexWrap: 'wrap',
         gap: 8,
+        justifyContent: 'center',
         alignItems: 'flex-start',
         marginBottom: 16,
       }}>
-        <AnimatePresence mode="sync">
-          {stableTokens.map((token, i) => (
+        {(isActivelyTyping || isAutoTyping) ? (
+          // Fast path: no AnimatePresence overhead during auto-type or rapid typing
+          stableTokens.map((token, i) => (
             <TokenBlock
               key={token.stableKey}
               token={token}
               index={i}
               showId={showIds}
-              isNew={token.isNew}
-              isAutoTyping={isAutoTyping}
+              isNew={false}
+              skipAnimation
             />
-          ))}
-        </AnimatePresence>
+          ))
+        ) : (
+          <AnimatePresence mode="sync">
+            {stableTokens.map((token, i) => (
+              <TokenBlock
+                key={token.stableKey}
+                token={token}
+                index={i}
+                showId={showIds}
+                isNew={token.isNew}
+              />
+            ))}
+          </AnimatePresence>
+        )}
       </div>
 
       {/* View toggle — below pills */}
@@ -289,6 +323,10 @@ export default function TokenizerPhase({
                 cursor: 'pointer',
                 transition: 'color 0.2s',
                 whiteSpace: 'nowrap',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               What AI sees
@@ -309,6 +347,10 @@ export default function TokenizerPhase({
                 cursor: 'pointer',
                 transition: 'color 0.2s',
                 whiteSpace: 'nowrap',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               Your text

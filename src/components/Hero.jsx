@@ -18,7 +18,7 @@ export default function Hero() {
         marginBottom: 12,
         letterSpacing: -0.5,
       }}>
-        This is how AI works.
+        This is how AI <span style={{ color: 'var(--nvidia-green)' }}>works.</span>
       </h1>
 
       <p style={{

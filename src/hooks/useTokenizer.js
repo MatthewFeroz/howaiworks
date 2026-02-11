@@ -42,32 +42,26 @@ export function useTokenizer() {
     }
   }, [])
 
-  const tokenize = useCallback(async (text) => {
+  const tokenize = useCallback((text) => {
     if (!text) {
       setTokens([])
       return []
     }
 
-    // Ensure encoder is loaded
-    if (!encoderRef.current) {
-      await initialize()
-    }
-
     const encoder = encoderRef.current
     if (!encoder) return []
 
-    // Get token IDs
+    // Get token IDs — synchronous, no async overhead
     const ids = encoder.encode(text)
 
     // Decode each token individually to get the text for each one
     const result = []
-    let byteOffset = 0
 
     for (let i = 0; i < ids.length; i++) {
       const id = ids[i]
       // Decode single token to get its text representation
       const decoded = encoder.decode([id])
-      
+
       result.push({
         id,
         text: decoded,
@@ -79,7 +73,7 @@ export function useTokenizer() {
 
     setTokens(result)
     return result
-  }, [initialize])
+  }, [])
 
   return {
     tokens,
