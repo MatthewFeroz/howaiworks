@@ -37,6 +37,10 @@ export default function Footer() {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <a href="https://github.com/MatthewFeroz/howaiworks" target="_blank" rel="noopener noreferrer" style={linkStyle}>
+          GitHub
+        </a>
+        <span>·</span>
         <a href="https://youtube.com/MatthewFeroz" target="_blank" rel="noopener noreferrer" style={linkStyle}>
           YouTube
         </a>

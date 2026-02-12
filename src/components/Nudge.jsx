@@ -3,9 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 export default function Nudge({ icon, children, onClick, delay = 0, explored = false, active = false, insightContent }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
       layout="position"
       style={{
         borderRadius: 10,

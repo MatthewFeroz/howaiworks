@@ -18,6 +18,11 @@ export default function RunLocalPage() {
   const [demoIndex, setDemoIndex] = useState(0)
   const cancelRef = useRef(null)
 
+  // Mark page 2 as visited so page 1 can show nav dots
+  useEffect(() => {
+    localStorage.setItem('visitedPageTwo', 'true')
+  }, [])
+
   // Check Ollama connection on mount
   const checkOllama = useCallback(async () => {
     try {
@@ -191,47 +196,26 @@ export default function RunLocalPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
-      {/* Back link */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        style={{ padding: '20px 0 0' }}
-      >
-        <Link
-          to="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 13,
-            color: 'var(--text-dim)',
-            textDecoration: 'none',
-            fontFamily: 'var(--font-mono)',
-            transition: 'color 0.2s',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--nvidia-green)'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-dim)'}
-        >
-          <span>←</span> Back to How AI Works
-        </Link>
-      </motion.div>
-
       {/* Page indicator dots */}
       <div style={{
         display: 'flex',
         justifyContent: 'center',
         gap: 8,
-        padding: '16px 0 0',
+        padding: '24px 0 0',
       }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <div style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            background: 'var(--border)',
-            transition: 'background 0.2s',
-          }} />
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: 'var(--border)',
+              transition: 'background 0.2s',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--nvidia-green)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--border)'}
+          />
         </Link>
         <div style={{
           width: 8,
@@ -352,54 +336,6 @@ export default function RunLocalPage() {
         />
       </div>
 
-      {/* Divider */}
-      <div style={{
-        height: 1,
-        background: 'linear-gradient(90deg, transparent, var(--border), transparent)',
-        margin: '24px 0 40px',
-      }} />
-
-      {/* Resource Links */}
-      <div style={{ padding: '0 0 20px' }}>
-        <div style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: 1.5,
-          textTransform: 'uppercase',
-          color: 'var(--text-dim)',
-          marginBottom: 16,
-        }}>
-          Resources
-        </div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 10,
-        }}>
-          <ResourceLink
-            href="https://ollama.com"
-            title="Ollama"
-            desc="Download & run LLMs locally"
-          />
-          <ResourceLink
-            href="https://www.nvidia.com/en-us/products/workstations/dgx-spark/"
-            title="NVIDIA DGX Spark"
-            desc="Personal AI supercomputer"
-          />
-          <ResourceLink
-            href="https://huggingface.co/models"
-            title="Hugging Face Hub"
-            desc="Browse open-source models"
-          />
-          <ResourceLink
-            href="https://ollama.com/blog/run-llama-locally"
-            title="Run LLMs Locally"
-            desc="Step-by-step guide"
-          />
-        </div>
-      </div>
-
       <Footer />
 
       {/* Blink animation for streaming cursor */}
@@ -410,47 +346,5 @@ export default function RunLocalPage() {
         }
       `}</style>
     </div>
-  )
-}
-
-function ResourceLink({ href, title, desc }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        display: 'block',
-        padding: '12px 16px',
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 10,
-        textDecoration: 'none',
-        transition: 'border-color 0.2s, background 0.2s',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--nvidia-green)'
-        e.currentTarget.style.background = 'var(--bg-elevated)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--border)'
-        e.currentTarget.style.background = 'var(--bg-surface)'
-      }}
-    >
-      <div style={{
-        fontSize: 14,
-        fontWeight: 500,
-        color: 'var(--nvidia-green)',
-        marginBottom: 2,
-      }}>
-        {title} <span style={{ fontSize: 12, opacity: 0.7 }}>↗</span>
-      </div>
-      <div style={{
-        fontSize: 12,
-        color: 'var(--text-dim)',
-      }}>
-        {desc}
-      </div>
-    </a>
   )
 }

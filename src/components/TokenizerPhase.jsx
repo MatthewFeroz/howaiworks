@@ -21,6 +21,7 @@ export default function TokenizerPhase({
   isLoading,
   isReady,
   onUserTyped,
+  onDepthOpened,
 }) {
   const [isAutoTyping, setIsAutoTyping] = useState(true)
   const [autoTypeIndex, setAutoTypeIndex] = useState(0)
@@ -32,6 +33,7 @@ export default function TokenizerPhase({
   const [hasScrolled, setHasScrolled] = useState(false)
   const [activeNudge, setActiveNudge] = useState(null) // key of the clicked nudge
   const [exploredNudges, setExploredNudges] = useState(new Set()) // nudges user has clicked
+  const [nudgeTyping, setNudgeTyping] = useState(null) // { text, index } for nudge type animation
   const hoverTimeoutRef = useRef(null)
   const textInputRef = useRef(null)
   const idsInputRef = useRef(null)
@@ -114,9 +116,29 @@ export default function TokenizerPhase({
     }
   }, [isReady, isAutoTyping, autoTypeIndex, onInputChange])
 
+  // Nudge typing animation (character-by-character, same as initial auto-type)
+  useEffect(() => {
+    if (!nudgeTyping) return
+
+    const { text, index } = nudgeTyping
+    if (index < text.length) {
+      const timer = setTimeout(() => {
+        const newText = text.slice(0, index + 1)
+        onInputChange(newText)
+        setNudgeTyping({ text, index: index + 1 })
+      }, TYPE_SPEED)
+      return () => clearTimeout(timer)
+    } else {
+      // Typing complete
+      setNudgeTyping(null)
+    }
+  }, [nudgeTyping, onInputChange])
+
   // Handle user text input (bar 1)
   const handleTextInput = useCallback((e) => {
     const text = e.target.value
+    // Cancel any in-progress nudge typing animation
+    setNudgeTyping(null)
     if (!userHasTyped && text !== AUTO_TYPE_TEXT.slice(0, text.length)) {
       setUserHasTyped(true)
       setIsAutoTyping(false)
@@ -128,6 +150,7 @@ export default function TokenizerPhase({
   // Handle IDs input (bar 2)
   const handleIdsInput = useCallback((e) => {
     const raw = e.target.value
+    setNudgeTyping(null) // Cancel any in-progress nudge typing
     setIdsInputText(raw)
 
     // Parse space-separated numbers
@@ -183,10 +206,16 @@ export default function TokenizerPhase({
 
   // Handle nudge clicks
   const handleNudge = (nudgeKey, text) => {
-    onInputChange(text)
+    // If this nudge is already open, just close it
+    if (activeNudge === nudgeKey) {
+      setActiveNudge(null)
+      return
+    }
+    // Clear current text and start typing animation
+    onInputChange('')
+    setNudgeTyping({ text, index: 0 })
     if (textInputRef.current) {
-      textInputRef.current.value = text
-      textInputRef.current.focus()
+      textInputRef.current.focus({ preventScroll: true })
     }
     setEditingBar('text')
     setActiveNudge(nudgeKey)
@@ -594,136 +623,284 @@ export default function TokenizerPhase({
       </AnimatePresence>
 
       {/* Nudges - accordion style, each expands to reveal insight */}
-      <AnimatePresence>
-        {!isAutoTyping && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 24 }}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 24 }}>
+        {NUDGES.map((nudge, i) => (
+          <Nudge
+            key={nudge.key}
+            icon={nudge.icon}
+            onClick={() => handleNudge(nudge.key, nudge.text)}
+            delay={0}
+            explored={exploredNudges.has(nudge.key)}
+            active={activeNudge === nudge.key}
+            insightContent={
+              <>
+                <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>
+                  {nudge.insight.headline}
+                </strong>{' '}
+                {nudge.insight.body}
+                {nudge.insight.nextHint && (
+                  <div style={{
+                    marginTop: 10,
+                    paddingTop: 8,
+                    borderTop: '1px solid rgba(118, 185, 0, 0.1)',
+                    fontSize: 13,
+                    color: 'var(--nvidia-green)',
+                    fontWeight: 500,
+                    opacity: 0.85,
+                  }}>
+                    {nudge.insight.nextHint}
+                  </div>
+                )}
+              </>
+            }
           >
-            {NUDGES.map((nudge, i) => (
-              <Nudge
-                key={nudge.key}
-                icon={nudge.icon}
-                onClick={() => handleNudge(nudge.key, nudge.text)}
-                delay={i * 0.1}
-                explored={exploredNudges.has(nudge.key)}
-                active={activeNudge === nudge.key}
-                insightContent={
-                  <>
-                    <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>
-                      {nudge.insight.headline}
-                    </strong>{' '}
-                    {nudge.insight.body}
-                    {nudge.insight.nextHint && (
-                      <div style={{
-                        marginTop: 10,
-                        paddingTop: 8,
-                        borderTop: '1px solid rgba(118, 185, 0, 0.1)',
-                        fontSize: 13,
-                        color: 'var(--nvidia-green)',
-                        fontWeight: 500,
-                        opacity: 0.85,
-                      }}>
-                        {nudge.insight.nextHint}
-                      </div>
-                    )}
-                  </>
-                }
-              >
-                {nudge.label}
-              </Nudge>
-            ))}
-            {exploredNudges.size > 0 && (
-              <motion.div
-                key={exploredNudges.size === NUDGES.length ? 'complete' : 'progress'}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: exploredNudges.size === NUDGES.length ? 12 : 11,
-                  color: exploredNudges.size === NUDGES.length ? 'var(--nvidia-green)' : 'var(--text-dim)',
-                  paddingLeft: 4,
-                  marginTop: 2,
-                  fontWeight: exploredNudges.size === NUDGES.length ? 600 : 400,
-                }}
-              >
-                {exploredNudges.size === NUDGES.length
-                  ? 'All explored — you now see what AI sees.'
-                  : `${exploredNudges.size}/${NUDGES.length} explored`
-                }
-              </motion.div>
-            )}
+            {nudge.label}
+          </Nudge>
+        ))}
+        {exploredNudges.size > 0 && (
+          <motion.div
+            key={exploredNudges.size === NUDGES.length ? 'complete' : 'progress'}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: exploredNudges.size === NUDGES.length ? 12 : 11,
+              color: exploredNudges.size === NUDGES.length ? 'var(--nvidia-green)' : 'var(--text-dim)',
+              paddingLeft: 4,
+              marginTop: 2,
+              fontWeight: exploredNudges.size === NUDGES.length ? 600 : 400,
+            }}
+          >
+            {exploredNudges.size === NUDGES.length
+              ? 'All explored — you now see what AI sees.'
+              : `${exploredNudges.size}/${NUDGES.length} explored`
+            }
           </motion.div>
         )}
-      </AnimatePresence>
+      </div>
 
-      {/* Go Deeper panel */}
+      {/* Go Deeper panel — only appears after all nudges explored */}
       <DepthPanel
-        visible={userHasTyped}
+        visible={exploredNudges.size === NUDGES.length}
         delay={0.5}
+        onOpen={onDepthOpened}
         concept={
           <div>
-            <p style={{ marginBottom: 12 }}>
-              This process is called <strong style={{ color: 'var(--text-primary)' }}>Byte Pair Encoding (BPE)</strong>.
-              The tokenizer starts with individual bytes and iteratively merges the most frequent pair
-              of adjacent tokens into a new token. After ~100,000 merges, you get a vocabulary where
-              common words are single tokens and rare words get split into subword pieces.
+            {/* 1. The Problem */}
+            <p style={{ marginBottom: 16 }}>
+              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>The problem: AI can't read.</strong>
             </p>
             <p style={{ marginBottom: 12 }}>
-              The tokenizer here is <strong style={{ color: 'var(--text-primary)' }}>cl100k_base</strong> — the same one
-              used by GPT-4. It has a vocabulary of ~100,256 tokens.
+              Neural networks are math machines — they multiply matrices and add numbers.
+              They have no concept of "a" or "z" or "strawberry." So before AI can think about
+              your text, something has to convert it into numbers. That something is called a{' '}
+              <strong style={{ color: 'var(--text-primary)' }}>tokenizer</strong>.
             </p>
-            <p>
-              Key insight: <strong style={{ color: 'var(--text-primary)' }}>the tokenizer is trained separately from the language model</strong>.
-              It's a preprocessing step that converts raw text into integer IDs. The neural network never sees characters — only these IDs.
+            <p style={{ marginBottom: 20 }}>
+              But <em>how</em> do you decide what each number represents? You have three options:
+            </p>
+
+            {/* Option comparison */}
+            <div style={{
+              display: 'grid',
+              gap: 10,
+              marginBottom: 20,
+            }}>
+              <div style={{
+                padding: '12px 16px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+              }}>
+                <strong style={{ color: '#e87a96' }}>Option A: One number per character</strong>
+                <div style={{ marginTop: 4, fontSize: 13 }}>
+                  "hello" → 5 numbers. Simple, but wildly inefficient.
+                  A 1,000-word essay becomes ~5,000 tokens. AI's context window fills up fast,
+                  and the model wastes processing power on individual letters that carry little meaning on their own.
+                </div>
+              </div>
+              <div style={{
+                padding: '12px 16px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+              }}>
+                <strong style={{ color: '#e8d06e' }}>Option B: One number per word</strong>
+                <div style={{ marginTop: 4, fontSize: 13 }}>
+                  Efficient for common words, but English alone has 750,000+ words. Add misspellings,
+                  slang, code, other languages — you'd need millions of entries. And any word not in
+                  the dictionary? Completely invisible to the model.
+                </div>
+              </div>
+              <div style={{
+                padding: '12px 16px',
+                background: 'rgba(118,185,0,0.06)',
+                border: '1px solid rgba(118,185,0,0.25)',
+                borderRadius: 8,
+              }}>
+                <strong style={{ color: 'var(--nvidia-green)' }}>Option C: Byte Pair Encoding — the sweet spot</strong>
+                <div style={{ marginTop: 4, fontSize: 13 }}>
+                  Learn the most useful pieces from real data. Common words like "the" get their own token.
+                  Rare words get broken into reusable subword pieces. A fixed vocabulary of ~100K tokens
+                  can represent <em>any</em> text in <em>any</em> language.
+                </div>
+              </div>
+            </div>
+
+            {/* 2. How BPE Works */}
+            <p style={{ marginBottom: 16 }}>
+              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>How Byte Pair Encoding works — step by step</strong>
+            </p>
+            <p style={{ marginBottom: 12 }}>
+              Imagine you're inventing a shorthand for writing faster. You'd look at what you write most
+              and create abbreviations for the most common patterns. BPE does exactly this, automatically,
+              by scanning billions of words of text:
+            </p>
+
+            {/* Steps */}
+            <div style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
+              <StepBox step={1} title="Start with individual bytes">
+                Break every piece of text into its smallest units — individual bytes (roughly characters).
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)', letterSpacing: 1 }}>
+                  "hello" → [h] [e] [l] [l] [o]
+                </div>
+              </StepBox>
+              <StepBox step={2} title="Count every adjacent pair">
+                Scan the entire training dataset (think: all of Wikipedia, Reddit, books, code).
+                Count how often each pair of adjacent tokens appears together.
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
+                  "th" appears 9.2 billion times{' '}
+                  <span style={{ color: 'var(--nvidia-green)' }}>← winner</span>
+                </div>
+              </StepBox>
+              <StepBox step={3} title="Merge the most frequent pair">
+                Combine [t] + [h] → [th] everywhere in the data. This new merged token
+                becomes part of the vocabulary.
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
+                  Before: [t] [h] [e] → After: [th] [e]
+                </div>
+              </StepBox>
+              <StepBox step={4} title="Repeat ~100,000 times">
+                Each round, find and merge the next most frequent pair. Early merges create
+                common pairs like "in", "er", "the". Later merges create full words
+                like "the", "and", "function". After ~100K merges, you have a complete vocabulary.
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
+                  [th] + [e] → [the] — now "the" is a single token
+                </div>
+              </StepBox>
+            </div>
+
+            {/* 3. The Result */}
+            <p style={{ marginBottom: 12 }}>
+              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>The result</strong>
+            </p>
+            <p style={{ marginBottom: 12 }}>
+              The tokenizer you're using right now is <strong style={{ color: 'var(--text-primary)' }}>cl100k_base</strong> — the
+              same one inside GPT-4. It has a vocabulary of exactly <strong style={{ color: 'var(--text-primary)' }}>100,256 tokens</strong>.
+            </p>
+            <p style={{ marginBottom: 6 }}>
+              Common English words like "the", "and", "hello" each get one token.
+              Rare words like "supercalifragilisticexpialidocious" get shattered into many small pieces.
+              And non-Latin scripts — Arabic, Hindi, Chinese — often get broken into even more
+              fragments, because there was less of that text in the training data.
+            </p>
+            <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(118,185,0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
+              <strong style={{ color: 'var(--text-primary)' }}>Key insight:</strong>{' '}
+              The tokenizer is trained <em>separately</em> from the AI model, <em>before</em> the
+              model ever sees any data. It's a preprocessing step. The neural network never sees
+              your characters — only the integer IDs the tokenizer produces. Everything the model
+              knows about language starts from these numbers.
             </p>
           </div>
         }
         code={`import tiktoken
 
+# Load the same tokenizer used by GPT-4
 enc = tiktoken.get_encoding("cl100k_base")
 
+# ── Tokenize a word ─────────────────────────────────
 text = "strawberry"
-tokens = enc.encode(text)
-print(tokens)  # [496, 675, 15717]
+token_ids = enc.encode(text)
+print(f'"{text}" → {token_ids}')
+# "strawberry" → [496, 675, 15717]
 
-# Decode each token
-for t in tokens:
-    print(f"  Token {t}: '{enc.decode([t])}'")
-    # Token 496:   'str'
-    # Token 675:   'aw'
-    # Token 15717: 'berry'`}
+# ── See what each token ID represents ───────────────
+for token_id in token_ids:
+    fragment = enc.decode([token_id])
+    print(f"  ID {token_id:>6} → '{fragment}'")
+# ID    496 → 'str'
+# ID    675 → 'aw'
+# ID  15717 → 'berry'
+
+# ── The language inequality ─────────────────────────
+english = "Hello, how are you?"
+arabic  = "مرحبا كيف حالك"
+
+en_tokens = enc.encode(english)
+ar_tokens = enc.encode(arabic)
+
+print(f"English: {len(en_tokens)} tokens")  # ~5
+print(f"Arabic:  {len(ar_tokens)} tokens")  # ~12
+# Same meaning. Different cost.`}
         challenge={
           <div>
-            <p style={{ marginBottom: 8 }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Try this:</strong> Type the same sentence in English
-              and another language. Compare the token counts.
+            <p style={{ marginBottom: 10 }}>
+              <strong style={{ color: 'var(--text-primary)' }}>Think about it:</strong>
             </p>
-            <p>
-              Why does non-English text produce more tokens? What does this imply about the training data?
+            <p style={{ marginBottom: 12 }}>
+              If BPE merges are based on frequency in training data, and the training data was
+              mostly English web text — what happens to languages that weren't well represented?
+            </p>
+            <p style={{ marginBottom: 8, paddingLeft: 16 }}>
+              <strong style={{ color: '#e8d06e' }}>1.</strong> Type "Hello, how are you?" above and note the token count.
+              Then try it in Spanish, Arabic, Hindi, or Yoruba. How does the count change?
+            </p>
+            <p style={{ marginBottom: 8, paddingLeft: 16 }}>
+              <strong style={{ color: '#e8d06e' }}>2.</strong> Try typing a common English name ("John") vs. a name from
+              another culture. Which one stays in one piece?
+            </p>
+            <p style={{ paddingLeft: 16 }}>
+              <strong style={{ color: '#e8d06e' }}>3.</strong> What would happen if you trained a tokenizer on <em>only</em>{' '}
+              Arabic text? Would English words start getting fragmented instead?
             </p>
           </div>
         }
         realWorld={
           <div>
-            <p style={{ marginBottom: 12 }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Tokenization is where AI inequity begins.</strong>
+            <p style={{ marginBottom: 14 }}>
+              Tokenization seems like a small technical detail — but it has real consequences
+              for billions of people.
             </p>
-            <p style={{ marginBottom: 8 }}>
-              Languages underrepresented in training data produce more tokens for the same meaning:
-            </p>
-            <p style={{ marginBottom: 6, paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>→ Cost:</strong> API pricing is per-token. The same message in
-              Yoruba or Bengali can cost 2-4x more than in English.
-            </p>
-            <p style={{ marginBottom: 6, paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>→ Quality:</strong> More tokens = less context window for reasoning.
-            </p>
-            <p style={{ paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>→ Identity:</strong> Non-Western names get shattered while "John" stays whole.
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e8d06e' }}>
+                <strong style={{ color: '#e8d06e' }}>Cost inequality</strong>
+                <div style={{ marginTop: 4, fontSize: 13 }}>
+                  AI APIs charge per token. The same message in Yoruba or Bengali can use 2-4x
+                  more tokens than English — meaning people in those languages literally pay more
+                  for the same service.
+                </div>
+              </div>
+              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #6ec0e8' }}>
+                <strong style={{ color: '#6ec0e8' }}>Quality gap</strong>
+                <div style={{ marginTop: 4, fontSize: 13 }}>
+                  AI models have a fixed context window (e.g. 128K tokens). If your language burns
+                  through tokens 3x faster, you get 3x less room for the AI to reason. Same model,
+                  worse results — just because of which language you speak.
+                </div>
+              </div>
+              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e87a96' }}>
+                <strong style={{ color: '#e87a96' }}>Identity erasure</strong>
+                <div style={{ marginTop: 4, fontSize: 13 }}>
+                  Names like "John" or "Sarah" are single tokens — the model sees them whole.
+                  Names like "Oluwaseun" or "Bhagyashree" get fragmented into meaningless syllables.
+                  The model literally cannot see these names the way it sees English ones.
+                </div>
+              </div>
+            </div>
+            <p style={{ marginTop: 14, fontSize: 13, color: 'var(--nvidia-green)', fontWeight: 500 }}>
+              This is where AI inequity begins — not in the model's weights, but in the very first
+              step: how text becomes numbers.
             </p>
           </div>
         }
@@ -816,5 +993,42 @@ function StatLink({ href, children }) {
     >
       {children} ↗
     </a>
+  )
+}
+
+function StepBox({ step, title, children }) {
+  return (
+    <div style={{
+      display: 'flex',
+      gap: 14,
+      padding: '12px 16px',
+      background: 'rgba(255,255,255,0.02)',
+      border: '1px solid var(--border)',
+      borderRadius: 8,
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 28,
+        height: 28,
+        borderRadius: '50%',
+        background: 'var(--nvidia-green-dim)',
+        color: 'var(--nvidia-green)',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 13,
+        fontWeight: 700,
+        flexShrink: 0,
+        marginTop: 2,
+      }}>
+        {step}
+      </div>
+      <div style={{ flex: 1 }}>
+        <strong style={{ color: 'var(--text-primary)', fontSize: 14 }}>{title}</strong>
+        <div style={{ marginTop: 4, fontSize: 13, lineHeight: 1.6 }}>
+          {children}
+        </div>
+      </div>
+    </div>
   )
 }
