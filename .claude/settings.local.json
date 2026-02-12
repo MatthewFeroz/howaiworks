@@ -13,7 +13,10 @@
       "Bash(findstr:*)",
       "Bash(del \"C:\\\\Users\\\\Matthew Feroz\\\\Desktop\\\\nanochat\\\\NVIDIAGTC2026\\\\howaiworks\\\\src\\\\components\\\\TokenBlock.jsx\")",
       "mcp__ide__getDiagnostics",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(dir:*)",
+      "Bash(claude mcp remove:*)",
+      "Bash(claude mcp:*)"
     ]
   }
 }

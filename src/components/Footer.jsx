@@ -15,27 +15,6 @@ export default function Footer() {
       alignItems: 'center',
       gap: 12,
     }}>
-      <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '6px 14px',
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 6,
-        fontFamily: 'var(--font-mono)',
-        fontSize: 12,
-        color: 'var(--text-dim)',
-      }}>
-        <span style={{
-          width: 6, height: 6,
-          background: 'var(--nvidia-green)',
-          borderRadius: '50%',
-          animation: 'pulse-dot 2s ease-in-out infinite',
-        }} />
-        Powered by NVIDIA · Ollama
-      </div>
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
         <a href="https://github.com/MatthewFeroz/howaiworks" target="_blank" rel="noopener noreferrer" style={linkStyle}>
           GitHub
