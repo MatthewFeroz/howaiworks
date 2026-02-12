@@ -11,6 +11,7 @@ Run: uvicorn main:app --reload --port 8000
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import tiktoken
 import subprocess
@@ -39,6 +40,11 @@ class TokenizeRequest(BaseModel):
 class EmbedRequest(BaseModel):
     texts: list[str]
     model: str = "nomic-embed-text"
+
+
+class ChatRequest(BaseModel):
+    messages: list[dict]
+    model: str = "qwen2.5:0.5b"
 
 
 # ── TOKENIZATION ──
@@ -95,6 +101,54 @@ async def embed(req: EmbedRequest):
         }
     except Exception as e:
         return {"error": str(e), "embeddings": []}
+
+
+# ── CHAT (streaming via Ollama) ──
+
+@app.post("/api/chat")
+async def chat(req: ChatRequest):
+    """Stream chat responses from Ollama as SSE."""
+
+    async def generate():
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                async with client.stream(
+                    "POST",
+                    f"{OLLAMA_BASE}/api/chat",
+                    json={
+                        "model": req.model,
+                        "messages": req.messages,
+                        "stream": True,
+                    },
+                ) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        if not line:
+                            continue
+                        try:
+                            data = json.loads(line)
+                            token = data.get("message", {}).get("content", "")
+                            if token:
+                                yield f"data: {json.dumps({'token': token})}\n\n"
+                            if data.get("done"):
+                                yield "data: [DONE]\n\n"
+                                break
+                        except json.JSONDecodeError:
+                            continue
+        except httpx.ConnectError:
+            yield f"data: {json.dumps({'error': 'Ollama not running'})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # ── GPU INFO ──

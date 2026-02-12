@@ -75,9 +75,22 @@ export function useTokenizer() {
     return result
   }, [])
 
+  const decode = useCallback((ids) => {
+    const encoder = encoderRef.current
+    if (!encoder || !ids.length) return { text: '', tokens: [] }
+    const tokenObjs = ids.map((id, i) => {
+      try {
+        const decoded = encoder.decode([id])
+        return { id, text: decoded, display: decoded.startsWith(' ') ? '⎵' + decoded.slice(1) : decoded, index: i }
+      } catch { return { id, text: '�', display: '�', index: i } }
+    })
+    return { text: tokenObjs.map(t => t.text).join(''), tokens: tokenObjs }
+  }, [])
+
   return {
     tokens,
     tokenize,
+    decode,
     initialize,
     isLoading,
     isReady,

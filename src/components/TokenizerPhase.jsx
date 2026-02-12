@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import TokenBlock from './TokenBlock'
+import confetti from 'canvas-confetti'
 import Nudge from './Nudge'
-import Insight from './Insight'
 import DepthPanel from './DepthPanel'
 
 const AUTO_TYPE_TEXT = 'How does AI work?'
@@ -18,8 +17,7 @@ export default function TokenizerPhase({
   inputText,
   onInputChange,
   tokens,
-  showIds,
-  onToggleIds,
+  decode,
   isLoading,
   isReady,
   onUserTyped,
@@ -27,16 +25,78 @@ export default function TokenizerPhase({
   const [isAutoTyping, setIsAutoTyping] = useState(true)
   const [autoTypeIndex, setAutoTypeIndex] = useState(0)
   const [userHasTyped, setUserHasTyped] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
+  const [textFocused, setTextFocused] = useState(false)
+  const [textHovered, setTextHovered] = useState(false)
+  const [idsFocused, setIdsFocused] = useState(false)
   const [hoveredStat, setHoveredStat] = useState(null)
+  const [hasScrolled, setHasScrolled] = useState(false)
+  const [activeNudge, setActiveNudge] = useState(null) // key of the clicked nudge
+  const [exploredNudges, setExploredNudges] = useState(new Set()) // nudges user has clicked
   const hoverTimeoutRef = useRef(null)
-  // Track the highest token count seen during auto-type for smooth reveals
-  const [revealedCount, setRevealedCount] = useState(0)
-  const inputRef = useRef(null)
-  const prevTokensRef = useRef([])
-  // Track whether user is actively typing to disable heavy animations
-  const [isActivelyTyping, setIsActivelyTyping] = useState(false)
-  const typingTimeoutRef = useRef(null)
+  const textInputRef = useRef(null)
+  const idsInputRef = useRef(null)
+
+  // Which bar the user is actively editing
+  const [editingBar, setEditingBar] = useState(null) // 'text' | 'ids' | null
+  // Raw user input in the IDs bar during editing
+  const [idsInputText, setIdsInputText] = useState('')
+
+  // Nudge definitions with unique insights
+  const NUDGES = [
+    {
+      key: 'strawberry',
+      icon: '🍓',
+      text: 'strawberry',
+      label: <>Try <Accent>strawberry</Accent> — 1 word, 3 tokens. This is why AI can't count the r's</>,
+      insight: {
+        headline: 'AI can\'t spell — and this is why.',
+        body: <>
+          "strawberry" becomes 3 tokens: <strong style={{ color: 'var(--text-primary)' }}>"str" + "aw" + "berry"</strong>.
+          When you ask AI "how many r's in strawberry?", it never sees the individual letters —
+          it sees 3 opaque fragments. The r's are scattered across token boundaries, invisible to the model.
+          This is the root cause of AI's famous spelling failures.
+        </>,
+        nextHint: 'Now try a really long word — see what happens when AI encounters something rare →',
+      },
+    },
+    {
+      key: 'supercalifragilistic',
+      icon: '🎪',
+      text: 'supercalifragilisticexpialidocious',
+      label: <>Try <Accent>supercalifragilisticexpialidocious</Accent> — 1 word you can say, 11 fragments AI sees</>,
+      insight: {
+        headline: 'The rarer the word, the harder AI works.',
+        body: <>
+          You can say this word in one breath. AI needs <strong style={{ color: 'var(--text-primary)' }}>~11 tokens</strong> just
+          to represent it. The tokenizer was trained on internet text where "the" appears billions of times
+          but "supercalifragilisticexpialidocious" almost never does. Common words get their own token.
+          Rare words get shattered into fragments — consuming more of AI's limited context window
+          and making the model work harder for the same meaning.
+        </>,
+        nextHint: 'Now try a different language — discover the hidden cost of not being English →',
+      },
+    },
+    {
+      key: 'arabic',
+      icon: '🌍',
+      text: 'مرحبا كيف حالك',
+      label: <>Try <Accent>Hello how are you</Accent> in Arabic — same meaning, nearly 3x the tokens</>,
+      insight: {
+        headline: 'Same meaning. 3x the cost.',
+        body: <>
+          "Hello how are you" is ~5 tokens. <strong style={{ color: 'var(--text-primary)' }}>The same phrase in Arabic can be 12+ tokens.</strong>{' '}
+          Because the tokenizer was trained mostly on English text, it learned efficient representations
+          for English words but treats non-Latin scripts almost character-by-character. This means
+          Arabic, Hindi, Yoruba, and other languages use more tokens for the same meaning —
+          costing more money, filling up the context window faster, and getting worse model performance.
+          <span style={{ display: 'block', marginTop: 8, color: 'var(--nvidia-green)', fontWeight: 500, fontSize: 14 }}>
+            Tokenization is where AI inequity begins.
+          </span>
+        </>,
+        nextHint: null,
+      },
+    },
+  ]
 
   // Auto-type animation on load
   useEffect(() => {
@@ -50,55 +110,125 @@ export default function TokenizerPhase({
       }, TYPE_SPEED)
       return () => clearTimeout(timer)
     } else {
-      // Auto-type complete
       setIsAutoTyping(false)
     }
   }, [isReady, isAutoTyping, autoTypeIndex, onInputChange])
 
-  // Track revealed count during auto-type so new pills fade in smoothly
-  useEffect(() => {
-    if (isAutoTyping && tokens.length > revealedCount) {
-      setRevealedCount(tokens.length)
-    }
-  }, [tokens.length, isAutoTyping, revealedCount])
-
-  // Handle user input
-  const handleInput = useCallback((e) => {
+  // Handle user text input (bar 1)
+  const handleTextInput = useCallback((e) => {
     const text = e.target.value
     if (!userHasTyped && text !== AUTO_TYPE_TEXT.slice(0, text.length)) {
       setUserHasTyped(true)
       setIsAutoTyping(false)
       onUserTyped?.()
     }
-    // Mark as actively typing — disables heavy animations
-    setIsActivelyTyping(true)
-    clearTimeout(typingTimeoutRef.current)
-    typingTimeoutRef.current = setTimeout(() => setIsActivelyTyping(false), 300)
     onInputChange(text)
   }, [onInputChange, userHasTyped, onUserTyped])
 
-  // Auto-resize textarea when text changes programmatically (auto-type, nudges)
+  // Handle IDs input (bar 2)
+  const handleIdsInput = useCallback((e) => {
+    const raw = e.target.value
+    setIdsInputText(raw)
+
+    // Parse space-separated numbers
+    const parts = raw.trim().split(/\s+/)
+    const ids = parts
+      .map(p => parseInt(p, 10))
+      .filter(n => !isNaN(n) && n >= 0)
+
+    if (ids.length > 0 && decode) {
+      const { text } = decode(ids)
+      onInputChange(text)
+      if (!userHasTyped) {
+        setUserHasTyped(true)
+        onUserTyped?.()
+      }
+    } else if (raw.trim() === '') {
+      onInputChange('')
+    }
+  }, [decode, onInputChange, userHasTyped, onUserTyped])
+
+  // Auto-resize text textarea when text changes programmatically (auto-type, nudges)
   useEffect(() => {
-    const el = inputRef.current
+    const el = textInputRef.current
     if (!el) return
     el.style.height = 'auto'
     el.style.height = el.scrollHeight + 'px'
   }, [inputText])
 
-  // Handle nudge clicks
-  const handleNudge = (text) => {
-    onInputChange(text)
-    if (inputRef.current) {
-      inputRef.current.value = text
-      inputRef.current.focus()
+  // Derived IDs text from tokens
+  const derivedIdsText = useMemo(() => {
+    return tokens.map(t => t.id).join('  ')
+  }, [tokens])
+
+  // Auto-resize IDs textarea when derived IDs change (not during editing)
+  useEffect(() => {
+    if (editingBar === 'ids') return
+    const el = idsInputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+  }, [derivedIdsText, editingBar])
+
+  // Track scroll to dismiss the "Scroll to explore more" indicator
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setHasScrolled(true)
+      }
     }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Handle nudge clicks
+  const handleNudge = (nudgeKey, text) => {
+    onInputChange(text)
+    if (textInputRef.current) {
+      textInputRef.current.value = text
+      textInputRef.current.focus()
+    }
+    setEditingBar('text')
+    setActiveNudge(nudgeKey)
+    setExploredNudges(prev => {
+      const next = new Set([...prev, nudgeKey])
+      // Fire confetti when all nudges explored for the first time
+      if (next.size === NUDGES.length && prev.size < NUDGES.length) {
+        setTimeout(() => {
+          // Left burst
+          confetti({
+            particleCount: 60,
+            spread: 55,
+            origin: { x: 0.15, y: 0.6 },
+            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+          })
+          // Right burst
+          confetti({
+            particleCount: 60,
+            spread: 55,
+            origin: { x: 0.85, y: 0.6 },
+            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+          })
+          // Center shower after a beat
+          setTimeout(() => {
+            confetti({
+              particleCount: 100,
+              spread: 100,
+              origin: { x: 0.5, y: 0.4 },
+              colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+            })
+          }, 250)
+        }, 400)
+      }
+      return next
+    })
     if (!userHasTyped) {
       setUserHasTyped(true)
       onUserTyped?.()
     }
   }
 
-  // Build token-colored segments for inline display
+  // Build token-colored segments for text bar overlay
   const coloredSegments = useMemo(() => {
     if (!tokens.length) return null
 
@@ -117,67 +247,138 @@ export default function TokenizerPhase({
     })
   }, [tokens])
 
-  // Generate stable keys for pills based on text offset + token id.
-  // Always use offset-based keys so that when isAutoTyping flips to false,
-  // React sees the same keys and reuses DOM nodes — no unmount/remount flash.
-  const stableTokens = useMemo(() => {
-    let offset = 0
-    const prev = prevTokensRef.current
-    const result = tokens.map((token, i) => {
-      const key = `${offset}-${token.id}`
-      const prevMatch = prev.find(p => p.stableKey === key)
-      const entry = {
-        ...token,
-        stableKey: key,
-        startOffset: offset,
-        isNew: !prevMatch,
+  // Build colored segments for IDs bar overlay
+  const idsColoredSegments = useMemo(() => {
+    if (editingBar === 'ids') {
+      // During editing: colorize the parsed numbers from user input
+      const parts = idsInputText.trim().split(/\s+/)
+      let colorIdx = 0
+      const segments = []
+      let pos = 0
+      for (const part of parts) {
+        const idx = idsInputText.indexOf(part, pos)
+        if (idx > pos) {
+          segments.push({ text: idsInputText.slice(pos, idx), color: 'var(--text-dim)', isSpace: true })
+        }
+        const num = parseInt(part, 10)
+        const isValid = !isNaN(num) && num >= 0
+        segments.push({
+          text: part,
+          color: isValid ? TOKEN_COLORS[colorIdx % TOKEN_COLORS.length] : '#ef476f',
+          isSpace: false,
+        })
+        if (isValid) colorIdx++
+        pos = idx + part.length
       }
-      offset += token.text.length
-      return entry
+      if (pos < idsInputText.length) {
+        segments.push({ text: idsInputText.slice(pos), color: 'var(--text-dim)', isSpace: true })
+      }
+      return segments
+    }
+
+    // Not editing: derive from tokens
+    if (!tokens.length) return null
+    const segments = []
+    tokens.forEach((token, i) => {
+      if (i > 0) {
+        segments.push({ text: '  ', color: 'var(--text-dim)', isSpace: true })
+      }
+      segments.push({
+        text: String(token.id),
+        color: TOKEN_COLORS[i % TOKEN_COLORS.length],
+        isSpace: false,
+      })
     })
-    prevTokensRef.current = result
-    return result
-  }, [tokens])
+    return segments
+  }, [tokens, editingBar, idsInputText])
+
+  // IDs bar value when not editing
+  const idsDisplayValue = editingBar === 'ids' ? idsInputText : derivedIdsText
 
   const tokenCount = tokens.length
   const charCount = inputText.length
   const charsPerToken = tokenCount > 0 ? (charCount / tokenCount).toFixed(1) : 0
+
+  // Whether bar 1 should breathe (after auto-type, before user types)
+  const isBreathing = !isAutoTyping && !userHasTyped && !textFocused
+
+  // Shared bar styles
+  const barStyle = (focused, { breathing = false, hovered = false } = {}) => ({
+    width: '100%',
+    minHeight: 59,
+    padding: '16px 20px',
+    background: 'var(--bg-surface)',
+    border: `1px solid ${
+      focused ? 'var(--nvidia-green)'
+      : hovered ? 'rgba(118,185,0,0.45)'
+      : 'var(--border)'
+    }`,
+    borderRadius: 12,
+    color: 'transparent',
+    caretColor: 'transparent',
+    fontFamily: 'var(--font-mono)',
+    fontSize: 18,
+    lineHeight: 1.5,
+    resize: 'none',
+    overflow: 'hidden',
+    outline: 'none',
+    transition: breathing && !hovered ? 'none' : 'border-color 0.2s, box-shadow 0.2s',
+    boxShadow: focused ? '0 0 0 3px var(--nvidia-green-dim)'
+      : hovered ? '0 0 0 3px rgba(118,185,0,0.15)'
+      : 'none',
+    animation: (breathing && !hovered) ? 'breathe 2.5s ease-in-out infinite' : 'none',
+  })
+
+  const overlayStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: '16px 20px',
+    fontFamily: 'var(--font-mono)',
+    fontSize: 18,
+    lineHeight: 1.5,
+    pointerEvents: 'none',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    borderRadius: 12,
+    overflow: 'hidden',
+  }
+
+  const labelStyle = {
+    fontFamily: 'var(--font-mono)',
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
-      style={{ padding: '20px 0 40px', flex: 1, display: 'flex', flexDirection: 'column' }}
+      style={{ padding: '20px 0 40px' }}
     >
-      {/* Chat-bar style input with inline colorization */}
-      <div style={{ position: 'relative', marginBottom: 24 }}>
-        {/* Colored overlay - shows colorized tokens */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            padding: '16px 20px',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 18,
-            lineHeight: 1.5,
-            pointerEvents: 'none',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            borderRadius: 12,
-            overflow: 'hidden',
-          }}
-        >
+      {/* === BAR 1: Your text === */}
+      <div style={{ ...labelStyle, color: 'var(--nvidia-green)' }}>
+        Your text
+      </div>
+      <div
+        style={{ position: 'relative', marginBottom: 0, cursor: textFocused ? undefined : 'pointer' }}
+        onMouseEnter={() => setTextHovered(true)}
+        onMouseLeave={() => setTextHovered(false)}
+      >
+        {/* Colored overlay */}
+        <div style={overlayStyle}>
           {coloredSegments?.map((seg, i) => (
             <span key={i} style={{ color: seg.color }}>
               {seg.text}
             </span>
           ))}
-          {/* Blinking cursor */}
-          {isFocused && (
+          {textFocused && (
             <span
               style={{
                 display: 'inline-block',
@@ -192,38 +393,20 @@ export default function TokenizerPhase({
           )}
         </div>
 
-        {/* Actual textarea - transparent text, handles input */}
+        {/* Actual textarea */}
         <textarea
-          ref={inputRef}
+          ref={textInputRef}
           value={inputText}
           placeholder={!isAutoTyping ? "Type anything here..." : ""}
           rows={1}
           onChange={(e) => {
-            handleInput(e)
-            // Auto-resize: reset height then set to scrollHeight
+            handleTextInput(e)
             e.target.style.height = 'auto'
             e.target.style.height = e.target.scrollHeight + 'px'
           }}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          style={{
-            width: '100%',
-            minHeight: 59,
-            padding: '16px 20px',
-            background: 'var(--bg-surface)',
-            border: `1px solid ${isFocused ? 'var(--nvidia-green)' : 'var(--border)'}`,
-            borderRadius: 12,
-            color: 'transparent',
-            caretColor: 'transparent',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 18,
-            lineHeight: 1.5,
-            resize: 'none',
-            overflow: 'hidden',
-            outline: 'none',
-            transition: 'border-color 0.2s, box-shadow 0.2s',
-            boxShadow: isFocused ? '0 0 0 3px var(--nvidia-green-dim)' : 'none',
-          }}
+          onFocus={() => { setTextFocused(true); setEditingBar('text') }}
+          onBlur={() => { setTextFocused(false); setEditingBar(null) }}
+          style={barStyle(textFocused, { breathing: isBreathing, hovered: textHovered && !textFocused })}
         />
 
         {isLoading && (
@@ -240,124 +423,59 @@ export default function TokenizerPhase({
         )}
       </div>
 
-      {/* Token pills display */}
-      <div style={{
-        minHeight: 60,
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 8,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        marginBottom: 16,
-      }}>
-        {(isActivelyTyping || isAutoTyping) ? (
-          // Fast path: no AnimatePresence overhead during auto-type or rapid typing
-          stableTokens.map((token, i) => (
-            <TokenBlock
-              key={token.stableKey}
-              token={token}
-              index={i}
-              showId={showIds}
-              isNew={false}
-              skipAnimation
-            />
-          ))
-        ) : (
-          <AnimatePresence mode="sync">
-            {stableTokens.map((token, i) => (
-              <TokenBlock
-                key={token.stableKey}
-                token={token}
-                index={i}
-                showId={showIds}
-                isNew={token.isNew}
-              />
-            ))}
-          </AnimatePresence>
-        )}
-      </div>
+      {/* === Connector (spacer only) === */}
+      <div style={{ padding: '12px 0' }} />
 
-      {/* View toggle — below pills */}
-      {tokens.length > 0 && onToggleIds && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          marginBottom: 16,
-        }}>
-          <div style={{
-            display: 'inline-flex',
-            position: 'relative',
-            background: 'var(--bg-surface)',
-            borderRadius: 8,
-            padding: 3,
-            border: '1px solid var(--border)',
-          }}>
-            {/* Sliding indicator */}
-            <motion.div
-              layout
+      {/* === BAR 2: What AI sees (IDs) === */}
+      <div style={{ ...labelStyle, color: 'var(--nvidia-green)' }}>
+        What AI sees
+      </div>
+      <div style={{ position: 'relative', marginBottom: 24 }}>
+        {/* Colored overlay for IDs */}
+        <div style={overlayStyle}>
+          {idsColoredSegments?.map((seg, i) => (
+            <span key={i} style={{ color: seg.color }}>
+              {seg.text}
+            </span>
+          ))}
+          {idsFocused && (
+            <span
               style={{
-                position: 'absolute',
-                top: 3,
-                bottom: 3,
-                width: 'calc(50% - 3px)',
-                left: showIds ? 3 : 'calc(50%)',
-                background: 'var(--nvidia-green-dim)',
-                border: '1px solid rgba(118, 185, 0, 0.25)',
-                borderRadius: 6,
+                display: 'inline-block',
+                width: 2,
+                height: '1.2em',
+                background: 'var(--nvidia-green)',
+                marginLeft: 1,
+                verticalAlign: 'text-bottom',
+                animation: 'blink 1s step-end infinite',
               }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             />
-            <button
-              onClick={() => { if (!showIds) onToggleIds() }}
-              style={{
-                position: 'relative',
-                zIndex: 1,
-                padding: '6px 16px',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: 6,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                fontWeight: showIds ? 500 : 400,
-                color: showIds ? 'var(--nvidia-green)' : 'var(--text-dim)',
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-                whiteSpace: 'nowrap',
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              What AI sees
-            </button>
-            <button
-              onClick={() => { if (showIds) onToggleIds() }}
-              style={{
-                position: 'relative',
-                zIndex: 1,
-                padding: '6px 16px',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: 6,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                fontWeight: !showIds ? 500 : 400,
-                color: !showIds ? 'var(--nvidia-green)' : 'var(--text-dim)',
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-                whiteSpace: 'nowrap',
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              Your text
-            </button>
-          </div>
+          )}
         </div>
-      )}
+
+        {/* Actual textarea for IDs */}
+        <textarea
+          ref={idsInputRef}
+          value={idsDisplayValue}
+          placeholder="Token IDs appear here..."
+          rows={1}
+          onChange={(e) => {
+            handleIdsInput(e)
+            e.target.style.height = 'auto'
+            e.target.style.height = e.target.scrollHeight + 'px'
+          }}
+          onFocus={() => {
+            setIdsFocused(true)
+            setEditingBar('ids')
+            setIdsInputText(derivedIdsText)
+          }}
+          onBlur={() => {
+            setIdsFocused(false)
+            setEditingBar(null)
+          }}
+          style={barStyle(idsFocused)}
+        />
+      </div>
 
       {/* Stats bar */}
       <div
@@ -381,8 +499,8 @@ export default function TokenizerPhase({
           active={hoveredStat === 'tokens'}
           onEnter={() => { clearTimeout(hoverTimeoutRef.current); setHoveredStat('tokens') }}
           tooltip={<>
-            The subword fragments AI actually reads.{' '}
-            <StatLink href="https://platform.openai.com/tokenizer">OpenAI Tokenizer</StatLink>
+            AI can't read text. It splits your input into small pieces called tokens — often parts of words, not whole words. "strawberry" becomes 3 tokens: "str", "aw", "berry". Everything AI does starts from these fragments.{' '}
+            <StatLink href="https://platform.openai.com/tokenizer">Try OpenAI's Tokenizer</StatLink>
           </>}
         >
           <span style={{ color: 'var(--nvidia-green)', fontWeight: 600, fontSize: 15 }}>
@@ -394,8 +512,8 @@ export default function TokenizerPhase({
           active={hoveredStat === 'characters'}
           onEnter={() => { clearTimeout(hoverTimeoutRef.current); setHoveredStat('characters') }}
           tooltip={<>
-            Letters, spaces, and symbols you typed. AI converts these to tokens before processing.{' '}
-            <StatLink href="https://en.wikipedia.org/wiki/Byte_pair_encoding">BPE on Wikipedia</StatLink>
+            The raw letters, spaces, and symbols you typed — what humans read. AI never sees these directly. It converts them into tokens first, which is why the token count is always different from the character count.{' '}
+            <StatLink href="https://huggingface.co/learn/llm-course/en/chapter2/4">How Tokenizers Work</StatLink>
           </>}
         >
           {charCount} characters
@@ -405,8 +523,8 @@ export default function TokenizerPhase({
           active={hoveredStat === 'ratio'}
           onEnter={() => { clearTimeout(hoverTimeoutRef.current); setHoveredStat('ratio') }}
           tooltip={<>
-            Tokenization efficiency. English averages ~4. Lower = more tokens = higher cost.{' '}
-            <StatLink href="https://blog.xenova.com/tiktoken">Tokenizer deep-dive</StatLink>
+            How many characters fit in one token on average. English text averages ~4 chars/token. A lower ratio means more tokens for the same text — making AI slower and more expensive. Non-English languages often score worse here.{' '}
+            <StatLink href="https://huggingface.co/spaces/Xenova/the-tokenizer-playground">Tokenizer Playground</StatLink>
           </>}
         >
           {charsPerToken} chars/token
@@ -416,30 +534,37 @@ export default function TokenizerPhase({
           active={hoveredStat === 'cost'}
           onEnter={() => { clearTimeout(hoverTimeoutRef.current); setHoveredStat('cost') }}
           tooltip={<>
-            Estimated cost at GPT-4 input pricing (~$0.03/1K tokens).{' '}
-            <StatLink href="https://openai.com/api/pricing">OpenAI Pricing</StatLink>
+            AI APIs charge per token, not per word or message. This estimate uses GPT-4's input rate (~$0.03 per 1K tokens). More tokens = higher cost — which is why inefficient tokenization for non-English text creates real cost inequality.{' '}
+            <StatLink href="https://openai.com/api/pricing/">OpenAI Pricing</StatLink>
           </>}
         >
           ~${tokenCount > 0 ? (tokenCount * 0.00003).toFixed(5) : '0.00000'}/call
         </StatItem>
       </div>
 
-      {/* Prompt after auto-type — draws user to type and explore below */}
+      {/* Phase 2: "Scroll to explore more" — after user types, until they scroll */}
       <AnimatePresence>
-        {!isAutoTyping && !userHasTyped && (
+        {userHasTyped && !hasScrolled && (
           <motion.div
+            key="scroll-prompt"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ duration: 0.5 }}
             style={{
-              textAlign: 'center',
-              marginTop: 'auto',
-              marginBottom: 24,
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 10,
+              justifyContent: 'flex-end',
+              paddingBottom: 24,
+              height: 60,
+              background: 'linear-gradient(transparent, var(--bg-deep) 60%)',
+              pointerEvents: 'none',
+              zIndex: 10,
             }}
           >
             <span style={{
@@ -448,7 +573,7 @@ export default function TokenizerPhase({
               fontWeight: 400,
               letterSpacing: 0.2,
             }}>
-              Now try your own words
+              Scroll to explore more
             </span>
             <motion.span
               animate={{ y: [0, 5, 0] }}
@@ -459,6 +584,7 @@ export default function TokenizerPhase({
                 color: 'var(--nvidia-green)',
                 opacity: 0.7,
                 lineHeight: 1,
+                marginTop: 4,
               }}
             >
               ↓
@@ -467,7 +593,7 @@ export default function TokenizerPhase({
         )}
       </AnimatePresence>
 
-      {/* Nudges - appear staggered */}
+      {/* Nudges - accordion style, each expands to reveal insight */}
       <AnimatePresence>
         {!isAutoTyping && (
           <motion.div
@@ -476,26 +602,63 @@ export default function TokenizerPhase({
             transition={{ duration: 0.3, delay: 0.1 }}
             style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 24 }}
           >
-            <Nudge icon="🍓" onClick={() => handleNudge('strawberry')} delay={0}>
-              Try <Accent>strawberry</Accent> — can AI count the r's?
-            </Nudge>
-            <Nudge icon="💪" onClick={() => handleNudge('Schwarzenegger')} delay={0.1}>
-              Try <Accent>Schwarzenegger</Accent> — long words get shattered
-            </Nudge>
-            <Nudge icon="🌏" onClick={() => handleNudge('こんにちは世界')} delay={0.2}>
-              Try <Accent>こんにちは世界</Accent> — how does AI handle Japanese?
-            </Nudge>
+            {NUDGES.map((nudge, i) => (
+              <Nudge
+                key={nudge.key}
+                icon={nudge.icon}
+                onClick={() => handleNudge(nudge.key, nudge.text)}
+                delay={i * 0.1}
+                explored={exploredNudges.has(nudge.key)}
+                active={activeNudge === nudge.key}
+                insightContent={
+                  <>
+                    <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>
+                      {nudge.insight.headline}
+                    </strong>{' '}
+                    {nudge.insight.body}
+                    {nudge.insight.nextHint && (
+                      <div style={{
+                        marginTop: 10,
+                        paddingTop: 8,
+                        borderTop: '1px solid rgba(118, 185, 0, 0.1)',
+                        fontSize: 13,
+                        color: 'var(--nvidia-green)',
+                        fontWeight: 500,
+                        opacity: 0.85,
+                      }}>
+                        {nudge.insight.nextHint}
+                      </div>
+                    )}
+                  </>
+                }
+              >
+                {nudge.label}
+              </Nudge>
+            ))}
+            {exploredNudges.size > 0 && (
+              <motion.div
+                key={exploredNudges.size === NUDGES.length ? 'complete' : 'progress'}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: exploredNudges.size === NUDGES.length ? 12 : 11,
+                  color: exploredNudges.size === NUDGES.length ? 'var(--nvidia-green)' : 'var(--text-dim)',
+                  paddingLeft: 4,
+                  marginTop: 2,
+                  fontWeight: exploredNudges.size === NUDGES.length ? 600 : 400,
+                }}
+              >
+                {exploredNudges.size === NUDGES.length
+                  ? 'All explored — you now see what AI sees.'
+                  : `${exploredNudges.size}/${NUDGES.length} explored`
+                }
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Insight card */}
-      <Insight visible={userHasTyped}>
-        <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>Notice how "strawberry" becomes 3 tokens?</strong>{' '}
-        AI doesn't see words — it sees fragments called tokens. The tokenizer splits text into pieces
-        based on patterns it learned from training data. Every AI model starts here: it never sees
-        your original letters, only these fragments.
-      </Insight>
 
       {/* Go Deeper panel */}
       <DepthPanel
@@ -566,11 +729,21 @@ for t in tokens:
         }
       />
 
-      {/* CSS for cursor blink animation */}
+      {/* CSS for cursor blink and breathing border animations */}
       <style>{`
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
+        }
+        @keyframes breathe {
+          0%, 100% {
+            box-shadow: 0 0 0 2px rgba(118,185,0,0.08);
+            border-color: rgba(118,185,0,0.25);
+          }
+          50% {
+            box-shadow: 0 0 0 4px rgba(118,185,0,0.2);
+            border-color: rgba(118,185,0,0.45);
+          }
         }
       `}</style>
     </motion.div>
