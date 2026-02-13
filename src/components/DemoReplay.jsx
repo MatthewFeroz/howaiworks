@@ -17,7 +17,13 @@ export const DEMO_CONVERSATIONS = [
 ]
 
 // Simulate token streaming by splitting response into word-level chunks
-export function simulateTokenStream(text, onToken, onDone) {
+// Optional params: initialDelay (ms before first token), tokenInterval (ms between tokens)
+export function simulateTokenStream(text, onToken, onDone, options = {}) {
+  const {
+    initialDelay = 0,
+    tokenInterval = 30 + Math.random() * 20,
+  } = options
+
   // Split into small chunks that approximate tokens
   const chunks = []
   let i = 0
@@ -40,15 +46,34 @@ export function simulateTokenStream(text, onToken, onDone) {
   }
 
   let idx = 0
-  const interval = setInterval(() => {
-    if (idx >= chunks.length) {
-      clearInterval(interval)
-      onDone()
-      return
-    }
-    onToken(chunks[idx])
-    idx++
-  }, 30 + Math.random() * 20) // ~30 tokens/sec with slight variation
+  let intervalId = null
+  let cancelled = false
 
-  return () => clearInterval(interval)
+  const startStreaming = () => {
+    if (cancelled) return
+    intervalId = setInterval(() => {
+      if (idx >= chunks.length) {
+        clearInterval(intervalId)
+        onDone()
+        return
+      }
+      onToken(chunks[idx])
+      idx++
+    }, tokenInterval)
+  }
+
+  if (initialDelay > 0) {
+    const delayTimer = setTimeout(startStreaming, initialDelay)
+    return () => {
+      cancelled = true
+      clearTimeout(delayTimer)
+      if (intervalId) clearInterval(intervalId)
+    }
+  } else {
+    startStreaming()
+    return () => {
+      cancelled = true
+      if (intervalId) clearInterval(intervalId)
+    }
+  }
 }

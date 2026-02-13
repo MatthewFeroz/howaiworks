@@ -47,6 +47,13 @@ class ChatRequest(BaseModel):
     model: str = "qwen2.5:0.5b"
 
 
+class CloudChatRequest(BaseModel):
+    prompt: str
+    apiKey: str
+    endpoint: str
+    model: str = "meta-llama/Llama-3.1-8B-Instruct"
+
+
 # ── TOKENIZATION ──
 
 @app.post("/api/tokenize")
@@ -149,6 +156,79 @@ async def chat(req: ChatRequest):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ── CLOUD CHAT (proxy to Brev / OpenAI-compatible API) ──
+
+@app.post("/api/cloud-chat")
+async def cloud_chat(req: CloudChatRequest):
+    """Proxy chat to a Brev/OpenAI-compatible endpoint. Streams SSE."""
+
+    async def generate():
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                async with client.stream(
+                    "POST",
+                    f"{req.endpoint.rstrip('/')}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {req.apiKey}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": req.model,
+                        "messages": [{"role": "user", "content": req.prompt}],
+                        "stream": True,
+                    },
+                ) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        if not line or not line.startswith("data: "):
+                            continue
+                        data_str = line[6:]
+                        if data_str.strip() == "[DONE]":
+                            yield "data: [DONE]\n\n"
+                            break
+                        try:
+                            data = json.loads(data_str)
+                            token = (
+                                data.get("choices", [{}])[0]
+                                .get("delta", {})
+                                .get("content", "")
+                            )
+                            if token:
+                                yield f"data: {json.dumps({'token': token})}\n\n"
+                        except (json.JSONDecodeError, IndexError):
+                            continue
+        except httpx.ConnectError:
+            yield f"data: {json.dumps({'error': 'Cannot connect to cloud endpoint'})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+# ── BREV HEALTH ──
+
+@app.post("/api/brev-health")
+async def brev_health(req: CloudChatRequest):
+    """Check if a Brev endpoint is reachable."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.get(
+                f"{req.endpoint.rstrip('/')}/models",
+                headers={"Authorization": f"Bearer {req.apiKey}"},
+            )
+            return {"ok": r.status_code == 200}
+    except Exception:
+        return {"ok": False}
 
 
 # ── GPU INFO ──

@@ -139,7 +139,7 @@ function highlightPython(code) {
   return tokens
 }
 
-function PythonCode({ code }) {
+export function PythonCode({ code }) {
   const highlighted = useMemo(() => highlightPython(code), [code])
 
   return (
@@ -188,14 +188,10 @@ function PythonCode({ code }) {
 /**
  * DepthPanel — expandable section that adds university-level depth
  *
- * Each panel has:
- * - A "Go Deeper" toggle
- * - CS concept explanation
- * - Optional code snippet (Python-highlighted)
- * - A mini challenge
- * - Real-world connection
+ * Accepts a `sections` array, each rendered as a collapsible accordion.
+ * First section auto-opens. Multiple sections can be open simultaneously.
  */
-export default function DepthPanel({ concept, code, challenge, realWorld, visible, delay = 0, onOpen }) {
+export default function DepthPanel({ sections, visible, delay = 0, onOpen }) {
   const [isOpen, setIsOpen] = useState(false)
 
   if (!visible) return null
@@ -232,23 +228,7 @@ export default function DepthPanel({ concept, code, challenge, realWorld, visibl
           textAlign: 'left',
         }}
       >
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 24,
-          height: 24,
-          borderRadius: 6,
-          background: 'var(--nvidia-green-dim)',
-          color: 'var(--nvidia-green)',
-          fontSize: 12,
-          fontFamily: 'var(--font-mono)',
-          fontWeight: 700,
-          flexShrink: 0,
-        }}>
-          CS
-        </span>
-        <span style={{ flex: 1 }}>Go Deeper — The Computer Science</span>
+        <span style={{ flex: 1 }}>Go Deeper — Computer Science</span>
         <span style={{
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0)',
           transition: 'transform 0.3s',
@@ -274,37 +254,19 @@ export default function DepthPanel({ concept, code, challenge, realWorld, visibl
               border: '1px solid rgba(118,185,0,0.15)',
               borderTop: 'none',
               borderRadius: '0 0 12px 12px',
-              padding: '24px',
+              padding: '16px 24px 24px',
             }}>
-
-              {/* CS Concept */}
-              {concept && (
-                <Section label="The CS Concept" color="var(--nvidia-green)">
-                  {concept}
-                </Section>
-              )}
-
-              {/* Code snippet — Python highlighted */}
-              {code && (
-                <Section label="See It In Code" color="#6ec0e8">
-                  <PythonCode code={code} />
-                </Section>
-              )}
-
-              {/* Challenge */}
-              {challenge && (
-                <Section label="Challenge" color="#e8d06e">
-                  {challenge}
-                </Section>
-              )}
-
-              {/* Real-world connection */}
-              {realWorld && (
-                <Section label="Why This Matters" color="#e87a96">
-                  {realWorld}
-                </Section>
-              )}
-
+              {sections.map((section, i) => (
+                <AccordionSection
+                  key={section.label}
+                  label={section.label}
+                  color={section.color}
+                  defaultOpen={section.defaultOpen}
+                  isLast={i === sections.length - 1}
+                >
+                  {section.content}
+                </AccordionSection>
+              ))}
             </div>
           </motion.div>
         )}
@@ -314,27 +276,70 @@ export default function DepthPanel({ concept, code, challenge, realWorld, visibl
 }
 
 
-function Section({ label, color, children }) {
+function AccordionSection({ label, color, defaultOpen = false, isLast, children }) {
+  const [open, setOpen] = useState(defaultOpen)
+
   return (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: 11,
-        fontWeight: 600,
-        letterSpacing: 1.5,
-        textTransform: 'uppercase',
-        color: color,
-        marginBottom: 10,
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: 14,
-        lineHeight: 1.7,
-        color: 'var(--text-secondary)',
-      }}>
-        {children}
-      </div>
+    <div style={{
+      borderBottom: isLast ? 'none' : '1px solid var(--border)',
+    }}>
+      {/* Clickable header */}
+      <button
+        onClick={() => setOpen(prev => !prev)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          width: '100%',
+          padding: '12px 0',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{
+          color: color,
+          fontSize: 14,
+          transition: 'transform 0.2s',
+          transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+          lineHeight: 1,
+        }}>
+          ▸
+        </span>
+        <span style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: 1.5,
+          textTransform: 'uppercase',
+          color: color,
+        }}>
+          {label}
+        </span>
+      </button>
+
+      {/* Collapsible content */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              padding: '0 0 20px 0',
+              fontSize: 14,
+              lineHeight: 1.7,
+              color: 'var(--text-secondary)',
+            }}>
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

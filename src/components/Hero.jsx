@@ -8,7 +8,7 @@ export default function Hero() {
       transition={{ duration: 0.5, ease: 'easeOut' }}
       style={{
         textAlign: 'center',
-        padding: '80px 0 32px',
+        padding: '48px 0 32px',
       }}
     >
       <h1 style={{

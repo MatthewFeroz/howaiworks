@@ -1,7 +1,8 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import TokenizerPage from './pages/TokenizerPage'
-import RunLocalPage from './pages/RunLocalPage'
+import EmbeddingsPage from './pages/EmbeddingsPage'
+import CloudVsLocalPage from './pages/CloudVsLocalPage'
 
 export default function App() {
   const location = useLocation()
@@ -17,7 +18,8 @@ export default function App() {
       >
         <Routes location={location}>
           <Route path="/" element={<TokenizerPage />} />
-          <Route path="/run" element={<RunLocalPage />} />
+          <Route path="/understand" element={<EmbeddingsPage />} />
+          <Route path="/run" element={<CloudVsLocalPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

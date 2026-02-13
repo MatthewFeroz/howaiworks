@@ -16,7 +16,12 @@
       "Bash(npm install:*)",
       "Bash(dir:*)",
       "Bash(claude mcp remove:*)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "WebFetch(domain:docs.nvidia.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 8 npm run dev:*)",
+      "Bash(powershell:*)"
     ]
   }
 }

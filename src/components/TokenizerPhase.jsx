@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import Nudge from './Nudge'
-import DepthPanel from './DepthPanel'
+import DepthPanel, { PythonCode } from './DepthPanel'
 
 const AUTO_TYPE_TEXT = 'How does AI work?'
 const TYPE_SPEED = 60 // ms per character
@@ -685,136 +685,143 @@ export default function TokenizerPhase({
         visible={exploredNudges.size === NUDGES.length}
         delay={0.5}
         onOpen={onDepthOpened}
-        concept={
-          <div>
-            {/* 1. The Problem */}
-            <p style={{ marginBottom: 16 }}>
-              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>The problem: AI can't read.</strong>
-            </p>
-            <p style={{ marginBottom: 12 }}>
-              Neural networks are math machines — they multiply matrices and add numbers.
-              They have no concept of "a" or "z" or "strawberry." So before AI can think about
-              your text, something has to convert it into numbers. That something is called a{' '}
-              <strong style={{ color: 'var(--text-primary)' }}>tokenizer</strong>.
-            </p>
-            <p style={{ marginBottom: 20 }}>
-              But <em>how</em> do you decide what each number represents? You have three options:
-            </p>
-
-            {/* Option comparison */}
-            <div style={{
-              display: 'grid',
-              gap: 10,
-              marginBottom: 20,
-            }}>
-              <div style={{
-                padding: '12px 16px',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-              }}>
-                <strong style={{ color: '#e87a96' }}>Option A: One number per character</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  "hello" → 5 numbers. Simple, but wildly inefficient.
-                  A 1,000-word essay becomes ~5,000 tokens. AI's context window fills up fast,
-                  and the model wastes processing power on individual letters that carry little meaning on their own.
+        sections={[
+          {
+            label: 'The Problem',
+            color: 'var(--nvidia-green)',
+            defaultOpen: true,
+            content: (
+              <div>
+                <p style={{ marginBottom: 16 }}>
+                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>The problem: AI can't read.</strong>
+                </p>
+                <p style={{ marginBottom: 12 }}>
+                  Neural networks are math machines — they multiply matrices and add numbers.
+                  They have no concept of "a" or "z" or "strawberry." So before AI can think about
+                  your text, something has to convert it into numbers. That something is called a{' '}
+                  <strong style={{ color: 'var(--text-primary)' }}>tokenizer</strong>.
+                </p>
+                <p style={{ marginBottom: 20 }}>
+                  But <em>how</em> do you decide what each number represents? You have three options:
+                </p>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <div style={{
+                    padding: '12px 16px',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                  }}>
+                    <strong style={{ color: '#e87a96' }}>Option A: One number per character</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      "hello" → 5 numbers. Simple, but wildly inefficient.
+                      A 1,000-word essay becomes ~5,000 tokens. AI's context window fills up fast,
+                      and the model wastes processing power on individual letters that carry little meaning on their own.
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '12px 16px',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                  }}>
+                    <strong style={{ color: '#e8d06e' }}>Option B: One number per word</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      Efficient for common words, but English alone has 750,000+ words. Add misspellings,
+                      slang, code, other languages — you'd need millions of entries. And any word not in
+                      the dictionary? Completely invisible to the model.
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '12px 16px',
+                    background: 'rgba(118,185,0,0.06)',
+                    border: '1px solid rgba(118,185,0,0.25)',
+                    borderRadius: 8,
+                  }}>
+                    <strong style={{ color: 'var(--nvidia-green)' }}>Option C: Byte Pair Encoding — the sweet spot</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      Learn the most useful pieces from real data. Common words like "the" get their own token.
+                      Rare words get broken into reusable subword pieces. A fixed vocabulary of ~100K tokens
+                      can represent <em>any</em> text in <em>any</em> language.
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div style={{
-                padding: '12px 16px',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-              }}>
-                <strong style={{ color: '#e8d06e' }}>Option B: One number per word</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  Efficient for common words, but English alone has 750,000+ words. Add misspellings,
-                  slang, code, other languages — you'd need millions of entries. And any word not in
-                  the dictionary? Completely invisible to the model.
+            ),
+          },
+          {
+            label: 'How BPE Works',
+            color: 'var(--nvidia-green)',
+            content: (
+              <div>
+                <p style={{ marginBottom: 12 }}>
+                  Imagine you're inventing a shorthand for writing faster. You'd look at what you write most
+                  and create abbreviations for the most common patterns. BPE does exactly this, automatically,
+                  by scanning billions of words of text:
+                </p>
+                <div style={{ display: 'grid', gap: 12 }}>
+                  <StepBox step={1} title="Start with individual bytes">
+                    Break every piece of text into its smallest units — individual bytes (roughly characters).
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)', letterSpacing: 1 }}>
+                      "hello" → [h] [e] [l] [l] [o]
+                    </div>
+                  </StepBox>
+                  <StepBox step={2} title="Count every adjacent pair">
+                    Scan the entire training dataset (think: all of Wikipedia, Reddit, books, code).
+                    Count how often each pair of adjacent tokens appears together.
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
+                      "th" appears 9.2 billion times{' '}
+                      <span style={{ color: 'var(--nvidia-green)' }}>← winner</span>
+                    </div>
+                  </StepBox>
+                  <StepBox step={3} title="Merge the most frequent pair">
+                    Combine [t] + [h] → [th] everywhere in the data. This new merged token
+                    becomes part of the vocabulary.
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
+                      Before: [t] [h] [e] → After: [th] [e]
+                    </div>
+                  </StepBox>
+                  <StepBox step={4} title="Repeat ~100,000 times">
+                    Each round, find and merge the next most frequent pair. Early merges create
+                    common pairs like "in", "er", "the". Later merges create full words
+                    like "the", "and", "function". After ~100K merges, you have a complete vocabulary.
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
+                      [th] + [e] → [the] — now "the" is a single token
+                    </div>
+                  </StepBox>
                 </div>
               </div>
-              <div style={{
-                padding: '12px 16px',
-                background: 'rgba(118,185,0,0.06)',
-                border: '1px solid rgba(118,185,0,0.25)',
-                borderRadius: 8,
-              }}>
-                <strong style={{ color: 'var(--nvidia-green)' }}>Option C: Byte Pair Encoding — the sweet spot</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  Learn the most useful pieces from real data. Common words like "the" get their own token.
-                  Rare words get broken into reusable subword pieces. A fixed vocabulary of ~100K tokens
-                  can represent <em>any</em> text in <em>any</em> language.
-                </div>
+            ),
+          },
+          {
+            label: 'The Result',
+            color: 'var(--nvidia-green)',
+            content: (
+              <div>
+                <p style={{ marginBottom: 12 }}>
+                  The tokenizer you're using right now is <strong style={{ color: 'var(--text-primary)' }}>cl100k_base</strong> — the
+                  same one inside GPT-4. It has a vocabulary of exactly <strong style={{ color: 'var(--text-primary)' }}>100,256 tokens</strong>.
+                </p>
+                <p style={{ marginBottom: 6 }}>
+                  Common English words like "the", "and", "hello" each get one token.
+                  Rare words like "supercalifragilisticexpialidocious" get shattered into many small pieces.
+                  And non-Latin scripts — Arabic, Hindi, Chinese — often get broken into even more
+                  fragments, because there was less of that text in the training data.
+                </p>
+                <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(118,185,0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Key insight:</strong>{' '}
+                  The tokenizer is trained <em>separately</em> from the AI model, <em>before</em> the
+                  model ever sees any data. It's a preprocessing step. The neural network never sees
+                  your characters — only the integer IDs the tokenizer produces. Everything the model
+                  knows about language starts from these numbers.
+                </p>
               </div>
-            </div>
-
-            {/* 2. How BPE Works */}
-            <p style={{ marginBottom: 16 }}>
-              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>How Byte Pair Encoding works — step by step</strong>
-            </p>
-            <p style={{ marginBottom: 12 }}>
-              Imagine you're inventing a shorthand for writing faster. You'd look at what you write most
-              and create abbreviations for the most common patterns. BPE does exactly this, automatically,
-              by scanning billions of words of text:
-            </p>
-
-            {/* Steps */}
-            <div style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
-              <StepBox step={1} title="Start with individual bytes">
-                Break every piece of text into its smallest units — individual bytes (roughly characters).
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)', letterSpacing: 1 }}>
-                  "hello" → [h] [e] [l] [l] [o]
-                </div>
-              </StepBox>
-              <StepBox step={2} title="Count every adjacent pair">
-                Scan the entire training dataset (think: all of Wikipedia, Reddit, books, code).
-                Count how often each pair of adjacent tokens appears together.
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
-                  "th" appears 9.2 billion times{' '}
-                  <span style={{ color: 'var(--nvidia-green)' }}>← winner</span>
-                </div>
-              </StepBox>
-              <StepBox step={3} title="Merge the most frequent pair">
-                Combine [t] + [h] → [th] everywhere in the data. This new merged token
-                becomes part of the vocabulary.
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
-                  Before: [t] [h] [e] → After: [th] [e]
-                </div>
-              </StepBox>
-              <StepBox step={4} title="Repeat ~100,000 times">
-                Each round, find and merge the next most frequent pair. Early merges create
-                common pairs like "in", "er", "the". Later merges create full words
-                like "the", "and", "function". After ~100K merges, you have a complete vocabulary.
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
-                  [th] + [e] → [the] — now "the" is a single token
-                </div>
-              </StepBox>
-            </div>
-
-            {/* 3. The Result */}
-            <p style={{ marginBottom: 12 }}>
-              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>The result</strong>
-            </p>
-            <p style={{ marginBottom: 12 }}>
-              The tokenizer you're using right now is <strong style={{ color: 'var(--text-primary)' }}>cl100k_base</strong> — the
-              same one inside GPT-4. It has a vocabulary of exactly <strong style={{ color: 'var(--text-primary)' }}>100,256 tokens</strong>.
-            </p>
-            <p style={{ marginBottom: 6 }}>
-              Common English words like "the", "and", "hello" each get one token.
-              Rare words like "supercalifragilisticexpialidocious" get shattered into many small pieces.
-              And non-Latin scripts — Arabic, Hindi, Chinese — often get broken into even more
-              fragments, because there was less of that text in the training data.
-            </p>
-            <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(118,185,0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Key insight:</strong>{' '}
-              The tokenizer is trained <em>separately</em> from the AI model, <em>before</em> the
-              model ever sees any data. It's a preprocessing step. The neural network never sees
-              your characters — only the integer IDs the tokenizer produces. Everything the model
-              knows about language starts from these numbers.
-            </p>
-          </div>
-        }
-        code={`import tiktoken
+            ),
+          },
+          {
+            label: 'See It In Code',
+            color: '#6ec0e8',
+            content: (
+              <PythonCode code={`import tiktoken
 
 # Load the same tokenizer used by GPT-4
 enc = tiktoken.get_encoding("cl100k_base")
@@ -842,68 +849,79 @@ ar_tokens = enc.encode(arabic)
 
 print(f"English: {len(en_tokens)} tokens")  # ~5
 print(f"Arabic:  {len(ar_tokens)} tokens")  # ~12
-# Same meaning. Different cost.`}
-        challenge={
-          <div>
-            <p style={{ marginBottom: 10 }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Think about it:</strong>
-            </p>
-            <p style={{ marginBottom: 12 }}>
-              If BPE merges are based on frequency in training data, and the training data was
-              mostly English web text — what happens to languages that weren't well represented?
-            </p>
-            <p style={{ marginBottom: 8, paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>1.</strong> Type "Hello, how are you?" above and note the token count.
-              Then try it in Spanish, Arabic, Hindi, or Yoruba. How does the count change?
-            </p>
-            <p style={{ marginBottom: 8, paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>2.</strong> Try typing a common English name ("John") vs. a name from
-              another culture. Which one stays in one piece?
-            </p>
-            <p style={{ paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>3.</strong> What would happen if you trained a tokenizer on <em>only</em>{' '}
-              Arabic text? Would English words start getting fragmented instead?
-            </p>
-          </div>
-        }
-        realWorld={
-          <div>
-            <p style={{ marginBottom: 14 }}>
-              Tokenization seems like a small technical detail — but it has real consequences
-              for billions of people.
-            </p>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e8d06e' }}>
-                <strong style={{ color: '#e8d06e' }}>Cost inequality</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  AI APIs charge per token. The same message in Yoruba or Bengali can use 2-4x
-                  more tokens than English — meaning people in those languages literally pay more
-                  for the same service.
-                </div>
+# Same meaning. Different cost.`} />
+            ),
+          },
+          {
+            label: 'Challenge',
+            color: '#e8d06e',
+            content: (
+              <div>
+                <p style={{ marginBottom: 10 }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Think about it:</strong>
+                </p>
+                <p style={{ marginBottom: 12 }}>
+                  If BPE merges are based on frequency in training data, and the training data was
+                  mostly English web text — what happens to languages that weren't well represented?
+                </p>
+                <p style={{ marginBottom: 8, paddingLeft: 16 }}>
+                  <strong style={{ color: '#e8d06e' }}>1.</strong> Type "Hello, how are you?" above and note the token count.
+                  Then try it in Spanish, Arabic, Hindi, or Yoruba. How does the count change?
+                </p>
+                <p style={{ marginBottom: 8, paddingLeft: 16 }}>
+                  <strong style={{ color: '#e8d06e' }}>2.</strong> Try typing a common English name ("John") vs. a name from
+                  another culture. Which one stays in one piece?
+                </p>
+                <p style={{ paddingLeft: 16 }}>
+                  <strong style={{ color: '#e8d06e' }}>3.</strong> What would happen if you trained a tokenizer on <em>only</em>{' '}
+                  Arabic text? Would English words start getting fragmented instead?
+                </p>
               </div>
-              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #6ec0e8' }}>
-                <strong style={{ color: '#6ec0e8' }}>Quality gap</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  AI models have a fixed context window (e.g. 128K tokens). If your language burns
-                  through tokens 3x faster, you get 3x less room for the AI to reason. Same model,
-                  worse results — just because of which language you speak.
+            ),
+          },
+          {
+            label: 'Why This Matters',
+            color: '#e87a96',
+            content: (
+              <div>
+                <p style={{ marginBottom: 14 }}>
+                  Tokenization seems like a small technical detail — but it has real consequences
+                  for billions of people.
+                </p>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e8d06e' }}>
+                    <strong style={{ color: '#e8d06e' }}>Cost inequality</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      AI APIs charge per token. The same message in Yoruba or Bengali can use 2-4x
+                      more tokens than English — meaning people in those languages literally pay more
+                      for the same service.
+                    </div>
+                  </div>
+                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #6ec0e8' }}>
+                    <strong style={{ color: '#6ec0e8' }}>Quality gap</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      AI models have a fixed context window (e.g. 128K tokens). If your language burns
+                      through tokens 3x faster, you get 3x less room for the AI to reason. Same model,
+                      worse results — just because of which language you speak.
+                    </div>
+                  </div>
+                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e87a96' }}>
+                    <strong style={{ color: '#e87a96' }}>Identity erasure</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      Names like "John" or "Sarah" are single tokens — the model sees them whole.
+                      Names like "Oluwaseun" or "Bhagyashree" get fragmented into meaningless syllables.
+                      The model literally cannot see these names the way it sees English ones.
+                    </div>
+                  </div>
                 </div>
+                <p style={{ marginTop: 14, fontSize: 13, color: 'var(--nvidia-green)', fontWeight: 500 }}>
+                  This is where AI inequity begins — not in the model's weights, but in the very first
+                  step: how text becomes numbers.
+                </p>
               </div>
-              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e87a96' }}>
-                <strong style={{ color: '#e87a96' }}>Identity erasure</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  Names like "John" or "Sarah" are single tokens — the model sees them whole.
-                  Names like "Oluwaseun" or "Bhagyashree" get fragmented into meaningless syllables.
-                  The model literally cannot see these names the way it sees English ones.
-                </div>
-              </div>
-            </div>
-            <p style={{ marginTop: 14, fontSize: 13, color: 'var(--nvidia-green)', fontWeight: 500 }}>
-              This is where AI inequity begins — not in the model's weights, but in the very first
-              step: how text becomes numbers.
-            </p>
-          </div>
-        }
+            ),
+          },
+        ]}
       />
 
       {/* CSS for cursor blink and breathing border animations */}
