@@ -3,9 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 import TokenizerPage from './pages/TokenizerPage'
 import EmbeddingsPage from './pages/EmbeddingsPage'
 import CloudVsLocalPage from './pages/CloudVsLocalPage'
+import { useWebLLM } from './hooks/useWebLLM'
 
 export default function App() {
   const location = useLocation()
+  const webllm = useWebLLM({ autoLoad: true })
 
   return (
     <AnimatePresence mode="wait">
@@ -19,7 +21,7 @@ export default function App() {
         <Routes location={location}>
           <Route path="/" element={<TokenizerPage />} />
           <Route path="/understand" element={<EmbeddingsPage />} />
-          <Route path="/run" element={<CloudVsLocalPage />} />
+          <Route path="/run" element={<CloudVsLocalPage webllm={webllm} />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

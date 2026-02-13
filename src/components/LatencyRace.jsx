@@ -10,7 +10,7 @@ const TOKEN_COLORS = [
 
 const DEFAULT_PROMPT = 'What is artificial intelligence?'
 
-export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplete }) {
+export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete, webllm, localInferenceMode }) {
   const [prompt, setPrompt] = useState('')
   const [isRacing, setIsRacing] = useState(false)
   const [hasRaced, setHasRaced] = useState(false)
@@ -23,6 +23,7 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
   const [cloudStartTime, setCloudStartTime] = useState(null)
   const [cloudFirstToken, setCloudFirstToken] = useState(null)
   const [cloudIsSimulated, setCloudIsSimulated] = useState(false)
+  const [cloudError, setCloudError] = useState(null)
 
   // Local state
   const [localTokens, setLocalTokens] = useState([])
@@ -53,6 +54,7 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
     setCloudTPS(null)
     setCloudStartTime(null)
     setCloudFirstToken(null)
+    setCloudError(null)
     setLocalTokens([])
     setLocalDone(false)
     setLocalTTFT(null)
@@ -72,11 +74,43 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
     const now = Date.now()
 
     // ── CLOUD COLUMN ──
-    const hasBrev = brevConfig?.apiKey && brevConfig?.endpoint
-    setCloudIsSimulated(!hasBrev)
 
-    if (hasBrev) {
-      // Real Brev streaming
+    // Helper: run simulated cloud (used as primary path or fallback)
+    const runSimulatedCloud = (startTime) => {
+      setCloudIsSimulated(true)
+      setCloudStartTime(startTime)
+      const demo = CLOUD_DEMO_RESPONSES.find(d => d.prompt === racePrompt) || CLOUD_DEMO_RESPONSES[0]
+      const cancel = simulateCloudStream(
+        demo.response,
+        (token) => {
+          const tokenTime = Date.now()
+          setCloudTokens(prev => {
+            if (prev.length === 0) {
+              setCloudFirstToken(tokenTime)
+              setCloudTTFT(tokenTime - startTime)
+            }
+            return [...prev, token]
+          })
+          cloudTokenCountRef.current++
+          if (cloudTokenCountRef.current > 1) {
+            setCloudTPS(prev => {
+              const elapsed = (tokenTime - startTime) / 1000
+              return elapsed > 0 ? Math.round(cloudTokenCountRef.current / elapsed) : prev
+            })
+          }
+        },
+        () => {
+          setCloudDone(true)
+          checkRaceComplete()
+        },
+      )
+      cloudCancelRef.current = cancel
+    }
+
+    if (nimConfig?.apiKey || nimConfig?.serverKey) {
+      // Route through backend proxy to avoid CORS issues
+      // The backend accepts a client-provided apiKey or falls back to its own NVIDIA_NIM_KEY
+      setCloudIsSimulated(false)
       setCloudStartTime(now)
       ;(async () => {
         try {
@@ -85,11 +119,25 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               prompt: racePrompt,
-              apiKey: brevConfig.apiKey,
-              endpoint: brevConfig.endpoint,
-              model: brevConfig.modelId || 'meta-llama/Llama-3.1-8B-Instruct',
+              apiKey: nimConfig.apiKey || '',
+              endpoint: nimConfig.endpoint || 'https://integrate.api.nvidia.com/v1',
+              model: nimConfig.modelId || 'nvidia/llama-3.1-nemotron-70b-instruct',
             }),
           })
+
+          if (!res.ok) {
+            let errMsg = res.status === 401 ? 'Invalid API key'
+              : res.status === 429 ? 'Rate limit exceeded'
+              : `Backend error (${res.status})`
+            try {
+              const errBody = await res.json()
+              errMsg = errBody.detail || errBody.error || errMsg
+            } catch {}
+            setCloudError(errMsg)
+            runSimulatedCloud(Date.now())
+            return
+          }
+
           const reader = res.body.getReader()
           const decoder = new TextDecoder()
           let buffer = ''
@@ -104,10 +152,14 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
 
             for (const line of lines) {
               if (!line.startsWith('data: ')) continue
-              const data = line.slice(6)
+              const data = line.slice(6).trim()
               if (data === '[DONE]') break
               try {
                 const parsed = JSON.parse(data)
+                if (parsed.error) {
+                  setCloudError(parsed.error)
+                  continue
+                }
                 const token = parsed.token || parsed.content || ''
                 if (token) {
                   if (!firstTokenTime) {
@@ -120,52 +172,32 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
                   const elapsed = (Date.now() - firstTokenTime) / 1000
                   if (elapsed > 0) setCloudTPS(Math.round(cloudTokenCountRef.current / elapsed))
                 }
-              } catch { /* skip */ }
+              } catch { /* skip malformed SSE lines */ }
             }
           }
-        } catch (err) {
-          console.error('Cloud race error:', err)
-        }
-        setCloudDone(true)
-        checkRaceComplete()
-      })()
-    } else {
-      // Simulated cloud
-      setCloudStartTime(now)
-      const demo = CLOUD_DEMO_RESPONSES.find(d => d.prompt === racePrompt) || CLOUD_DEMO_RESPONSES[0]
-      const cancel = simulateCloudStream(
-        demo.response,
-        (token) => {
-          const tokenTime = Date.now()
-          setCloudTokens(prev => {
-            if (prev.length === 0) {
-              setCloudFirstToken(tokenTime)
-              setCloudTTFT(tokenTime - now)
-            }
-            return [...prev, token]
-          })
-          cloudTokenCountRef.current++
-          const firstTime = cloudTokenCountRef.current === 1 ? tokenTime : null
-          if (cloudTokenCountRef.current > 1) {
-            // Use a rough estimate of first token for TPS calculation
-            setCloudTPS(prev => {
-              const elapsed = (tokenTime - now) / 1000
-              return elapsed > 0 ? Math.round(cloudTokenCountRef.current / elapsed) : prev
-            })
+          if (cloudTokenCountRef.current === 0) {
+            // No tokens received — likely an API error. Fall back to simulated.
+            runSimulatedCloud(Date.now())
+            return
           }
-        },
-        () => {
           setCloudDone(true)
           checkRaceComplete()
-        },
-      )
-      cloudCancelRef.current = cancel
+        } catch (err) {
+          console.error('Cloud race error:', err)
+          setCloudError('Backend unavailable — make sure the FastAPI server is running')
+          runSimulatedCloud(Date.now())
+        }
+      })()
+    } else {
+      // Branch C: Simulated (no config)
+      runSimulatedCloud(now)
     }
 
     // ── LOCAL COLUMN ──
-    setLocalIsSimulated(!ollamaConnected)
+    const currentLocalMode = localInferenceMode || (ollamaConnected ? 'ollama' : 'simulated')
+    setLocalIsSimulated(currentLocalMode === 'simulated')
 
-    if (ollamaConnected) {
+    if (currentLocalMode === 'ollama') {
       // Real Ollama streaming
       setLocalStartTime(now)
       ;(async () => {
@@ -217,6 +249,34 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
         setLocalDone(true)
         checkRaceComplete()
       })()
+    } else if (currentLocalMode === 'webllm' && webllm?.isReady) {
+      // WebLLM browser inference
+      setLocalStartTime(now)
+      let firstTokenTime = null
+      const abort = webllm.chat(racePrompt, {
+        onToken: (token) => {
+          const tokenTime = Date.now()
+          if (!firstTokenTime) {
+            firstTokenTime = tokenTime
+            setLocalFirstToken(tokenTime)
+            setLocalTTFT(tokenTime - now)
+          }
+          localTokenCountRef.current++
+          setLocalTokens(prev => [...prev, token])
+          const elapsed = (tokenTime - firstTokenTime) / 1000
+          if (elapsed > 0) setLocalTPS(Math.round(localTokenCountRef.current / elapsed))
+        },
+        onDone: () => {
+          setLocalDone(true)
+          checkRaceComplete()
+        },
+        onError: (err) => {
+          console.error('WebLLM race error:', err)
+          setLocalDone(true)
+          checkRaceComplete()
+        },
+      })
+      localCancelRef.current = abort
     } else {
       // Simulated local
       setLocalStartTime(now)
@@ -247,7 +307,7 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
       )
       localCancelRef.current = cancel
     }
-  }, [ollamaConnected, brevConfig]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ollamaConnected, nimConfig, localInferenceMode, webllm]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkRaceComplete = () => {
     // This is called from async contexts; we use a timeout to let state settle
@@ -285,27 +345,32 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
         {/* Cloud column */}
         <RaceColumn
           label="CLOUD"
-          sublabel={cloudIsSimulated ? 'Simulated · Brev GPU' : `Brev · ${brevConfig?.modelId || 'llama3.1:8b'}`}
+          sublabel={cloudIsSimulated ? 'Simulated · NVIDIA NIM' : `NVIDIA NIM · ${nimConfig?.modelId || 'nemotron-70b'}`}
           accentColor="#6ec0e8"
           tokens={cloudTokens}
           done={cloudDone}
           ttft={cloudTTFT}
           tps={cloudTPS}
           isSimulated={cloudIsSimulated}
-          model={brevConfig?.modelId || 'llama3.1:8b'}
+          model={nimConfig?.modelId || 'nemotron-70b'}
+          error={cloudError}
         />
 
         {/* Local column */}
         <RaceColumn
           label="LOCAL"
-          sublabel={localIsSimulated ? 'Simulated · Your Machine' : 'Ollama · Your Machine'}
+          sublabel={
+            localInferenceMode === 'ollama' ? 'Ollama · Your Machine'
+            : localInferenceMode === 'webllm' && !localIsSimulated ? 'WebLLM · In Your Browser (WebGPU)'
+            : 'Simulated · Your Machine'
+          }
           accentColor="var(--nvidia-green)"
           tokens={localTokens}
           done={localDone}
           ttft={localTTFT}
           tps={localTPS}
           isSimulated={localIsSimulated}
-          model="qwen2.5:0.5b"
+          model={localInferenceMode === 'webllm' && !localIsSimulated ? 'qwen2.5-0.5b (browser)' : 'qwen2.5:0.5b'}
         />
       </div>
 
@@ -360,7 +425,7 @@ export default function LatencyRace({ ollamaConnected, brevConfig, onRaceComplet
   )
 }
 
-function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isSimulated, model }) {
+function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isSimulated, model, error }) {
   const contentRef = useRef(null)
 
   // Auto-scroll to bottom as tokens stream
@@ -436,7 +501,15 @@ function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isS
           lineHeight: 1.6,
         }}
       >
-        {tokens.length === 0 && !done && (
+        {error && tokens.length === 0 && (
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ color: '#e8956e', fontSize: 12 }}>{error}</div>
+            <div style={{ color: 'var(--text-dim)', fontSize: 11, marginTop: 4 }}>
+              Falling back to simulated...
+            </div>
+          </div>
+        )}
+        {tokens.length === 0 && !done && !error && (
           <div style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>
             Waiting...
             <span style={{ animation: 'pulse-dot 1.5s infinite' }}> ●</span>

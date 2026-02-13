@@ -16,9 +16,13 @@ from pydantic import BaseModel
 import tiktoken
 import subprocess
 import json
+import os
 import httpx
 
 app = FastAPI(title="howaiworks.io API")
+
+# NVIDIA NIM API key (optional — enables zero-config cloud inference)
+NVIDIA_NIM_KEY = os.environ.get("NVIDIA_NIM_KEY", "")
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,9 +53,9 @@ class ChatRequest(BaseModel):
 
 class CloudChatRequest(BaseModel):
     prompt: str
-    apiKey: str
-    endpoint: str
-    model: str = "meta-llama/Llama-3.1-8B-Instruct"
+    apiKey: str = ""
+    endpoint: str = "https://integrate.api.nvidia.com/v1"
+    model: str = "nvidia/llama-3.1-nemotron-70b-instruct"
 
 
 # ── TOKENIZATION ──
@@ -158,11 +162,17 @@ async def chat(req: ChatRequest):
     )
 
 
-# ── CLOUD CHAT (proxy to Brev / OpenAI-compatible API) ──
+# ── CLOUD CHAT (proxy to NVIDIA NIM / OpenAI-compatible API) ──
 
 @app.post("/api/cloud-chat")
 async def cloud_chat(req: CloudChatRequest):
-    """Proxy chat to a Brev/OpenAI-compatible endpoint. Streams SSE."""
+    """Proxy chat to NVIDIA NIM or any OpenAI-compatible endpoint. Streams SSE."""
+    # Use client-provided key, fall back to server-side NIM key
+    api_key = req.apiKey or NVIDIA_NIM_KEY
+    if not api_key:
+        async def no_key():
+            yield f"data: {json.dumps({'error': 'No API key configured. Set NVIDIA_NIM_KEY env var or provide a key in the UI.'})}\n\n"
+        return StreamingResponse(no_key(), media_type="text/event-stream")
 
     async def generate():
         try:
@@ -171,7 +181,7 @@ async def cloud_chat(req: CloudChatRequest):
                     "POST",
                     f"{req.endpoint.rstrip('/')}/chat/completions",
                     headers={
-                        "Authorization": f"Bearer {req.apiKey}",
+                        "Authorization": f"Bearer {api_key}",
                         "Content-Type": "application/json",
                     },
                     json={
@@ -215,20 +225,32 @@ async def cloud_chat(req: CloudChatRequest):
     )
 
 
-# ── BREV HEALTH ──
+# ── CLOUD HEALTH ──
 
-@app.post("/api/brev-health")
-async def brev_health(req: CloudChatRequest):
-    """Check if a Brev endpoint is reachable."""
+class CloudHealthRequest(BaseModel):
+    apiKey: str = ""
+    endpoint: str = "https://integrate.api.nvidia.com/v1"
+
+@app.post("/api/cloud-health")
+async def cloud_health(req: CloudHealthRequest):
+    """Check if a cloud endpoint (NIM or other) is reachable."""
+    api_key = req.apiKey or NVIDIA_NIM_KEY
+    if not api_key:
+        return {"ok": False, "serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             r = await client.get(
                 f"{req.endpoint.rstrip('/')}/models",
-                headers={"Authorization": f"Bearer {req.apiKey}"},
+                headers={"Authorization": f"Bearer {api_key}"},
             )
-            return {"ok": r.status_code == 200}
+            return {"ok": r.status_code == 200, "serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
     except Exception:
-        return {"ok": False}
+        return {"ok": False, "serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
+
+@app.get("/api/cloud-status")
+async def cloud_status():
+    """Quick check if server-side NIM key is configured (no external call)."""
+    return {"serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
 
 
 # ── GPU INFO ──
