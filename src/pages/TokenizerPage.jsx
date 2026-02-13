@@ -105,7 +105,7 @@ export default function TokenizerPage() {
         />
       </div>
 
-      {/* Narrative bridge CTA to Page 2 — only rendered after user views Go Deeper */}
+      {/* CTA to Page 2 — only rendered after user views Go Deeper */}
       <AnimatePresence>
         {hasViewedDepth && (
           <motion.div
@@ -113,97 +113,37 @@ export default function TokenizerPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            style={{ padding: '48px 0 24px' }}
+            style={{ padding: '8px 0 24px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
           >
-            <div style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 16,
-              overflow: 'hidden',
-            }}>
-              {/* Green accent line at top */}
-              <div style={{
-                height: 2,
-                background: 'linear-gradient(90deg, transparent, var(--nvidia-green), transparent)',
-              }} />
-
-              <div style={{ padding: '28px 28px 32px', textAlign: 'center' }}>
-                {/* Chapter label */}
-                <div style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: 1.5,
-                  textTransform: 'uppercase',
-                  color: 'var(--text-dim)',
-                  marginBottom: 16,
-                }}>
-                  Next
-                </div>
-
-                {/* Headline */}
-                <div style={{
-                  fontSize: 22,
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-body)',
-                  lineHeight: 1.4,
-                  marginBottom: 12,
-                }}>
-                  <span style={{ color: 'var(--text-dim)' }}>You saw how AI <span style={{ fontStyle: 'italic' }}>reads.</span></span>
-                  <br />
-                  <span style={{ color: 'var(--nvidia-green)' }}>Now see how it <span style={{ fontStyle: 'italic' }}>understands.</span></span>
-                </div>
-
-                {/* Explanation */}
-                <div style={{
-                  fontSize: 14,
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.6,
-                  marginBottom: 24,
-                  maxWidth: 420,
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                }}>
-                  AI turns tokens into numbers — but how does it know what they mean? Explore the map of meaning where similar words live close together.
-                </div>
-
-                {/* Token stream preview */}
-                <div style={{ marginBottom: 28 }}>
-                  <TokenStreamPreview />
-                </div>
-
-                {/* CTA button */}
-                <Link
-                  to="/understand"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '14px 28px',
-                    background: 'var(--nvidia-green)',
-                    color: '#0a0a0b',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    fontFamily: 'var(--font-body)',
-                    borderRadius: 10,
-                    textDecoration: 'none',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
-                  }}
-                >
-                  Explore meaning-space
-                  <span style={{ fontSize: 18 }}>→</span>
-                </Link>
-              </div>
-            </div>
+            <Link
+              to="/understand"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '14px 28px',
+                background: 'var(--nvidia-green)',
+                color: '#0a0a0b',
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: 'var(--font-body)',
+                borderRadius: 10,
+                textDecoration: 'none',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+              }}
+            >
+              Explore how AI understands
+              <span style={{ fontSize: 18 }}>→</span>
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -223,77 +163,6 @@ export default function TokenizerPage() {
   )
 }
 
-const PREVIEW_TOKENS = [
-  { text: 'A', color: '#a8d86e' },
-  { text: ' neural', color: '#6ec0e8' },
-  { text: ' network', color: '#e8956e' },
-  { text: ' is', color: '#c58ee8' },
-  { text: ' a', color: '#e8d06e' },
-]
-
-function TokenStreamPreview() {
-  const [visibleCount, setVisibleCount] = useState(0)
-  const [showCursor, setShowCursor] = useState(true)
-  const [animationDone, setAnimationDone] = useState(false)
-
-  useEffect(() => {
-    if (visibleCount < PREVIEW_TOKENS.length) {
-      const timer = setTimeout(() => {
-        setVisibleCount(c => c + 1)
-      }, 350 + visibleCount * 80)
-      return () => clearTimeout(timer)
-    } else {
-      setAnimationDone(true)
-    }
-  }, [visibleCount])
-
-  // Blinking cursor after tokens finish
-  useEffect(() => {
-    if (!animationDone) return
-    const interval = setInterval(() => {
-      setShowCursor(c => !c)
-    }, 530)
-    return () => clearInterval(interval)
-  }, [animationDone])
-
-  return (
-    <div style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 0,
-      background: 'var(--bg-deep)',
-      border: '1px solid var(--border)',
-      borderRadius: 8,
-      padding: '8px 14px',
-      fontFamily: 'var(--font-mono)',
-      fontSize: 14,
-      minHeight: 36,
-    }}>
-      {PREVIEW_TOKENS.map((token, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 4 }}
-          animate={i < visibleCount ? { opacity: 1, y: 0 } : { opacity: 0, y: 4 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-          style={{ color: token.color, whiteSpace: 'pre' }}
-        >
-          {token.text}
-        </motion.span>
-      ))}
-      <motion.span
-        animate={animationDone ? { opacity: showCursor ? 1 : 0 } : { opacity: 1 }}
-        transition={{ duration: 0.1 }}
-        style={{
-          color: 'var(--text-dim)',
-          marginLeft: 1,
-          fontWeight: 300,
-        }}
-      >
-        ...
-      </motion.span>
-    </div>
-  )
-}
 
 const RESOURCES = [
   {

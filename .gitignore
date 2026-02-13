@@ -6,3 +6,4 @@ __pycache__/
 .vite/
 .venv/
 nul
+.DS_Store

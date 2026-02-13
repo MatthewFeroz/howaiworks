@@ -49,47 +49,47 @@ export default function TokenizerPhase({
       key: 'strawberry',
       icon: '🍓',
       text: 'strawberry',
-      label: <>Try <Accent>strawberry</Accent> — 1 word, 3 tokens. This is why AI can't count the r's</>,
+      label: <>Try <Accent>strawberry</Accent> - Why does AI have such a tough time?</>,
       insight: {
-        headline: 'AI can\'t spell — and this is why.',
+        headline: 'AI can\'t spell - and this is why.',
         body: <>
           "strawberry" becomes 3 tokens: <strong style={{ color: 'var(--text-primary)' }}>"str" + "aw" + "berry"</strong>.
-          When you ask AI "how many r's in strawberry?", it never sees the individual letters —
+          When you ask AI "how many r's in strawberry?", it never sees the individual letters -
           it sees 3 opaque fragments. The r's are scattered across token boundaries, invisible to the model.
           This is the root cause of AI's famous spelling failures.
         </>,
-        nextHint: 'Now try a really long word — see what happens when AI encounters something rare →',
+        nextHint: 'Now try a really long word - see what happens when AI encounters something rare ↓',
       },
     },
     {
       key: 'supercalifragilistic',
-      icon: '🎪',
+      icon: '☂️',
       text: 'supercalifragilisticexpialidocious',
-      label: <>Try <Accent>supercalifragilisticexpialidocious</Accent> — 1 word you can say, 11 fragments AI sees</>,
+      label: <>Try <Accent>supercalifragilisticexpialidocious</Accent> - 1 word you can say, 11 fragments AI sees</>,
       insight: {
         headline: 'The rarer the word, the harder AI works.',
         body: <>
           You can say this word in one breath. AI needs <strong style={{ color: 'var(--text-primary)' }}>~11 tokens</strong> just
           to represent it. The tokenizer was trained on internet text where "the" appears billions of times
           but "supercalifragilisticexpialidocious" almost never does. Common words get their own token.
-          Rare words get shattered into fragments — consuming more of AI's limited context window
+          Rare words get shattered into fragments - consuming more of AI's limited context window
           and making the model work harder for the same meaning.
         </>,
-        nextHint: 'Now try a different language — discover the hidden cost of not being English →',
+        nextHint: 'Now try a different language - discover the hidden cost of not being English ↓',
       },
     },
     {
       key: 'arabic',
       icon: '🌍',
       text: 'مرحبا كيف حالك',
-      label: <>Try <Accent>Hello how are you</Accent> in Arabic — same meaning, nearly 3x the tokens</>,
+      label: <>Try <Accent>Hello how are you</Accent> in Arabic - same meaning, nearly 3x the tokens</>,
       insight: {
         headline: 'Same meaning. 3x the cost.',
         body: <>
           "Hello how are you" is ~5 tokens. <strong style={{ color: 'var(--text-primary)' }}>The same phrase in Arabic can be 12+ tokens.</strong>{' '}
           Because the tokenizer was trained mostly on English text, it learned efficient representations
           for English words but treats non-Latin scripts almost character-by-character. This means
-          Arabic, Hindi, Yoruba, and other languages use more tokens for the same meaning —
+          Arabic, Hindi, Yoruba, and other languages use more tokens for the same meaning -
           costing more money, filling up the context window faster, and getting worse model performance.
           <span style={{ display: 'block', marginTop: 8, color: 'var(--nvidia-green)', fontWeight: 500, fontSize: 14 }}>
             Tokenization is where AI inequity begins.
@@ -389,7 +389,7 @@ export default function TokenizerPhase({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
-      style={{ padding: '20px 0 40px' }}
+      style={{ padding: '20px 0 20px' }}
     >
       {/* === BAR 1: Your text === */}
       <div style={{ ...labelStyle, color: 'var(--nvidia-green)' }}>
@@ -407,7 +407,7 @@ export default function TokenizerPhase({
               {seg.text}
             </span>
           ))}
-          {textFocused && (
+          {(textFocused || (!userHasTyped && !isAutoTyping)) && (
             <span
               style={{
                 display: 'inline-block',

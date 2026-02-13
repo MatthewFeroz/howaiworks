@@ -29,7 +29,8 @@ export default function Hero() {
         margin: '0 auto',
         lineHeight: 1.5,
       }}>
-        AI turns words into numbers and predicts what comes next.
+        AI turns data into numbers and predicts what comes next using statistics.
+        Try for yourself below.
       </p>
     </motion.div>
   )

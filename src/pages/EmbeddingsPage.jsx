@@ -327,44 +327,96 @@ export default function EmbeddingsPage() {
 
       {/* Selected word info */}
       <AnimatePresence>
-        {selectedWord && (
-          <motion.div
-            key="selected-info"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div style={{
-              padding: '10px 16px',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              marginTop: 8,
-              marginBottom: 8,
-            }}>
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 14,
-                color: 'var(--nvidia-green)',
-                fontWeight: 600,
+        {selectedWord && (() => {
+          const target = embeddingData.words.find(w => w.word === selectedWord)
+          const miniEmb = embeddingData.miniEmbeddings?.[selectedWord]
+          const categoryColors = {
+            animal: '#a8d86e', emotion: '#e8956e', technology: '#e8d06e',
+            food: '#6ee8cc', place: '#94a0e8', person: '#c58ee8',
+          }
+          const neighborSims = neighborLines.map(l => {
+            const dist = Math.sqrt((l.x2 - l.x1) ** 2 + (l.y2 - l.y1) ** 2)
+            const sim = Math.max(0, Math.min(1, 1 - dist / 1.5))
+            const nWord = embeddingData.words.find(w => w.word === l.target)
+            return { word: l.target, similarity: sim.toFixed(2), category: nWord?.category }
+          })
+          return (
+            <motion.div
+              key="selected-info"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div style={{
+                padding: '14px 16px',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 10,
+                marginTop: 8,
+                marginBottom: 8,
               }}>
-                {selectedWord}
-              </span>
-              {neighborLines.length > 0 && (
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 13,
-                  color: 'var(--text-secondary)',
-                  marginLeft: 8,
-                }}>
-                  nearest: {neighborLines.map(l => l.target).join(', ')}
-                </span>
-              )}
-            </div>
-          </motion.div>
-        )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: neighborSims.length > 0 || miniEmb ? 10 : 0 }}>
+                  <span style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 15,
+                    color: categoryColors[target?.category] || 'var(--nvidia-green)',
+                    fontWeight: 700,
+                  }}>
+                    {selectedWord}
+                  </span>
+                  {target && (
+                    <span style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      color: 'var(--text-dim)',
+                      background: 'rgba(255,255,255,0.04)',
+                      padding: '2px 8px',
+                      borderRadius: 4,
+                    }}>
+                      ({target.x.toFixed(2)}, {target.y.toFixed(2)})
+                    </span>
+                  )}
+                </div>
+                {/* Mini embedding preview */}
+                {miniEmb && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-dim)', marginBottom: 4 }}>
+                      embedding vector sample (12 of 768 dims)
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 24 }}>
+                      {miniEmb.map((val, i) => (
+                        <div key={i} style={{
+                          flex: 1,
+                          height: `${Math.abs(val) * 100}%`,
+                          background: val >= 0
+                            ? (categoryColors[target?.category] || 'var(--nvidia-green)')
+                            : '#e85a6e',
+                          borderRadius: 1,
+                          opacity: 0.7,
+                          minHeight: 1,
+                        }} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Similarity scores */}
+                {neighborSims.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    {neighborSims.map(n => (
+                      <span key={n.word} style={{ color: 'var(--text-secondary)' }}>
+                        <span style={{ color: 'var(--text-dim)' }}>→</span>{' '}
+                        <span style={{ color: categoryColors[n.category] || 'var(--text-secondary)' }}>{n.word}</span>
+                        <span style={{ color: 'var(--text-dim)', marginLeft: 4 }}>{n.similarity}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )
+        })()}
       </AnimatePresence>
 
       {/* Spacer */}
