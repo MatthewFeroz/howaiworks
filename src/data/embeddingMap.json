@@ -136,7 +136,11 @@
     { "word": "soldier", "x": 0.1378, "y": -0.0423, "category": "person" },
     { "word": "farmer", "x": 0.1145, "y": 0.0067, "category": "person" },
     { "word": "judge", "x": 0.1312, "y": -0.0512, "category": "person" },
-    { "word": "poet", "x": 0.0645, "y": 0.0378, "category": "person" }
+    { "word": "poet", "x": 0.0645, "y": 0.0378, "category": "person" },
+    { "word": "man", "x": 0.1156, "y": -0.0134, "category": "person" },
+    { "word": "woman", "x": 0.1089, "y": -0.0045, "category": "person" },
+    { "word": "France", "x": -0.1489, "y": 0.6545, "category": "place" },
+    { "word": "Japan", "x": -0.1534, "y": 0.6678, "category": "place" }
   ],
   "pca": {
     "mean": [],

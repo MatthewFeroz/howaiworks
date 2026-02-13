@@ -234,22 +234,19 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
                     flexWrap: 'wrap',
                     marginBottom: 12,
                   }}>
-                    <MiniInput
+                    <WordSelect
                       value={customInputs.a}
                       onChange={(v) => setCustomInputs(p => ({ ...p, a: v }))}
-                      placeholder="word"
                     />
                     <span style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', fontSize: 18 }}>−</span>
-                    <MiniInput
+                    <WordSelect
                       value={customInputs.b}
                       onChange={(v) => setCustomInputs(p => ({ ...p, b: v }))}
-                      placeholder="word"
                     />
                     <span style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', fontSize: 18 }}>+</span>
-                    <MiniInput
+                    <WordSelect
                       value={customInputs.c}
                       onChange={(v) => setCustomInputs(p => ({ ...p, c: v }))}
-                      placeholder="word"
                     />
                     <button
                       onClick={handleCustomSubmit}
@@ -284,13 +281,6 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
                       ≈ {customResult}
                     </motion.div>
                   )}
-                  <div style={{
-                    fontSize: 12,
-                    color: 'var(--text-dim)',
-                    marginTop: 6,
-                  }}>
-                    Try words from the map above (e.g. dog − animal + food)
-                  </div>
                 </div>
               )}
 
@@ -345,23 +335,36 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
   )
 }
 
-function MiniInput({ value, onChange, placeholder }) {
+const WORD_OPTIONS = [
+  'king', 'queen', 'man', 'woman', 'doctor', 'nurse',
+  'cat', 'dog', 'fish', 'bird',
+  'Paris', 'France', 'Japan', 'Tokyo',
+  'happy', 'sad', 'love', 'fear',
+  'computer', 'pizza', 'coffee', 'ocean',
+]
+
+function WordSelect({ value, onChange }) {
   return (
-    <input
-      type="text"
+    <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
       style={{
-        width: 80,
-        padding: '6px 10px',
+        width: 100,
+        padding: '6px 8px',
         background: 'var(--bg-deep)',
         border: '1px solid var(--border)',
         borderRadius: 6,
-        color: 'var(--text-primary)',
+        color: value ? 'var(--text-primary)' : 'var(--text-dim)',
         fontFamily: 'var(--font-mono)',
         fontSize: 14,
         outline: 'none',
+        cursor: 'pointer',
+        appearance: 'none',
+        WebkitAppearance: 'none',
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8a96'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 8px center',
+        paddingRight: 24,
       }}
       onFocus={(e) => {
         e.target.style.borderColor = 'var(--nvidia-green)'
@@ -371,6 +374,11 @@ function MiniInput({ value, onChange, placeholder }) {
         e.target.style.borderColor = 'var(--border)'
         e.target.style.boxShadow = 'none'
       }}
-    />
+    >
+      <option value="" disabled>pick a word</option>
+      {WORD_OPTIONS.map(w => (
+        <option key={w} value={w}>{w}</option>
+      ))}
+    </select>
   )
 }

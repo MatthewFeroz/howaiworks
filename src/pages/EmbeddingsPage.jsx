@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import MeaningMap from '../components/MeaningMap'
 import WordArithmetic from '../components/WordArithmetic'
-import DepthPanel from '../components/DepthPanel'
+import DepthPanel, { PythonCode } from '../components/DepthPanel'
 import Footer from '../components/Footer'
 import embeddingData from '../data/embeddingMap.json'
 
@@ -16,6 +16,7 @@ export default function EmbeddingsPage() {
   const [allExperimentsExplored, setAllExperimentsExplored] = useState(false)
   const [hasViewedDepth, setHasViewedDepth] = useState(false)
   const [arithmeticDisplay, setArithmeticDisplay] = useState(null)
+  const [mapPhase, setMapPhase] = useState('scrambled')
   const inputRef = useRef(null)
 
   // Mark page as visited for navigation dots
@@ -71,7 +72,7 @@ export default function EmbeddingsPage() {
     setSelectedWord(null)
 
     // Show lines from operands to result
-    if (data.result) {
+    if (data.result && data.a && data.c) {
       setNeighborLines([
         { x1: data.a.x, y1: data.a.y, x2: data.result.x, y2: data.result.y, target: data.result.word },
         { x1: data.c.x, y1: data.c.y, x2: data.result.x, y2: data.result.y, target: data.result.word },
@@ -221,16 +222,41 @@ export default function EmbeddingsPage() {
           AI doesn't just see numbers.{' '}
           <span style={{ color: 'var(--nvidia-green)' }}>It understands meaning.</span>
         </h1>
-        <p style={{
+        <div style={{
           fontSize: 17,
           color: 'var(--text-secondary)',
           fontWeight: 400,
           maxWidth: 420,
           margin: '0 auto',
           lineHeight: 1.5,
+          minHeight: 26,
         }}>
-          Every word lives at a specific point in a map of meaning. Explore it.
-        </p>
+          <AnimatePresence mode="wait">
+            {mapPhase === 'scrambled' && (
+              <motion.p
+                key="scrambled"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{ margin: 0 }}
+              >
+                140 words. Just text.
+              </motion.p>
+            )}
+            {mapPhase === 'settled' && (
+              <motion.p
+                key="settled"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                style={{ margin: 0 }}
+              >
+                AI organized these by meaning — no one told it which words are related.
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
 
       {/* Meaning Map */}
@@ -245,6 +271,7 @@ export default function EmbeddingsPage() {
           selectedWord={selectedWord}
           neighborLines={neighborLines}
           liveWord={liveWord}
+          onPhaseChange={setMapPhase}
         />
       </motion.div>
 
@@ -325,100 +352,6 @@ export default function EmbeddingsPage() {
         )}
       </motion.div>
 
-      {/* Selected word info */}
-      <AnimatePresence>
-        {selectedWord && (() => {
-          const target = embeddingData.words.find(w => w.word === selectedWord)
-          const miniEmb = embeddingData.miniEmbeddings?.[selectedWord]
-          const categoryColors = {
-            animal: '#a8d86e', emotion: '#e8956e', technology: '#e8d06e',
-            food: '#6ee8cc', place: '#94a0e8', person: '#c58ee8',
-          }
-          const neighborSims = neighborLines.map(l => {
-            const dist = Math.sqrt((l.x2 - l.x1) ** 2 + (l.y2 - l.y1) ** 2)
-            const sim = Math.max(0, Math.min(1, 1 - dist / 1.5))
-            const nWord = embeddingData.words.find(w => w.word === l.target)
-            return { word: l.target, similarity: sim.toFixed(2), category: nWord?.category }
-          })
-          return (
-            <motion.div
-              key="selected-info"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{ overflow: 'hidden' }}
-            >
-              <div style={{
-                padding: '14px 16px',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 10,
-                marginTop: 8,
-                marginBottom: 8,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: neighborSims.length > 0 || miniEmb ? 10 : 0 }}>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 15,
-                    color: categoryColors[target?.category] || 'var(--nvidia-green)',
-                    fontWeight: 700,
-                  }}>
-                    {selectedWord}
-                  </span>
-                  {target && (
-                    <span style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      color: 'var(--text-dim)',
-                      background: 'rgba(255,255,255,0.04)',
-                      padding: '2px 8px',
-                      borderRadius: 4,
-                    }}>
-                      ({target.x.toFixed(2)}, {target.y.toFixed(2)})
-                    </span>
-                  )}
-                </div>
-                {/* Mini embedding preview */}
-                {miniEmb && (
-                  <div style={{ marginBottom: 10 }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-dim)', marginBottom: 4 }}>
-                      embedding vector sample (12 of 768 dims)
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 24 }}>
-                      {miniEmb.map((val, i) => (
-                        <div key={i} style={{
-                          flex: 1,
-                          height: `${Math.abs(val) * 100}%`,
-                          background: val >= 0
-                            ? (categoryColors[target?.category] || 'var(--nvidia-green)')
-                            : '#e85a6e',
-                          borderRadius: 1,
-                          opacity: 0.7,
-                          minHeight: 1,
-                        }} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {/* Similarity scores */}
-                {neighborSims.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                    {neighborSims.map(n => (
-                      <span key={n.word} style={{ color: 'var(--text-secondary)' }}>
-                        <span style={{ color: 'var(--text-dim)' }}>→</span>{' '}
-                        <span style={{ color: categoryColors[n.category] || 'var(--text-secondary)' }}>{n.word}</span>
-                        <span style={{ color: 'var(--text-dim)', marginLeft: 4 }}>{n.similarity}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )
-        })()}
-      </AnimatePresence>
-
       {/* Spacer */}
       <div style={{ height: 32 }} />
 
@@ -440,55 +373,65 @@ export default function EmbeddingsPage() {
         visible={allExperimentsExplored}
         delay={0.5}
         onOpen={() => setHasViewedDepth(true)}
-        concept={
-          <div>
-            <p style={{ marginBottom: 16 }}>
-              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>What are embeddings?</strong>
-            </p>
-            <p style={{ marginBottom: 12 }}>
-              An embedding is a list of numbers — typically 768 or more — that represents the <em>meaning</em> of
-              a word, sentence, or concept. These numbers aren't random; they're learned by the model so that{' '}
-              <strong style={{ color: 'var(--text-primary)' }}>similar meanings produce similar numbers.</strong>
-            </p>
-            <p style={{ marginBottom: 20 }}>
-              The scatter plot above projects 768 dimensions down to just 2 (using PCA — Principal Component Analysis).
-              Even in this crude 2D view, you can see clusters of meaning: animals together, emotions together,
-              places together. In the full 768-dimensional space, these relationships are far richer.
-            </p>
+        sections={[
+          {
+            label: 'The Concept',
+            color: 'var(--nvidia-green)',
+            defaultOpen: true,
+            content: (
+              <div>
+                <p style={{ marginBottom: 16 }}>
+                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>What are embeddings?</strong>
+                </p>
+                <p style={{ marginBottom: 12 }}>
+                  An embedding is a list of numbers — typically 768 or more — that represents the <em>meaning</em> of
+                  a word, sentence, or concept. These numbers aren't random; they're learned by the model so that{' '}
+                  <strong style={{ color: 'var(--text-primary)' }}>similar meanings produce similar numbers.</strong>
+                </p>
+                <p style={{ marginBottom: 20 }}>
+                  The scatter plot above projects 768 dimensions down to just 2 (using PCA — Principal Component Analysis).
+                  Even in this crude 2D view, you can see clusters of meaning: animals together, emotions together,
+                  places together. In the full 768-dimensional space, these relationships are far richer.
+                </p>
 
-            <p style={{ marginBottom: 16 }}>
-              <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>Why 768 numbers?</strong>
-            </p>
-            <p style={{ marginBottom: 12 }}>
-              Each dimension captures some aspect of meaning. No single dimension means "is an animal" or
-              "is a color" — instead, meaning is distributed across all dimensions. This is why we call them{' '}
-              <strong style={{ color: 'var(--text-primary)' }}>distributed representations.</strong>
-            </p>
+                <p style={{ marginBottom: 16 }}>
+                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>Why 768 numbers?</strong>
+                </p>
+                <p style={{ marginBottom: 12 }}>
+                  Each dimension captures some aspect of meaning. No single dimension means "is an animal" or
+                  "is a color" — instead, meaning is distributed across all dimensions. This is why we call them{' '}
+                  <strong style={{ color: 'var(--text-primary)' }}>distributed representations.</strong>
+                </p>
 
-            <div style={{
-              padding: '12px 16px',
-              background: 'rgba(118,185,0,0.06)',
-              border: '1px solid rgba(118,185,0,0.25)',
-              borderRadius: 8,
-              marginBottom: 20,
-            }}>
-              <strong style={{ color: 'var(--nvidia-green)' }}>Cosine similarity</strong>
-              <div style={{ marginTop: 4, fontSize: 13 }}>
-                We measure how similar two embeddings are using cosine similarity — the angle between two vectors.
-                cos(0°) = 1.0 means identical direction (identical meaning). cos(90°) = 0 means unrelated.
-                "cat" and "kitten" might have cosine similarity of 0.92. "cat" and "javascript" might be 0.15.
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'rgba(118,185,0,0.06)',
+                  border: '1px solid rgba(118,185,0,0.25)',
+                  borderRadius: 8,
+                  marginBottom: 20,
+                }}>
+                  <strong style={{ color: 'var(--nvidia-green)' }}>Cosine similarity</strong>
+                  <div style={{ marginTop: 4, fontSize: 13 }}>
+                    We measure how similar two embeddings are using cosine similarity — the angle between two vectors.
+                    cos(0°) = 1.0 means identical direction (identical meaning). cos(90°) = 0 means unrelated.
+                    "cat" and "kitten" might have cosine similarity of 0.92. "cat" and "javascript" might be 0.15.
+                  </div>
+                </div>
+
+                <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(118,185,0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Key insight:</strong>{' '}
+                  Embeddings are the bridge between human language and machine computation. The tokenizer
+                  converts words to IDs (Page 1). The embedding layer converts those IDs into rich meaning
+                  vectors. Everything the AI "understands" lives in this geometric space.
+                </p>
               </div>
-            </div>
-
-            <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(118,185,0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Key insight:</strong>{' '}
-              Embeddings are the bridge between human language and machine computation. The tokenizer
-              converts words to IDs (Page 1). The embedding layer converts those IDs into rich meaning
-              vectors. Everything the AI "understands" lives in this geometric space.
-            </p>
-          </div>
-        }
-        code={`import ollama
+            ),
+          },
+          {
+            label: 'The Code',
+            color: '#6ec0e8',
+            content: (
+              <PythonCode code={`import ollama
 
 # Get embeddings from nomic-embed-text (768 dimensions)
 response = ollama.embed(
@@ -517,60 +460,71 @@ man  = ollama.embed(model="nomic-embed-text", input=["man"])["embeddings"][0]
 woman = ollama.embed(model="nomic-embed-text", input=["woman"])["embeddings"][0]
 
 result = np.array(king) - np.array(man) + np.array(woman)
-# Find nearest word → "queen"`}
-        challenge={
-          <div>
-            <p style={{ marginBottom: 10 }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Think about it:</strong>
-            </p>
-            <p style={{ marginBottom: 12 }}>
-              Why might "doctor" be closer to "man" than "woman" in some embedding spaces?
-              What does this tell us about training data?
-            </p>
-            <p style={{ marginBottom: 8, paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>1.</strong> Click on "doctor" and "nurse" on the map above.
-              Look at their nearest neighbors. Do you notice a gender pattern?
-            </p>
-            <p style={{ marginBottom: 8, paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>2.</strong> If embeddings learn from text data, and the
-              training text has biases (e.g., "the doctor... he" vs "the nurse... she"), where do those biases end up?
-            </p>
-            <p style={{ paddingLeft: 16 }}>
-              <strong style={{ color: '#e8d06e' }}>3.</strong> How might you de-bias embeddings? Can you remove
-              the "gender direction" without losing other useful information?
-            </p>
-          </div>
-        }
-        realWorld={
-          <div>
-            <p style={{ marginBottom: 14 }}>
-              Embeddings power most of the AI features you use daily — often invisibly.
-            </p>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #6ec0e8' }}>
-                <strong style={{ color: '#6ec0e8' }}>Search engines</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  Google embeds your query and compares it to embedded documents. Searching "how to fix a flat tire"
-                  finds pages about "changing a punctured tire" — different words, same meaning-space neighborhood.
+# Find nearest word → "queen"`} />
+            ),
+          },
+          {
+            label: 'Challenge',
+            color: '#e8d06e',
+            content: (
+              <div>
+                <p style={{ marginBottom: 10 }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Think about it:</strong>
+                </p>
+                <p style={{ marginBottom: 12 }}>
+                  Why might "doctor" be closer to "man" than "woman" in some embedding spaces?
+                  What does this tell us about training data?
+                </p>
+                <p style={{ marginBottom: 8, paddingLeft: 16 }}>
+                  <strong style={{ color: '#e8d06e' }}>1.</strong> Click on "doctor" and "nurse" on the map above.
+                  Look at their nearest neighbors. Do you notice a gender pattern?
+                </p>
+                <p style={{ marginBottom: 8, paddingLeft: 16 }}>
+                  <strong style={{ color: '#e8d06e' }}>2.</strong> If embeddings learn from text data, and the
+                  training text has biases (e.g., "the doctor... he" vs "the nurse... she"), where do those biases end up?
+                </p>
+                <p style={{ paddingLeft: 16 }}>
+                  <strong style={{ color: '#e8d06e' }}>3.</strong> How might you de-bias embeddings? Can you remove
+                  the "gender direction" without losing other useful information?
+                </p>
+              </div>
+            ),
+          },
+          {
+            label: 'Real World',
+            color: '#e87a96',
+            content: (
+              <div>
+                <p style={{ marginBottom: 14 }}>
+                  Embeddings power most of the AI features you use daily — often invisibly.
+                </p>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #6ec0e8' }}>
+                    <strong style={{ color: '#6ec0e8' }}>Search engines</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      Google embeds your query and compares it to embedded documents. Searching "how to fix a flat tire"
+                      finds pages about "changing a punctured tire" — different words, same meaning-space neighborhood.
+                    </div>
+                  </div>
+                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e8d06e' }}>
+                    <strong style={{ color: '#e8d06e' }}>RAG (Retrieval-Augmented Generation)</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      When ChatGPT searches the web or reads documents to answer you, it's using embeddings to find
+                      the most relevant chunks of text. This is how AI "knows" about your company's internal docs.
+                    </div>
+                  </div>
+                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e87a96' }}>
+                    <strong style={{ color: '#e87a96' }}>Recommendation systems</strong>
+                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                      Netflix, Spotify, and YouTube embed content and users in the same space. If your "user vector"
+                      is near a movie's embedding, you'll probably like it. Same math, different domain.
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e8d06e' }}>
-                <strong style={{ color: '#e8d06e' }}>RAG (Retrieval-Augmented Generation)</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  When ChatGPT searches the web or reads documents to answer you, it's using embeddings to find
-                  the most relevant chunks of text. This is how AI "knows" about your company's internal docs.
-                </div>
-              </div>
-              <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #e87a96' }}>
-                <strong style={{ color: '#e87a96' }}>Recommendation systems</strong>
-                <div style={{ marginTop: 4, fontSize: 13 }}>
-                  Netflix, Spotify, and YouTube embed content and users in the same space. If your "user vector"
-                  is near a movie's embedding, you'll probably like it. Same math, different domain.
-                </div>
-              </div>
-            </div>
-          </div>
-        }
+            ),
+          },
+        ]}
       />
 
       {/* CTA to Page 3 */}
@@ -578,86 +532,40 @@ result = np.array(king) - np.array(man) + np.array(woman)
         {hasViewedDepth && (
           <motion.div
             key="cta"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            style={{ padding: '48px 0 24px' }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            style={{ padding: '32px 0 16px', textAlign: 'center' }}
           >
-            <div style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 16,
-              overflow: 'hidden',
-            }}>
-              <div style={{
-                height: 2,
-                background: 'linear-gradient(90deg, transparent, var(--nvidia-green), transparent)',
-              }} />
-              <div style={{ padding: '28px 28px 32px', textAlign: 'center' }}>
-                <div style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: 1.5,
-                  textTransform: 'uppercase',
-                  color: 'var(--text-dim)',
-                  marginBottom: 16,
-                }}>
-                  Next
-                </div>
-                <div style={{
-                  fontSize: 22,
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-body)',
-                  lineHeight: 1.4,
-                  marginBottom: 12,
-                }}>
-                  <span style={{ color: 'var(--text-dim)' }}>You've seen how AI <span style={{ fontStyle: 'italic' }}>reads</span> and <span style={{ fontStyle: 'italic' }}>understands.</span></span>
-                  <br />
-                  <span style={{ color: 'var(--nvidia-green)' }}>But where does all this <span style={{ fontStyle: 'italic' }}>happen?</span></span>
-                </div>
-                <div style={{
-                  fontSize: 14,
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.6,
-                  marginBottom: 24,
-                  maxWidth: 420,
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                }}>
-                  Cloud GPU clusters vs. your own machine. Watch the same AI model race on two very different platforms.
-                </div>
-                <Link
-                  to="/run"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '14px 28px',
-                    background: 'var(--nvidia-green)',
-                    color: '#0a0a0b',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    fontFamily: 'var(--font-body)',
-                    borderRadius: 10,
-                    textDecoration: 'none',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
-                  }}
-                >
-                  See where AI runs
-                  <span style={{ fontSize: 18 }}>→</span>
-                </Link>
-              </div>
-            </div>
+            <Link
+              to="/run"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '14px 28px',
+                background: 'var(--nvidia-green)',
+                color: '#0a0a0b',
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: 'var(--font-body)',
+                borderRadius: 10,
+                textDecoration: 'none',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+              }}
+            >
+              See where AI runs
+              <span style={{ fontSize: 18 }}>→</span>
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
