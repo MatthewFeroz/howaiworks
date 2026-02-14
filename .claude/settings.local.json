@@ -27,7 +27,9 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "WebFetch(domain:docs.railway.com)",
-      "WebFetch(domain:blog.railway.com)"
+      "WebFetch(domain:blog.railway.com)",
+      "WebFetch(domain:howaiworks-production.up.railway.app)",
+      "WebFetch(domain:build.nvidia.com)"
     ]
   }
 }
