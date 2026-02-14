@@ -5,13 +5,14 @@ export default function NvidiaCloudCard({ onConfigured }) {
   const [showSetup, setShowSetup] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('nimApiKey') || '')
   const [modelId, setModelId] = useState(() => localStorage.getItem('nimModel') || 'nvidia/llama-3.1-nemotron-70b-instruct')
-  const nimEndpoint = 'https://integrate.api.nvidia.com/v1'
+  const [nimEndpoint, setNimEndpoint] = useState(() => localStorage.getItem('nimEndpoint') || 'https://integrate.api.nvidia.com/v1')
   const [saved, setSaved] = useState(false)
   const [serverKeyAvailable, setServerKeyAvailable] = useState(false)
 
   // Check if server has a NIM key configured
   useEffect(() => {
-    fetch('/api/cloud-status')
+    const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+    fetch(`${apiBase}/api/cloud-status`)
       .then(r => r.json())
       .then(data => {
         if (data.serverKeyConfigured) {
@@ -28,6 +29,7 @@ export default function NvidiaCloudCard({ onConfigured }) {
   const handleSave = () => {
     localStorage.setItem('nimApiKey', apiKey)
     localStorage.setItem('nimModel', modelId)
+    localStorage.setItem('nimEndpoint', nimEndpoint)
     setSaved(true)
     onConfigured?.({ apiKey, modelId, endpoint: nimEndpoint })
     setTimeout(() => setSaved(false), 2000)
@@ -36,11 +38,13 @@ export default function NvidiaCloudCard({ onConfigured }) {
   const handleClear = () => {
     localStorage.removeItem('nimApiKey')
     localStorage.removeItem('nimModel')
+    localStorage.removeItem('nimEndpoint')
     setApiKey('')
     setModelId('nvidia/llama-3.1-nemotron-70b-instruct')
+    setNimEndpoint('https://integrate.api.nvidia.com/v1')
     // If server key is available, still report as configured
     if (serverKeyAvailable) {
-      onConfigured?.({ apiKey: '', modelId: 'nvidia/llama-3.1-nemotron-70b-instruct', endpoint: nimEndpoint, serverKey: true })
+      onConfigured?.({ apiKey: '', modelId: 'nvidia/llama-3.1-nemotron-70b-instruct', endpoint: 'https://integrate.api.nvidia.com/v1', serverKey: true })
     } else {
       onConfigured?.(null)
     }

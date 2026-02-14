@@ -114,7 +114,8 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
       setCloudStartTime(now)
       ;(async () => {
         try {
-          const res = await fetch('/api/cloud-chat', {
+          const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+          const res = await fetch(`${apiBase}/api/cloud-chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -202,7 +203,8 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
       setLocalStartTime(now)
       ;(async () => {
         try {
-          const res = await fetch('/api/chat', {
+          const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+          const res = await fetch(`${apiBase}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

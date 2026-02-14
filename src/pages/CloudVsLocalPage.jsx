@@ -28,7 +28,8 @@ export default function CloudVsLocalPage({ webllm }) {
 
   // Check Ollama
   useEffect(() => {
-    fetch('/api/health')
+    const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+    fetch(`${apiBase}/api/health`)
       .then(r => r.json())
       .then(data => setOllamaConnected(data.ollama === true))
       .catch(() => setOllamaConnected(false))

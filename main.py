@@ -26,9 +26,15 @@ NVIDIA_NIM_KEY = os.environ.get("NVIDIA_NIM_KEY", "")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://howaiworks.vercel.app",  # Your Vercel domain
+        "http://localhost:3000",          # Local development
+        "http://localhost:5173",          # Vite default port
+        "*"                               # Allow all (less secure but easier for testing)
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
 # Load tokenizer once at startup
