@@ -5,7 +5,7 @@ export default function NvidiaCloudCard({ onConfigured }) {
   const [showSetup, setShowSetup] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('nimApiKey') || '')
   const [modelId, setModelId] = useState(() => localStorage.getItem('nimModel') || 'nvidia/llama-3.1-nemotron-70b-instruct')
-  const [nimEndpoint, setNimEndpoint] = useState(() => localStorage.getItem('nimEndpoint') || 'https://integrate.api.nvidia.com/v1')
+  const nimEndpoint = 'https://integrate.api.nvidia.com/v1'
   const [saved, setSaved] = useState(false)
   const [serverKeyAvailable, setServerKeyAvailable] = useState(false)
 
@@ -28,7 +28,6 @@ export default function NvidiaCloudCard({ onConfigured }) {
   const handleSave = () => {
     localStorage.setItem('nimApiKey', apiKey)
     localStorage.setItem('nimModel', modelId)
-    localStorage.setItem('nimEndpoint', nimEndpoint)
     setSaved(true)
     onConfigured?.({ apiKey, modelId, endpoint: nimEndpoint })
     setTimeout(() => setSaved(false), 2000)
@@ -37,13 +36,11 @@ export default function NvidiaCloudCard({ onConfigured }) {
   const handleClear = () => {
     localStorage.removeItem('nimApiKey')
     localStorage.removeItem('nimModel')
-    localStorage.removeItem('nimEndpoint')
     setApiKey('')
     setModelId('nvidia/llama-3.1-nemotron-70b-instruct')
-    setNimEndpoint('https://integrate.api.nvidia.com/v1')
     // If server key is available, still report as configured
     if (serverKeyAvailable) {
-      onConfigured?.({ apiKey: '', modelId: 'nvidia/llama-3.1-nemotron-70b-instruct', endpoint: 'https://integrate.api.nvidia.com/v1', serverKey: true })
+      onConfigured?.({ apiKey: '', modelId: 'nvidia/llama-3.1-nemotron-70b-instruct', endpoint: nimEndpoint, serverKey: true })
     } else {
       onConfigured?.(null)
     }
@@ -207,15 +204,29 @@ export default function NvidiaCloudCard({ onConfigured }) {
                     marginBottom: 4,
                     display: 'block',
                   }}>
-                    NIM Endpoint URL
+                    Model
                   </label>
-                  <input
-                    type="text"
-                    value={nimEndpoint}
-                    onChange={(e) => setNimEndpoint(e.target.value)}
-                    placeholder="https://integrate.api.nvidia.com/v1"
-                    style={inputStyle}
-                  />
+                  <select
+                    value={modelId}
+                    onChange={(e) => setModelId(e.target.value)}
+                    style={{
+                      ...inputStyle,
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8a96' d='M6 8L2 4h8z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                      paddingRight: '36px',
+                    }}
+                  >
+                    <option value="nvidia/llama-3.1-nemotron-70b-instruct">nvidia/llama-3.1-nemotron-70b-instruct</option>
+                    <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct</option>
+                    <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct</option>
+                    <option value="mistralai/mistral-7b-instruct-v0.3">mistralai/mistral-7b-instruct-v0.3</option>
+                    <option value="mistralai/mixtral-8x7b-instruct-v0.1">mistralai/mixtral-8x7b-instruct-v0.1</option>
+                    <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
+                    <option value="microsoft/phi-3-mini-128k-instruct">microsoft/phi-3-mini-128k-instruct</option>
+                  </select>
                 </div>
                 <div>
                   <label style={{
@@ -232,24 +243,6 @@ export default function NvidiaCloudCard({ onConfigured }) {
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder="nvapi-..."
-                    style={inputStyle}
-                  />
-                </div>
-                <div>
-                  <label style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--text-dim)',
-                    marginBottom: 4,
-                    display: 'block',
-                  }}>
-                    Model ID
-                  </label>
-                  <input
-                    type="text"
-                    value={modelId}
-                    onChange={(e) => setModelId(e.target.value)}
-                    placeholder="nvidia/llama-3.1-nemotron-70b-instruct"
                     style={inputStyle}
                   />
                 </div>

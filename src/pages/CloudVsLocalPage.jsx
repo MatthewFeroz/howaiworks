@@ -135,6 +135,16 @@ export default function CloudVsLocalPage({ webllm }) {
         />
       </motion.div>
 
+      {/* NVIDIA NIM Cloud Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+        style={{ marginTop: 24 }}
+      >
+        <NvidiaCloudCard onConfigured={handleNimConfigured} />
+      </motion.div>
+
       {/* Trade-off Cards — appear after first race */}
       <AnimatePresence>
         {raceComplete && (
@@ -330,21 +340,6 @@ for chunk in response:
           },
         ]}
       />
-
-      {/* NVIDIA NIM Cloud Card */}
-      <AnimatePresence>
-        {raceComplete && (
-          <motion.div
-            key="nim-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            style={{ marginTop: 24 }}
-          >
-            <NvidiaCloudCard onConfigured={handleNimConfigured} />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Divider */}
       <div style={{
