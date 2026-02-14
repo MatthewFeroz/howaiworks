@@ -122,7 +122,7 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
               prompt: racePrompt,
               apiKey: nimConfig.apiKey || '',
               endpoint: nimConfig.endpoint || 'https://integrate.api.nvidia.com/v1',
-              model: nimConfig.modelId || 'nvidia/llama-3.1-nemotron-70b-instruct',
+              model: nimConfig.modelId || 'nvidia/llama-3.3-nemotron-super-49b-v1',
             }),
           })
 
@@ -347,14 +347,14 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
         {/* Cloud column */}
         <RaceColumn
           label="CLOUD"
-          sublabel={cloudIsSimulated ? 'Simulated · NVIDIA NIM' : `NVIDIA NIM · ${nimConfig?.modelId || 'nemotron-70b'}`}
+          sublabel={cloudIsSimulated ? 'Simulated · NVIDIA NIM' : `NVIDIA NIM · ${nimConfig?.modelId || 'nemotron-super-49b'}`}
           accentColor="#6ec0e8"
           tokens={cloudTokens}
           done={cloudDone}
           ttft={cloudTTFT}
           tps={cloudTPS}
           isSimulated={cloudIsSimulated}
-          model={nimConfig?.modelId || 'nemotron-70b'}
+          model={nimConfig?.modelId || 'nemotron-super-49b'}
           error={cloudError}
         />
 

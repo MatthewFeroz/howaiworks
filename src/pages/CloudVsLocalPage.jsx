@@ -249,7 +249,7 @@ client = openai.OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="nvidia/llama-3.1-nemotron-70b-instruct",
+    model="nvidia/llama-3.3-nemotron-super-49b-v1",
     messages=[{"role": "user", "content": "What is AI?"}],
     stream=True
 )

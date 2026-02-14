@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 export default function NvidiaCloudCard({ onConfigured }) {
   const [showSetup, setShowSetup] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('nimApiKey') || '')
-  const [modelId, setModelId] = useState(() => localStorage.getItem('nimModel') || 'nvidia/llama-3.1-nemotron-70b-instruct')
+  const [modelId, setModelId] = useState(() => localStorage.getItem('nimModel') || 'nvidia/llama-3.3-nemotron-super-49b-v1')
   const [nimEndpoint, setNimEndpoint] = useState(() => localStorage.getItem('nimEndpoint') || 'https://integrate.api.nvidia.com/v1')
   const [saved, setSaved] = useState(false)
   const [serverKeyAvailable, setServerKeyAvailable] = useState(false)
@@ -40,11 +40,11 @@ export default function NvidiaCloudCard({ onConfigured }) {
     localStorage.removeItem('nimModel')
     localStorage.removeItem('nimEndpoint')
     setApiKey('')
-    setModelId('nvidia/llama-3.1-nemotron-70b-instruct')
+    setModelId('nvidia/llama-3.3-nemotron-super-49b-v1')
     setNimEndpoint('https://integrate.api.nvidia.com/v1')
     // If server key is available, still report as configured
     if (serverKeyAvailable) {
-      onConfigured?.({ apiKey: '', modelId: 'nvidia/llama-3.1-nemotron-70b-instruct', endpoint: 'https://integrate.api.nvidia.com/v1', serverKey: true })
+      onConfigured?.({ apiKey: '', modelId: 'nvidia/llama-3.3-nemotron-super-49b-v1', endpoint: 'https://integrate.api.nvidia.com/v1', serverKey: true })
     } else {
       onConfigured?.(null)
     }
@@ -223,13 +223,11 @@ export default function NvidiaCloudCard({ onConfigured }) {
                       paddingRight: '36px',
                     }}
                   >
-                    <option value="nvidia/llama-3.1-nemotron-70b-instruct">nvidia/llama-3.1-nemotron-70b-instruct</option>
-                    <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct</option>
-                    <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct</option>
-                    <option value="mistralai/mistral-7b-instruct-v0.3">mistralai/mistral-7b-instruct-v0.3</option>
-                    <option value="mistralai/mixtral-8x7b-instruct-v0.1">mistralai/mixtral-8x7b-instruct-v0.1</option>
-                    <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
-                    <option value="microsoft/phi-3-mini-128k-instruct">microsoft/phi-3-mini-128k-instruct</option>
+                    <option value="nvidia/llama-3.3-nemotron-super-49b-v1">nvidia/llama-3.3-nemotron-super-49b-v1</option>
+                    <option value="nvidia/llama-3.1-nemotron-ultra-253b-v1">nvidia/llama-3.1-nemotron-ultra-253b-v1</option>
+                    <option value="nvidia/llama-3.1-nemotron-nano-8b-v1">nvidia/llama-3.1-nemotron-nano-8b-v1</option>
+                    <option value="deepseek/deepseek-v3.2">deepseek/deepseek-v3.2</option>
+                    <option value="mistralai/mistral-large-3-675b-instruct-2512">mistralai/mistral-large-3-675b-instruct-2512</option>
                   </select>
                 </div>
                 <div>

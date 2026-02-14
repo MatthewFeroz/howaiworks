@@ -61,7 +61,7 @@ class CloudChatRequest(BaseModel):
     prompt: str
     apiKey: str = ""
     endpoint: str = "https://integrate.api.nvidia.com/v1"
-    model: str = "nvidia/llama-3.1-nemotron-70b-instruct"
+    model: str = "nvidia/llama-3.3-nemotron-super-49b-v1"
 
 
 # ── TOKENIZATION ──

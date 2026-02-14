@@ -177,7 +177,7 @@ function CloudSteps() {
       </SetupStep>
 
       <SetupStep step={2} accent={cloudAccent} title="Pick a model">
-        We use <code style={code}>nemotron-70b-instruct</code>, a 70-billion-parameter model NVIDIA trained for instruction following. At FP16 that's 140GB of weights — too large for any consumer GPU. That's why cloud exists.
+        We use <code style={code}>nemotron-super-49b</code>, a 49-billion-parameter model NVIDIA trained for instruction following. At FP16 that's ~98GB of weights — too large for any consumer GPU. That's why cloud exists.
       </SetupStep>
 
       <SetupStep step={3} accent={cloudAccent} title="Generate an API key">
