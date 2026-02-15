@@ -17,7 +17,41 @@ export default function EmbeddingsPage() {
   const [allExperimentsExplored, setAllExperimentsExplored] = useState(false)
   const [arithmeticDisplay, setArithmeticDisplay] = useState(null)
   const [mapPhase, setMapPhase] = useState('scrambled')
+  const [isAutoTyping, setIsAutoTyping] = useState(true)
+  const [autoTypeIndex, setAutoTypeIndex] = useState(0)
+  const [demoPhraseIdx, setDemoPhraseIdx] = useState(0)
   const inputRef = useRef(null)
+
+  const demoPhrases = ['python', 'butterfly', 'fear', 'ocean', 'queen', 'GPU', 'chocolate', 'Tokyo', 'pride', 'algorithm']
+
+  // Auto-type demo words and highlight them on the map
+  useEffect(() => {
+    if (!isAutoTyping) return
+
+    const currentPhrase = demoPhrases[demoPhraseIdx]
+    if (autoTypeIndex < currentPhrase.length) {
+      const timer = setTimeout(() => {
+        const newText = currentPhrase.slice(0, autoTypeIndex + 1)
+        setWordInput(newText)
+        setAutoTypeIndex(autoTypeIndex + 1)
+      }, 70)
+      return () => clearTimeout(timer)
+    } else {
+      // Finished typing — highlight the word on the map, then pause before next
+      const match = embeddingData.words.find(w => w.word.toLowerCase() === currentPhrase.toLowerCase())
+      if (match && selectedWord !== match.word) {
+        handleWordClick(match.word)
+      }
+      const timer = setTimeout(() => {
+        setAutoTypeIndex(0)
+        setDemoPhraseIdx((demoPhraseIdx + 1) % demoPhrases.length)
+        setWordInput('')
+        setSelectedWord(null)
+        setNeighborLines([])
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [isAutoTyping, autoTypeIndex, demoPhraseIdx])
 
   // Check Ollama availability
   useEffect(() => {
@@ -157,6 +191,9 @@ export default function EmbeddingsPage() {
 
   const handleInputSubmit = (e) => {
     e.preventDefault()
+    if (isAutoTyping) {
+      setIsAutoTyping(false)
+    }
     if (ollamaAvailable) {
       handleEmbedWord()
     } else {
@@ -183,41 +220,16 @@ export default function EmbeddingsPage() {
           AI doesn't just see numbers.{' '}
           <span style={{ color: 'var(--nvidia-green)' }}>It understands meaning.</span>
         </h1>
-        <div style={{
+        <p style={{
           fontSize: 17,
           color: 'var(--text-secondary)',
           fontWeight: 400,
           maxWidth: 420,
           margin: '0 auto',
           lineHeight: 1.5,
-          minHeight: 26,
         }}>
-          <AnimatePresence mode="wait">
-            {mapPhase === 'scrambled' && (
-              <motion.p
-                key="scrambled"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{ margin: 0 }}
-              >
-                140 words. Just text.
-              </motion.p>
-            )}
-            {mapPhase === 'settled' && (
-              <motion.p
-                key="settled"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                style={{ margin: 0 }}
-              >
-                AI organized these by meaning — no one told it which words are related.
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </div>
+          AI organized these words by meaning — no one told it which words are related.
+        </p>
       </motion.div>
 
       {/* Meaning Map */}
@@ -240,7 +252,7 @@ export default function EmbeddingsPage() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.25 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
         style={{ marginTop: 16, marginBottom: 8 }}
       >
         <form onSubmit={handleInputSubmit} style={{ display: 'flex', gap: 8 }}>
@@ -248,11 +260,15 @@ export default function EmbeddingsPage() {
             ref={inputRef}
             type="text"
             value={wordInput}
-            onChange={(e) => setWordInput(e.target.value)}
-            placeholder={ollamaAvailable
-              ? "Type a word to embed it on the map..."
-              : "Type a word from the map to highlight it..."
-            }
+            onChange={(e) => {
+              if (isAutoTyping) {
+                setIsAutoTyping(false)
+                setSelectedWord(null)
+                setNeighborLines([])
+              }
+              setWordInput(e.target.value)
+            }}
+            placeholder="Type or click a word from the map to highlight it..."
             style={{
               flex: 1,
               padding: '12px 16px',
@@ -266,6 +282,12 @@ export default function EmbeddingsPage() {
               transition: 'border-color 0.2s, box-shadow 0.2s',
             }}
             onFocus={(e) => {
+              if (isAutoTyping) {
+                setIsAutoTyping(false)
+                setWordInput('')
+                setSelectedWord(null)
+                setNeighborLines([])
+              }
               e.target.style.borderColor = 'var(--nvidia-green)'
               e.target.style.boxShadow = '0 0 0 3px var(--nvidia-green-dim)'
             }}
@@ -297,20 +319,45 @@ export default function EmbeddingsPage() {
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            {ollamaAvailable ? 'Embed' : 'Find'}
+            Find
           </button>
         </form>
-        {!ollamaAvailable && (
-          <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            color: 'var(--text-dim)',
-            marginTop: 6,
-            paddingLeft: 4,
-          }}>
-            Connect Ollama to embed your own words live on the map
-          </div>
-        )}
+      </motion.div>
+
+      {/* What is an embedding / vector explainer card */}
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+        style={{
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 12,
+          padding: 24,
+          marginTop: 12,
+          marginBottom: 8,
+        }}
+      >
+        <h3 style={{ fontSize: 17, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
+          What is an embedding?
+        </h3>
+        <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>
+          An embedding is a way of turning a word into a list of numbers that captures its{' '}
+          <span style={{ color: 'var(--text-primary)' }}>meaning</span>. The model learns these numbers
+          during training so that words with similar meanings end up with similar numbers. Every dot on the
+          map above is one word, placed according to its embedding.
+        </p>
+
+        <h3 style={{ fontSize: 17, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
+          What is a vector?
+        </h3>
+        <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
+          A vector is just a list of numbers — like coordinates, but in many dimensions. Each word's
+          embedding is a vector with{' '}
+          <span style={{ color: 'var(--text-primary)' }}>768 numbers</span>. We can't visualize 768
+          dimensions, so the map above compresses them down to 2. Even in this simplified view, you can
+          see that related words cluster together — animals near animals, emotions near emotions.
+        </p>
       </motion.div>
 
       {/* Spacer */}
@@ -341,16 +388,9 @@ export default function EmbeddingsPage() {
             defaultOpen: true,
             content: (
               <div>
-                <p style={{ marginBottom: 16 }}>
-                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>What are embeddings?</strong>
-                </p>
-                <p style={{ marginBottom: 12 }}>
-                  An embedding is a list of numbers — typically 768 or more — that represents the <em>meaning</em> of
-                  a word, sentence, or concept. These numbers aren't random; they're learned by the model so that{' '}
-                  <strong style={{ color: 'var(--text-primary)' }}>similar meanings produce similar numbers.</strong>
-                </p>
                 <p style={{ marginBottom: 20 }}>
-                  The scatter plot above projects 768 dimensions down to just 2 (using PCA — Principal Component Analysis).
+                  The scatter plot above projects 768 dimensions down to just 2 using{' '}
+                  <strong style={{ color: 'var(--text-primary)' }}>PCA (Principal Component Analysis)</strong>.
                   Even in this crude 2D view, you can see clusters of meaning: animals together, emotions together,
                   places together. In the full 768-dimensional space, these relationships are far richer.
                 </p>

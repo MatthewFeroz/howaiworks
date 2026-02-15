@@ -5,8 +5,20 @@ import Nudge from './Nudge'
 import DepthPanel, { PythonCode } from './DepthPanel'
 import { markLessonComplete } from './Navbar'
 
-const AUTO_TYPE_TEXT = 'How does AI work?'
+const CHAR_LIMIT = 280
 const TYPE_SPEED = 60 // ms per character
+const PAUSE_BETWEEN_PHRASES = 2000 // ms to hold each phrase before clearing
+
+const DEMO_PHRASES = [
+  'How does AI work?',
+  'Just keep swimming.',
+  'Summarize this document for me.',
+  'Hello, World!',
+  'Fix the bug in my code.',
+  'With great power comes great responsibility.',
+  'Explain this like I\'m five.',
+  "I'm sorry Dave, I'm afraid I can't do that.", // easter egg — last
+]
 
 // Token color palette - matches globals.css .token-color-*
 const TOKEN_COLORS = [
@@ -26,12 +38,12 @@ export default function TokenizerPhase({
 }) {
   const [isAutoTyping, setIsAutoTyping] = useState(true)
   const [autoTypeIndex, setAutoTypeIndex] = useState(0)
+  const [demoPhraseIdx, setDemoPhraseIdx] = useState(0) // which phrase in DEMO_PHRASES
   const [userHasTyped, setUserHasTyped] = useState(false)
   const [textFocused, setTextFocused] = useState(false)
   const [textHovered, setTextHovered] = useState(false)
   const [idsFocused, setIdsFocused] = useState(false)
   const [hoveredStat, setHoveredStat] = useState(null)
-  const [hasScrolled, setHasScrolled] = useState(false)
   const [activeNudge, setActiveNudge] = useState(null) // key of the clicked nudge
   const [exploredNudges, setExploredNudges] = useState(new Set()) // nudges user has clicked
   const [nudgeTyping, setNudgeTyping] = useState(null) // { text, index } for nudge type animation
@@ -101,21 +113,31 @@ export default function TokenizerPhase({
     },
   ]
 
-  // Auto-type animation on load
+  // Auto-type animation — cycles through DEMO_PHRASES
   useEffect(() => {
     if (!isReady || !isAutoTyping) return
 
-    if (autoTypeIndex < AUTO_TYPE_TEXT.length) {
+    const currentPhrase = DEMO_PHRASES[demoPhraseIdx]
+
+    if (autoTypeIndex < currentPhrase.length) {
+      // Still typing the current phrase
       const timer = setTimeout(() => {
-        const newText = AUTO_TYPE_TEXT.slice(0, autoTypeIndex + 1)
+        const newText = currentPhrase.slice(0, autoTypeIndex + 1)
         onInputChange(newText)
         setAutoTypeIndex(autoTypeIndex + 1)
       }, TYPE_SPEED)
       return () => clearTimeout(timer)
     } else {
-      setIsAutoTyping(false)
+      // Phrase fully typed — pause then move to next
+      const timer = setTimeout(() => {
+        const nextIdx = (demoPhraseIdx + 1) % DEMO_PHRASES.length
+        setDemoPhraseIdx(nextIdx)
+        setAutoTypeIndex(0)
+        onInputChange('')
+      }, PAUSE_BETWEEN_PHRASES)
+      return () => clearTimeout(timer)
     }
-  }, [isReady, isAutoTyping, autoTypeIndex, onInputChange])
+  }, [isReady, isAutoTyping, autoTypeIndex, demoPhraseIdx, onInputChange])
 
   // Nudge typing animation (character-by-character, same as initial auto-type)
   useEffect(() => {
@@ -137,10 +159,14 @@ export default function TokenizerPhase({
 
   // Handle user text input (bar 1)
   const handleTextInput = useCallback((e) => {
-    const text = e.target.value
+    let text = e.target.value
+    // Enforce character limit
+    if (text.length > CHAR_LIMIT) {
+      text = text.slice(0, CHAR_LIMIT)
+    }
     // Cancel any in-progress nudge typing animation
     setNudgeTyping(null)
-    if (!userHasTyped && text !== AUTO_TYPE_TEXT.slice(0, text.length)) {
+    if (!userHasTyped) {
       setUserHasTyped(true)
       setIsAutoTyping(false)
       onUserTyped?.()
@@ -193,17 +219,6 @@ export default function TokenizerPhase({
     el.style.height = 'auto'
     el.style.height = el.scrollHeight + 'px'
   }, [derivedIdsText, editingBar])
-
-  // Track scroll to dismiss the "Scroll to explore more" indicator
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setHasScrolled(true)
-      }
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   // Handle nudge clicks
   const handleNudge = (nudgeKey, text) => {
@@ -394,8 +409,18 @@ export default function TokenizerPhase({
       style={{ padding: '20px 0 20px' }}
     >
       {/* === BAR 1: Your text === */}
-      <div style={{ ...labelStyle, color: 'var(--nvidia-green)' }}>
-        Your text
+      <div style={{ ...labelStyle, color: 'var(--nvidia-green)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>Your text</span>
+        {userHasTyped && (
+          <span style={{
+            color: charCount >= CHAR_LIMIT ? '#e87a96' : charCount >= CHAR_LIMIT * 0.85 ? '#e8d06e' : 'var(--text-dim)',
+            fontWeight: charCount >= CHAR_LIMIT ? 600 : 400,
+            fontSize: 11,
+            transition: 'color 0.2s',
+          }}>
+            {charCount}/{CHAR_LIMIT}
+          </span>
+        )}
       </div>
       <div
         style={{ position: 'relative', marginBottom: 0, cursor: textFocused ? undefined : 'pointer' }}
@@ -435,8 +460,20 @@ export default function TokenizerPhase({
             e.target.style.height = 'auto'
             e.target.style.height = e.target.scrollHeight + 'px'
           }}
-          onFocus={() => { setTextFocused(true); setEditingBar('text') }}
+          onFocus={() => {
+            setTextFocused(true)
+            setEditingBar('text')
+            // On first focus, stop auto-typing and clear so user can type
+            if (!userHasTyped) {
+              setIsAutoTyping(false)
+              setNudgeTyping(null)
+              setUserHasTyped(true)
+              onInputChange('')
+              onUserTyped?.()
+            }
+          }}
           onBlur={() => { setTextFocused(false); setEditingBar(null) }}
+          maxLength={CHAR_LIMIT}
           style={barStyle(textFocused, { breathing: isBreathing, hovered: textHovered && !textFocused })}
         />
 
@@ -573,56 +610,51 @@ export default function TokenizerPhase({
         </StatItem>
       </div>
 
-      {/* Phase 2: "Scroll to explore more" — after user types, until they scroll */}
-      <AnimatePresence>
-        {userHasTyped && !hasScrolled && (
-          <motion.div
-            key="scroll-prompt"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              paddingBottom: 24,
-              height: 60,
-              background: 'linear-gradient(transparent, var(--bg-deep) 60%)',
-              pointerEvents: 'none',
-              zIndex: 10,
-            }}
-          >
-            <span style={{
-              fontSize: 15,
-              color: 'var(--text-secondary)',
-              fontWeight: 400,
-              letterSpacing: 0.2,
-            }}>
-              Scroll to explore more
-            </span>
-            <motion.span
-              animate={{ y: [0, 5, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-              style={{
-                display: 'inline-block',
-                fontSize: 18,
-                color: 'var(--nvidia-green)',
-                opacity: 0.7,
-                lineHeight: 1,
-                marginTop: 4,
-              }}
-            >
-              ↓
-            </motion.span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div style={{
+        marginTop: 24,
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 12,
+        padding: 24,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20,
+      }}>
+        <div>
+          <div style={{
+            fontSize: 17,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            marginBottom: 12,
+          }}>
+            What is a token?
+          </div>
+          <div style={{
+            fontSize: 14,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.7,
+          }}>
+            A token is a small piece of text — it might be a whole word, part of a word, or even a single character. AI doesn't read words the way you do. It breaks everything down into these pieces first. Each colored chunk above is one token.
+          </div>
+        </div>
+        <div>
+          <div style={{
+            fontSize: 17,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            marginBottom: 12,
+          }}>
+            What is a tokenizer?
+          </div>
+          <div style={{
+            fontSize: 14,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.7,
+          }}>
+            A tokenizer is the tool that decides where to split. The one running here is <span style={{ color: 'var(--text-primary)' }}>cl100k_base</span> — the same tokenizer used by ChatGPT and GPT-4. It has a vocabulary of ~100,000 tokens, and every piece of text you type gets mapped to entries in that vocabulary. This is the very first step a language model performs before it can understand anything.
+          </div>
+        </div>
+      </div>
 
       {/* Nudges - accordion style, each expands to reveal insight */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 24 }}>

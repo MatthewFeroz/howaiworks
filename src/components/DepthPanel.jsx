@@ -228,7 +228,7 @@ export default function DepthPanel({ sections, visible, delay = 0, onOpen }) {
           textAlign: 'left',
         }}
       >
-        <span style={{ flex: 1 }}>Go Deeper — Computer Science</span>
+        <span style={{ flex: 1 }}>The computer science behind this</span>
         <span style={{
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0)',
           transition: 'transform 0.3s',

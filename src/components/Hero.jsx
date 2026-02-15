@@ -18,7 +18,7 @@ export default function Hero() {
         marginBottom: 12,
         letterSpacing: -0.5,
       }}>
-        This is how AI <span style={{ color: 'var(--nvidia-green)' }}>works.</span>
+        AI doesn't read words. It reads <span style={{ color: 'var(--nvidia-green)' }}>numbers.</span>
       </h1>
 
       <p style={{
@@ -29,8 +29,8 @@ export default function Hero() {
         margin: '0 auto',
         lineHeight: 1.5,
       }}>
-        AI turns data into numbers and predicts what comes next using statistics.
-        Try for yourself below.
+        Before AI can do anything with your text, it has to break it into smaller pieces called tokens.
+        Type below and see exactly how.
       </p>
     </motion.div>
   )
