@@ -641,57 +641,6 @@ export default function MeaningMap({ words, onWordClick, selectedWord, neighborL
                 </span>
               </div>
 
-              {/* Mini embedding bar chart */}
-              {tooltip.miniEmbedding && (
-                <div style={{ marginBottom: 8 }}>
-                  <div style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 10,
-                    color: 'var(--text-dim)',
-                    marginBottom: 4,
-                  }}>
-                    embedding sample (12 of 768 dimensions)
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    height: 28,
-                  }}>
-                    {tooltip.miniEmbedding.map((val, i) => {
-                      const absVal = Math.abs(val)
-                      const isPositive = val >= 0
-                      return (
-                        <div
-                          key={i}
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            height: '100%',
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: '100%',
-                              height: `${absVal * 100}%`,
-                              background: isPositive
-                                ? CATEGORY_COLORS[tooltip.category] || 'var(--nvidia-green)'
-                                : '#e85a6e',
-                              borderRadius: 1,
-                              opacity: 0.7,
-                              minHeight: 1,
-                            }}
-                          />
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
               {/* Nearest neighbors */}
               {tooltip.neighbors.length > 0 && (
                 <div style={{
