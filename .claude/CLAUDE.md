@@ -33,13 +33,16 @@ There are no tests or linting configured.
 
 ## Architecture
 
-**React 19 + Vite 6 SPA.** Two routes, no SSR. Phase 1-2 (tokenizer) works fully client-side with zero backend. Phase 3 (chat) requires a FastAPI backend + Ollama.
+**React 19 + Vite 6 SPA.** Three routes, no SSR. Phase 1-2 (tokenizer) works fully client-side with zero backend. Phase 3 uses WebLLM (in-browser via WebGPU) or falls back to demo replay.
 
 ### Routing
 
-`main.jsx` wraps `<App />` in `<BrowserRouter>`. `App.jsx` defines two routes with Framer Motion page transitions:
+`main.jsx` wraps `<App />` in `<BrowserRouter>`. `App.jsx` defines three routes with Framer Motion page transitions:
 - `/` → `TokenizerPage` — the hero experience (primary)
-- `/run` → `RunLocalPage` — chat with local Ollama (secondary)
+- `/understand` → `EmbeddingsPage` — embeddings visualization (MeaningMap, WordArithmetic)
+- `/run` → `CloudVsLocalPage` — chat interface with WebLLM in-browser inference
+
+`App.jsx` initializes `useWebLLM({ autoLoad: true })` at the top level and passes it to `CloudVsLocalPage`.
 
 ### The Tokenizer Pipeline
 
@@ -55,9 +58,17 @@ This is the largest and most complex component. It orchestrates the entire hero 
 - **Progressive reveal state machine**: Tracks `userHasTyped`, number of inputs, nudges explored. Stats bar appears after first input. Nudges appear progressively. All 3 nudges explored → confetti → Go Deeper unlocks.
 - **Three nudges**: "strawberry" (subword splitting), "supercalifragilisticexpialidocious" (rare word cost), "مرحبا كيف حالك" (multilingual inequity). Each has an expandable insight card.
 
-### RunLocalPage.jsx — Chat Interface
+### WebLLM — In-Browser Inference
 
-Streams responses from Ollama via SSE (`/api/chat`). Falls back to pre-recorded demo conversations (in `DemoReplay.jsx`) when backend is unavailable. Tokens in AI responses are colorized using the same palette. `OllamaStatus.jsx` shows connection state; `GPUStats.jsx` shows hardware info from `/api/gpu-info`.
+`useWebLLM.js` hook loads `Qwen2.5-0.5B-Instruct-q4f16_1-MLC` via `@mlc-ai/web-llm` using WebGPU. It exposes `{ status, progress, isReady, load, chat }`. The `chat()` method streams tokens via an async iterator. Falls back gracefully when WebGPU is unsupported.
+
+### CloudVsLocalPage.jsx — Chat Interface
+
+Receives `webllm` prop from App. Includes `CloudDemoReplay.jsx` for NVIDIA NIM cloud demos and `DemoReplay.jsx` for pre-recorded local demos when backend/WebGPU is unavailable. Also has `LatencyRace.jsx`, `NvidiaCloudCard.jsx`, `BrevDeployCard.jsx`, and `SetupGuide.jsx`.
+
+### EmbeddingsPage.jsx — Meaning Visualization
+
+Uses `MeaningMap.jsx` (D3-based 2D scatter plot of word embeddings) and `WordArithmetic.jsx` (vector arithmetic demos like king - man + woman = queen). Requires embedding data from backend or pre-generated via `scripts/generate_embeddings.py`.
 
 ### Backend (main.py — optional FastAPI)
 

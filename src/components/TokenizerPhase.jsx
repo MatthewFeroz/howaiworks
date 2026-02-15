@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import Nudge from './Nudge'
 import DepthPanel, { PythonCode } from './DepthPanel'
+import { markLessonComplete } from './Navbar'
 
 const AUTO_TYPE_TEXT = 'How does AI work?'
 const TYPE_SPEED = 60 // ms per character
@@ -223,6 +224,7 @@ export default function TokenizerPhase({
       const next = new Set([...prev, nudgeKey])
       // Fire confetti when all nudges explored for the first time
       if (next.size === NUDGES.length && prev.size < NUDGES.length) {
+        markLessonComplete('lesson-complete-tokenizer')
         setTimeout(() => {
           // Left burst
           confetti({
@@ -680,9 +682,9 @@ export default function TokenizerPhase({
         )}
       </div>
 
-      {/* Go Deeper panel — only appears after all nudges explored */}
+      {/* Go Deeper panel — always visible */}
       <DepthPanel
-        visible={exploredNudges.size === NUDGES.length}
+        visible={true}
         delay={0.5}
         onOpen={onDepthOpened}
         sections={[

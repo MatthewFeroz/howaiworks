@@ -5,6 +5,7 @@ import MeaningMap from '../components/MeaningMap'
 import WordArithmetic from '../components/WordArithmetic'
 import DepthPanel, { PythonCode } from '../components/DepthPanel'
 import Footer from '../components/Footer'
+import { markLessonComplete } from '../components/Navbar'
 import embeddingData from '../data/embeddingMap.json'
 
 export default function EmbeddingsPage() {
@@ -14,16 +15,9 @@ export default function EmbeddingsPage() {
   const [wordInput, setWordInput] = useState('')
   const [ollamaAvailable, setOllamaAvailable] = useState(false)
   const [allExperimentsExplored, setAllExperimentsExplored] = useState(false)
-  const [hasViewedDepth, setHasViewedDepth] = useState(false)
   const [arithmeticDisplay, setArithmeticDisplay] = useState(null)
   const [mapPhase, setMapPhase] = useState('scrambled')
   const inputRef = useRef(null)
-
-  // Mark page as visited for navigation dots
-  useEffect(() => {
-    localStorage.setItem('visitedPageTwo', 'true')
-    localStorage.setItem('visitedPageThree', 'true')
-  }, [])
 
   // Check Ollama availability
   useEffect(() => {
@@ -172,39 +166,6 @@ export default function EmbeddingsPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
-      {/* Page indicator dots */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: 8,
-        padding: '24px 0 0',
-      }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <div
-            style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: 'var(--border)', transition: 'background 0.2s', cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--nvidia-green)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--border)'}
-          />
-        </Link>
-        <div style={{
-          width: 8, height: 8, borderRadius: '50%',
-          background: 'var(--nvidia-green)',
-        }} />
-        <Link to="/run" style={{ textDecoration: 'none' }}>
-          <div
-            style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: 'var(--border)', transition: 'background 0.2s', cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--nvidia-green)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--border)'}
-          />
-        </Link>
-      </div>
-
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -368,11 +329,11 @@ export default function EmbeddingsPage() {
         />
       </motion.div>
 
-      {/* DepthPanel */}
+      {/* DepthPanel — always visible */}
       <DepthPanel
-        visible={allExperimentsExplored}
+        visible={true}
         delay={0.5}
-        onOpen={() => setHasViewedDepth(true)}
+        onOpen={() => { setHasViewedDepth(true); markLessonComplete('lesson-complete-understand') }}
         sections={[
           {
             label: 'The Concept',
@@ -528,47 +489,42 @@ result = np.array(king) - np.array(man) + np.array(woman)
       />
 
       {/* CTA to Page 3 */}
-      <AnimatePresence>
-        {hasViewedDepth && (
-          <motion.div
-            key="cta"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            style={{ padding: '32px 0 16px', textAlign: 'center' }}
-          >
-            <Link
-              to="/run"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '14px 28px',
-                background: 'var(--nvidia-green)',
-                color: '#0a0a0b',
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: 'var(--font-body)',
-                borderRadius: 10,
-                textDecoration: 'none',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
-              }}
-            >
-              See where AI runs
-              <span style={{ fontSize: 18 }}>→</span>
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        style={{ padding: '32px 0 16px', textAlign: 'center' }}
+      >
+        <Link
+          to="/run"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '14px 28px',
+            background: 'var(--nvidia-green)',
+            color: '#0a0a0b',
+            fontSize: 15,
+            fontWeight: 600,
+            fontFamily: 'var(--font-body)',
+            borderRadius: 10,
+            textDecoration: 'none',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+          }}
+        >
+          See where AI runs
+          <span style={{ fontSize: 18 }}>→</span>
+        </Link>
+      </motion.div>
 
       <div style={{
         height: 1,

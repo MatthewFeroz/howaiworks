@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import LatencyRace from '../components/LatencyRace'
 import TradeoffCards from '../components/TradeoffCards'
@@ -7,6 +6,7 @@ import DepthPanel from '../components/DepthPanel'
 import NvidiaCloudCard from '../components/NvidiaCloudCard'
 import SetupGuide from '../components/SetupGuide'
 import Footer from '../components/Footer'
+import { markLessonComplete } from '../components/Navbar'
 
 export default function CloudVsLocalPage({ webllm }) {
   const [ollamaConnected, setOllamaConnected] = useState(false)
@@ -16,15 +16,7 @@ export default function CloudVsLocalPage({ webllm }) {
     const model = localStorage.getItem('nimModel')
     return key && endpoint ? { apiKey: key, endpoint, modelId: model } : null
   })
-  const [raceComplete, setRaceComplete] = useState(false)
   const [allTradeoffsExplored, setAllTradeoffsExplored] = useState(false)
-  const [hasViewedDepth, setHasViewedDepth] = useState(false)
-
-  // Mark page as visited
-  useEffect(() => {
-    localStorage.setItem('visitedPageTwo', 'true')
-    localStorage.setItem('visitedPageThree', 'true')
-  }, [])
 
   // Check Ollama
   useEffect(() => {
@@ -43,39 +35,6 @@ export default function CloudVsLocalPage({ webllm }) {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
-      {/* Page indicator dots */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: 8,
-        padding: '24px 0 0',
-      }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <div
-            style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: 'var(--border)', transition: 'background 0.2s', cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--nvidia-green)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--border)'}
-          />
-        </Link>
-        <Link to="/understand" style={{ textDecoration: 'none' }}>
-          <div
-            style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: 'var(--border)', transition: 'background 0.2s', cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--nvidia-green)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--border)'}
-          />
-        </Link>
-        <div style={{
-          width: 8, height: 8, borderRadius: '50%',
-          background: 'var(--nvidia-green)',
-        }} />
-      </div>
-
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -130,7 +89,7 @@ export default function CloudVsLocalPage({ webllm }) {
         <LatencyRace
           ollamaConnected={ollamaConnected}
           nimConfig={nimConfig}
-          onRaceComplete={() => setRaceComplete(true)}
+          onRaceComplete={() => {}}
           webllm={webllm}
           localInferenceMode={localInferenceMode}
         />
@@ -146,26 +105,21 @@ export default function CloudVsLocalPage({ webllm }) {
         <NvidiaCloudCard onConfigured={handleNimConfigured} />
       </motion.div>
 
-      {/* Trade-off Cards — appear after first race */}
-      <AnimatePresence>
-        {raceComplete && (
-          <motion.div
-            key="tradeoffs"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            style={{ marginTop: 32 }}
-          >
-            <TradeoffCards onAllExplored={() => setAllTradeoffsExplored(true)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Trade-off Cards — always visible */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        style={{ marginTop: 32 }}
+      >
+        <TradeoffCards onAllExplored={() => setAllTradeoffsExplored(true)} />
+      </motion.div>
 
-      {/* DepthPanel */}
+      {/* DepthPanel — always visible */}
       <DepthPanel
-        visible={allTradeoffsExplored}
+        visible={true}
         delay={0.5}
-        onOpen={() => setHasViewedDepth(true)}
+        onOpen={() => { setHasViewedDepth(true); markLessonComplete('lesson-complete-run') }}
         sections={[
           {
             label: 'The Concept',

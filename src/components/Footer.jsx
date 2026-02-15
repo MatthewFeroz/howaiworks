@@ -20,10 +20,6 @@ export default function Footer() {
           GitHub
         </a>
         <span>·</span>
-        <a href="https://youtube.com/MatthewFeroz" target="_blank" rel="noopener noreferrer" style={linkStyle}>
-          YouTube
-        </a>
-        <span>·</span>
         <a href="https://howaiworks.io" style={linkStyle}>
           howaiworks.io
         </a>
