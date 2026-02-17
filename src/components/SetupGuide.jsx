@@ -242,7 +242,7 @@ export default function SetupGuide({ cloudConnected, localConnected, webllm, loc
   const bothDisconnected = !cloudConnected && !localActive
 
   const localTitle = localActive
-    ? 'Local — Running in Browser (WebGPU)'
+    ? 'Local — WebLLM Active (Ollama recommended)'
     : webllm?.status === 'loading'
       ? 'Connect Local — Loading in browser...'
       : 'Connect Local — Ollama'

@@ -1,7 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { simulateTokenStream, DEMO_CONVERSATIONS } from './DemoReplay'
-import { simulateCloudStream, CLOUD_DEMO_RESPONSES } from './CloudDemoReplay'
 
 const TOKEN_COLORS = [
   '#a8d86e', '#6ec0e8', '#e8956e', '#c58ee8', '#e8d06e', '#6ee8cc',
@@ -22,7 +19,6 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
   const [cloudTPS, setCloudTPS] = useState(null)
   const [cloudStartTime, setCloudStartTime] = useState(null)
   const [cloudFirstToken, setCloudFirstToken] = useState(null)
-  const [cloudIsSimulated, setCloudIsSimulated] = useState(false)
   const [cloudError, setCloudError] = useState(null)
 
   // Local state
@@ -32,19 +28,22 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
   const [localTPS, setLocalTPS] = useState(null)
   const [localStartTime, setLocalStartTime] = useState(null)
   const [localFirstToken, setLocalFirstToken] = useState(null)
-  const [localIsSimulated, setLocalIsSimulated] = useState(false)
 
   const cloudCancelRef = useRef(null)
   const localCancelRef = useRef(null)
   const cloudTokenCountRef = useRef(0)
   const localTokenCountRef = useRef(0)
 
-  // Auto-race on mount
+  // Derive readiness
+  const cloudReady = !!(nimConfig?.apiKey || nimConfig?.serverKey)
+  const localReady = localInferenceMode !== 'simulated'
+
+  // Auto-race on mount only if at least one side is connected
   useEffect(() => {
-    const timer = setTimeout(() => {
-      startRace(DEFAULT_PROMPT)
-    }, 800)
-    return () => clearTimeout(timer)
+    if (cloudReady || localReady) {
+      const timer = setTimeout(() => startRace(DEFAULT_PROMPT), 800)
+      return () => clearTimeout(timer)
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetState = () => {
@@ -69,48 +68,18 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
     if (cloudCancelRef.current) cloudCancelRef.current()
     if (localCancelRef.current) localCancelRef.current()
     resetState()
-    setIsRacing(true)
 
+    const cReady = !!(nimConfig?.apiKey || nimConfig?.serverKey)
+    const currentLocalMode = localInferenceMode || (ollamaConnected ? 'ollama' : 'simulated')
+    const lReady = currentLocalMode !== 'simulated'
+
+    if (!cReady && !lReady) return
+
+    setIsRacing(true)
     const now = Date.now()
 
     // ── CLOUD COLUMN ──
-
-    // Helper: run simulated cloud (used as primary path or fallback)
-    const runSimulatedCloud = (startTime) => {
-      setCloudIsSimulated(true)
-      setCloudStartTime(startTime)
-      const demo = CLOUD_DEMO_RESPONSES.find(d => d.prompt === racePrompt) || CLOUD_DEMO_RESPONSES[0]
-      const cancel = simulateCloudStream(
-        demo.response,
-        (token) => {
-          const tokenTime = Date.now()
-          setCloudTokens(prev => {
-            if (prev.length === 0) {
-              setCloudFirstToken(tokenTime)
-              setCloudTTFT(tokenTime - startTime)
-            }
-            return [...prev, token]
-          })
-          cloudTokenCountRef.current++
-          if (cloudTokenCountRef.current > 1) {
-            setCloudTPS(prev => {
-              const elapsed = (tokenTime - startTime) / 1000
-              return elapsed > 0 ? Math.round(cloudTokenCountRef.current / elapsed) : prev
-            })
-          }
-        },
-        () => {
-          setCloudDone(true)
-          checkRaceComplete()
-        },
-      )
-      cloudCancelRef.current = cancel
-    }
-
-    if (nimConfig?.apiKey || nimConfig?.serverKey) {
-      // Route through backend proxy to avoid CORS issues
-      // The backend accepts a client-provided apiKey or falls back to its own NVIDIA_NIM_KEY
-      setCloudIsSimulated(false)
+    if (cReady) {
       setCloudStartTime(now)
       ;(async () => {
         try {
@@ -135,7 +104,8 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
               errMsg = errBody.detail || errBody.error || errMsg
             } catch {}
             setCloudError(errMsg)
-            runSimulatedCloud(Date.now())
+            setCloudDone(true)
+            checkRaceComplete()
             return
           }
 
@@ -177,29 +147,21 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
             }
           }
           if (cloudTokenCountRef.current === 0) {
-            // No tokens received — likely an API error. Fall back to simulated.
-            runSimulatedCloud(Date.now())
-            return
+            setCloudError('No response received from API')
           }
           setCloudDone(true)
           checkRaceComplete()
         } catch (err) {
           console.error('Cloud race error:', err)
           setCloudError('Backend unavailable — make sure the FastAPI server is running')
-          runSimulatedCloud(Date.now())
+          setCloudDone(true)
+          checkRaceComplete()
         }
       })()
-    } else {
-      // Branch C: Simulated (no config)
-      runSimulatedCloud(now)
     }
 
     // ── LOCAL COLUMN ──
-    const currentLocalMode = localInferenceMode || (ollamaConnected ? 'ollama' : 'simulated')
-    setLocalIsSimulated(currentLocalMode === 'simulated')
-
     if (currentLocalMode === 'ollama') {
-      // Real Ollama streaming
       setLocalStartTime(now)
       ;(async () => {
         try {
@@ -252,7 +214,6 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
         checkRaceComplete()
       })()
     } else if (currentLocalMode === 'webllm' && webllm?.isReady) {
-      // WebLLM browser inference
       setLocalStartTime(now)
       let firstTokenTime = null
       const abort = webllm.chat(racePrompt, {
@@ -279,40 +240,10 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
         },
       })
       localCancelRef.current = abort
-    } else {
-      // Simulated local
-      setLocalStartTime(now)
-      const demo = DEMO_CONVERSATIONS[0]
-      const cancel = simulateTokenStream(
-        demo.response,
-        (token) => {
-          const tokenTime = Date.now()
-          setLocalTokens(prev => {
-            if (prev.length === 0) {
-              setLocalFirstToken(tokenTime)
-              setLocalTTFT(tokenTime - now)
-            }
-            return [...prev, token]
-          })
-          localTokenCountRef.current++
-          if (localTokenCountRef.current > 1) {
-            setLocalTPS(prev => {
-              const elapsed = (tokenTime - now) / 1000
-              return elapsed > 0 ? Math.round(localTokenCountRef.current / elapsed) : prev
-            })
-          }
-        },
-        () => {
-          setLocalDone(true)
-          checkRaceComplete()
-        },
-      )
-      localCancelRef.current = cancel
     }
   }, [ollamaConnected, nimConfig, localInferenceMode, webllm]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkRaceComplete = () => {
-    // This is called from async contexts; we use a timeout to let state settle
     setTimeout(() => {
       setIsRacing(false)
       setHasRaced(true)
@@ -347,15 +278,15 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
         {/* Cloud column */}
         <RaceColumn
           label="CLOUD"
-          sublabel={cloudIsSimulated ? 'Simulated · NVIDIA NIM' : `NVIDIA NIM · ${nimConfig?.modelId || 'nemotron-super-49b'}`}
+          sublabel={cloudReady ? `NVIDIA NIM · ${(nimConfig?.modelId || 'nemotron-super-49b').split('/').pop()}` : 'Not connected'}
           accentColor="#6ec0e8"
           tokens={cloudTokens}
           done={cloudDone}
           ttft={cloudTTFT}
           tps={cloudTPS}
-          isSimulated={cloudIsSimulated}
-          model={nimConfig?.modelId || 'nemotron-super-49b'}
           error={cloudError}
+          isRacing={isRacing}
+          placeholder={!cloudReady ? 'Configure NVIDIA NIM Cloud below to race ↓' : null}
         />
 
         {/* Local column */}
@@ -363,16 +294,16 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
           label="LOCAL"
           sublabel={
             localInferenceMode === 'ollama' ? 'Ollama · Your Machine'
-            : localInferenceMode === 'webllm' && !localIsSimulated ? 'WebLLM · In Your Browser (WebGPU)'
-            : 'Simulated · Your Machine'
+            : localInferenceMode === 'webllm' ? 'WebGPU · In-Browser'
+            : 'Not connected'
           }
           accentColor="var(--nvidia-green)"
           tokens={localTokens}
           done={localDone}
           ttft={localTTFT}
           tps={localTPS}
-          isSimulated={localIsSimulated}
-          model={localInferenceMode === 'webllm' && !localIsSimulated ? 'qwen2.5-0.5b (browser)' : 'qwen2.5:0.5b'}
+          isRacing={isRacing}
+          placeholder={!localReady ? 'Set up Ollama or WebGPU below to race ↓' : null}
         />
       </div>
 
@@ -427,7 +358,7 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
   )
 }
 
-function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isSimulated, model, error }) {
+function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, error, isRacing, placeholder }) {
   const contentRef = useRef(null)
 
   // Auto-scroll to bottom as tokens stream
@@ -436,8 +367,6 @@ function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isS
       contentRef.current.scrollTop = contentRef.current.scrollHeight
     }
   }, [tokens])
-
-  const tokenText = tokens.join('')
 
   return (
     <div style={{
@@ -474,20 +403,6 @@ function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isS
             {sublabel}
           </div>
         </div>
-        {isSimulated && (
-          <span style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 9,
-            color: 'var(--text-dim)',
-            background: 'var(--bg-elevated)',
-            padding: '2px 6px',
-            borderRadius: 4,
-            textTransform: 'uppercase',
-            letterSpacing: 1,
-          }}>
-            Simulated
-          </span>
-        )}
       </div>
 
       {/* Token stream area */}
@@ -506,15 +421,38 @@ function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isS
         {error && tokens.length === 0 && (
           <div style={{ marginBottom: 8 }}>
             <div style={{ color: '#e8956e', fontSize: 12 }}>{error}</div>
-            <div style={{ color: 'var(--text-dim)', fontSize: 11, marginTop: 4 }}>
-              Falling back to simulated...
-            </div>
           </div>
         )}
-        {tokens.length === 0 && !done && !error && (
-          <div style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>
-            Waiting...
-            <span style={{ animation: 'pulse-dot 1.5s infinite' }}> ●</span>
+        {placeholder && tokens.length === 0 && !error && (
+          <div style={{
+            color: 'var(--text-dim)',
+            fontSize: 13,
+            lineHeight: 1.6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 100,
+            textAlign: 'center',
+            padding: '0 16px',
+          }}>
+            {placeholder}
+          </div>
+        )}
+        {!placeholder && tokens.length === 0 && !done && !error && (
+          <div style={{
+            color: 'var(--text-dim)',
+            fontStyle: 'italic',
+            display: isRacing ? 'block' : 'flex',
+            alignItems: isRacing ? undefined : 'center',
+            justifyContent: isRacing ? undefined : 'center',
+            minHeight: isRacing ? undefined : 100,
+            textAlign: isRacing ? undefined : 'center',
+          }}>
+            {isRacing ? (
+              <>Waiting...<span style={{ animation: 'pulse-dot 1.5s infinite' }}> ●</span></>
+            ) : (
+              'Type a prompt and hit Race'
+            )}
           </div>
         )}
         {/* Render colored tokens */}
@@ -562,7 +500,6 @@ function RaceColumn({ label, sublabel, accentColor, tokens, done, ttft, tps, isS
             <span style={{ color: accentColor, fontWeight: 600 }}>{tps} tok/s</span>
           ) : '— tok/s'}
         </span>
-        <span style={{ fontSize: 10 }}>{model}</span>
       </div>
     </div>
   )

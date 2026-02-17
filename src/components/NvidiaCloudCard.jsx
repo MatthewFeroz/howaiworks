@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+
+const MODEL_ID = 'nvidia/llama-3.3-nemotron-super-49b-v1'
+const NIM_ENDPOINT = 'https://integrate.api.nvidia.com/v1'
 
 export default function NvidiaCloudCard({ onConfigured }) {
-  const [showSetup, setShowSetup] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('nimApiKey') || '')
-  const [modelId, setModelId] = useState(() => localStorage.getItem('nimModel') || 'nvidia/llama-3.3-nemotron-super-49b-v1')
-  const [nimEndpoint, setNimEndpoint] = useState(() => localStorage.getItem('nimEndpoint') || 'https://integrate.api.nvidia.com/v1')
   const [saved, setSaved] = useState(false)
   const [serverKeyAvailable, setServerKeyAvailable] = useState(false)
 
@@ -17,9 +16,8 @@ export default function NvidiaCloudCard({ onConfigured }) {
       .then(data => {
         if (data.serverKeyConfigured) {
           setServerKeyAvailable(true)
-          // Auto-notify parent that cloud is available via server key
           if (!apiKey) {
-            onConfigured?.({ apiKey: '', modelId, endpoint: nimEndpoint, serverKey: true })
+            onConfigured?.({ apiKey: '', modelId: MODEL_ID, endpoint: NIM_ENDPOINT, serverKey: true })
           }
         }
       })
@@ -28,23 +26,16 @@ export default function NvidiaCloudCard({ onConfigured }) {
 
   const handleSave = () => {
     localStorage.setItem('nimApiKey', apiKey)
-    localStorage.setItem('nimModel', modelId)
-    localStorage.setItem('nimEndpoint', nimEndpoint)
     setSaved(true)
-    onConfigured?.({ apiKey, modelId, endpoint: nimEndpoint })
+    onConfigured?.({ apiKey, modelId: MODEL_ID, endpoint: NIM_ENDPOINT })
     setTimeout(() => setSaved(false), 2000)
   }
 
   const handleClear = () => {
     localStorage.removeItem('nimApiKey')
-    localStorage.removeItem('nimModel')
-    localStorage.removeItem('nimEndpoint')
     setApiKey('')
-    setModelId('nvidia/llama-3.3-nemotron-super-49b-v1')
-    setNimEndpoint('https://integrate.api.nvidia.com/v1')
-    // If server key is available, still report as configured
     if (serverKeyAvailable) {
-      onConfigured?.({ apiKey: '', modelId: 'nvidia/llama-3.3-nemotron-super-49b-v1', endpoint: 'https://integrate.api.nvidia.com/v1', serverKey: true })
+      onConfigured?.({ apiKey: '', modelId: MODEL_ID, endpoint: NIM_ENDPOINT, serverKey: true })
     } else {
       onConfigured?.(null)
     }
@@ -57,46 +48,48 @@ export default function NvidiaCloudCard({ onConfigured }) {
       borderRadius: 12,
       overflow: 'hidden',
     }}>
-      {/* Top accent — NVIDIA green for NIM */}
+      {/* Top accent — cloud blue for NIM */}
       <div style={{
         height: 2,
-        background: 'linear-gradient(90deg, transparent, var(--nvidia-green), transparent)',
+        background: 'linear-gradient(90deg, transparent, #6ec0e8, transparent)',
       }} />
 
       <div style={{ padding: '20px 24px' }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <div style={{ marginBottom: 16 }}>
           <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            background: 'var(--nvidia-green-dim)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 18,
-            flexShrink: 0,
+            fontSize: 15,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            marginBottom: 2,
           }}>
-            ⚡
+            NVIDIA NIM Cloud
           </div>
-          <div>
-            <div style={{
-              fontSize: 15,
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              marginBottom: 2,
-            }}>
-              Race with NVIDIA NIM
-            </div>
-            <div style={{
-              fontSize: 13,
-              color: 'var(--text-secondary)',
-            }}>
-              {serverKeyAvailable
-                ? 'Cloud inference is ready — NVIDIA NIM API configured on server'
-                : 'Get 10K free requests from NVIDIA\'s cloud inference API'}
-            </div>
+          <div style={{
+            fontSize: 13,
+            color: 'var(--text-secondary)',
+          }}>
+            {serverKeyAvailable
+              ? 'Cloud inference is ready — NVIDIA NIM API configured on server'
+              : 'Get 10K free requests from NVIDIA\'s cloud inference API'}
           </div>
+        </div>
+
+        {/* Educational IntroBlock */}
+        <div style={{
+          padding: '12px 16px',
+          background: 'var(--bg-elevated)',
+          borderLeft: '3px solid #6ec0e8',
+          borderRadius: '0 8px 8px 0',
+          marginBottom: 16,
+          fontSize: 13,
+          lineHeight: 1.6,
+          color: 'var(--text-secondary)',
+        }}>
+          <strong style={{ color: '#6ec0e8' }}>Cloud inference</strong> sends your prompt over the internet
+          to a data center where clusters of GPUs run the model and stream the answer back. You get access
+          to massive models (49B+ parameters) that would never fit on a laptop — but every request travels
+          the network.
         </div>
 
         {/* Server key status badge */}
@@ -119,174 +112,82 @@ export default function NvidiaCloudCard({ onConfigured }) {
           </div>
         )}
 
-        {/* Get API Key link */}
+        {/* API key form — always visible when no server key */}
         {!serverKeyAvailable && (
-          <a
-            href="https://build.nvidia.com/explore/discover"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '10px 20px',
-              background: 'var(--nvidia-green)',
-              color: '#0a0a0b',
-              fontSize: 14,
-              fontWeight: 600,
-              fontFamily: 'var(--font-body)',
-              borderRadius: 8,
-              textDecoration: 'none',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              marginBottom: 12,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)'
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(118,185,0,0.3)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = 'none'
-            }}
-          >
-            Get free API key
-            <span style={{ fontSize: 12 }}>↗</span>
-          </a>
-        )}
-
-        {/* Setup toggle */}
-        <button
-          onClick={() => setShowSetup(o => !o)}
-          style={{
+          <div style={{
             display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            background: 'none',
-            border: 'none',
-            padding: '8px 0',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: 1.5,
-            textTransform: 'uppercase',
-            color: showSetup ? 'var(--nvidia-green)' : 'var(--text-dim)',
-            transition: 'color 0.2s',
-          }}
-        >
-          <motion.span
-            animate={{ rotate: showSetup ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ display: 'inline-block', fontSize: 10 }}
-          >
-            ▶
-          </motion.span>
-          {apiKey ? 'API Key Configured' : 'Paste your own API key'}
-        </button>
-
-        {/* Setup form */}
-        <AnimatePresence initial={false}>
-          {showSetup && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ overflow: 'hidden' }}
-            >
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                padding: '12px 0 4px',
+            flexDirection: 'column',
+            gap: 10,
+          }}>
+            <div>
+              <label style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: 'var(--text-dim)',
+                marginBottom: 4,
+                display: 'block',
               }}>
-                <div>
-                  <label style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
+                API Key
+              </label>
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="nvapi-..."
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                onClick={handleSave}
+                style={{
+                  padding: '8px 16px',
+                  background: 'var(--nvidia-green)',
+                  color: '#0a0a0b',
+                  border: 'none',
+                  borderRadius: 6,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {saved ? 'Saved!' : 'Save'}
+              </button>
+              {apiKey && (
+                <button
+                  onClick={handleClear}
+                  style={{
+                    padding: '8px 16px',
+                    background: 'transparent',
                     color: 'var(--text-dim)',
-                    marginBottom: 4,
-                    display: 'block',
-                  }}>
-                    Model
-                  </label>
-                  <select
-                    value={modelId}
-                    onChange={(e) => setModelId(e.target.value)}
-                    style={{
-                      ...inputStyle,
-                      cursor: 'pointer',
-                      appearance: 'none',
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8a96' d='M6 8L2 4h8z'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 12px center',
-                      paddingRight: '36px',
-                    }}
-                  >
-                    <option value="nvidia/llama-3.3-nemotron-super-49b-v1">nvidia/llama-3.3-nemotron-super-49b-v1</option>
-                    <option value="nvidia/llama-3.1-nemotron-ultra-253b-v1">nvidia/llama-3.1-nemotron-ultra-253b-v1</option>
-                    <option value="nvidia/llama-3.1-nemotron-nano-8b-v1">nvidia/llama-3.1-nemotron-nano-8b-v1</option>
-                    <option value="deepseek/deepseek-v3.2">deepseek/deepseek-v3.2</option>
-                    <option value="mistralai/mistral-large-3-675b-instruct-2512">mistralai/mistral-large-3-675b-instruct-2512</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
                     fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: 'var(--text-dim)',
-                    marginBottom: 4,
-                    display: 'block',
-                  }}>
-                    API Key
-                  </label>
-                  <input
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="nvapi-..."
-                    style={inputStyle}
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={handleSave}
-                    style={{
-                      padding: '8px 16px',
-                      background: 'var(--nvidia-green)',
-                      color: '#0a0a0b',
-                      border: 'none',
-                      borderRadius: 6,
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {saved ? 'Saved!' : 'Save'}
-                  </button>
-                  {apiKey && (
-                    <button
-                      onClick={handleClear}
-                      style={{
-                        padding: '8px 16px',
-                        background: 'transparent',
-                        color: 'var(--text-dim)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 6,
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Clear
+                </button>
+              )}
+              <a
+                href="https://build.nvidia.com/explore/discover"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  marginLeft: 'auto',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: '#6ec0e8',
+                  textDecoration: 'none',
+                }}
+              >
+                Get free API key ↗
+              </a>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

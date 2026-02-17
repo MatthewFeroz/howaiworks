@@ -48,7 +48,7 @@ export default function EmbeddingsPage() {
         setWordInput('')
         setSelectedWord(null)
         setNeighborLines([])
-      }, 2000)
+      }, 4000)
       return () => clearTimeout(timer)
     }
   }, [isAutoTyping, autoTypeIndex, demoPhraseIdx])
