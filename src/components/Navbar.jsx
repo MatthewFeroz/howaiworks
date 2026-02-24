@@ -4,6 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 const NAV_ITEMS = [
   {
+    path: '/what-is-ai',
+    label: 'What is AI',
+    title: 'What is AI',
+    preview: 'The basics',
+    completionKey: 'lesson-complete-what-is-ai',
+  },
+  {
     path: '/tokenize',
     label: 'Tokenizer',
     title: 'Tokenize',

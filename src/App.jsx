@@ -6,6 +6,7 @@ import EmbeddingsPage from './pages/EmbeddingsPage'
 import CloudVsLocalPage from './pages/CloudVsLocalPage'
 import AboutPage from './pages/AboutPage'
 import ResourcesPage from './pages/ResourcesPage'
+import WhatIsAIPage from './pages/WhatIsAIPage'
 import Navbar from './components/Navbar'
 import { useWebLLM } from './hooks/useWebLLM'
 
@@ -21,6 +22,7 @@ export default function App() {
           <div key={location.pathname}>
             <Routes location={location}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/what-is-ai" element={<WhatIsAIPage />} />
               <Route path="/tokenize" element={<TokenizerPage />} />
               <Route path="/understand" element={<EmbeddingsPage />} />
               <Route path="/run" element={<CloudVsLocalPage webllm={webllm} />} />
