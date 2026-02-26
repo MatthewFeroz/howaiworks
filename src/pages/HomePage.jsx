@@ -5,20 +5,27 @@ import Footer from '../components/Footer'
 const LESSONS = [
   {
     num: 1,
+    title: 'What is AI',
+    desc: 'See how AI evolved from rules to language',
+    path: '/what-is-ai',
+    completionKey: 'lesson-complete-what-is-ai',
+  },
+  {
+    num: 2,
     title: 'Tokenize',
     desc: 'See how AI splits your words into pieces',
     path: '/tokenize',
     completionKey: 'lesson-complete-tokenizer',
   },
   {
-    num: 2,
+    num: 3,
     title: 'Understand',
     desc: 'Watch AI organize words by meaning',
     path: '/understand',
     completionKey: 'lesson-complete-understand',
   },
   {
-    num: 3,
+    num: 4,
     title: 'Run',
     desc: 'Race cloud vs local inference',
     path: '/run',
@@ -27,9 +34,9 @@ const LESSONS = [
 ]
 
 const LOCKED = [
-  { num: 4, title: 'Fine-tune', desc: 'Train on your own data' },
-  { num: 5, title: 'Evaluate', desc: 'Measure model quality' },
-  { num: 6, title: 'Deploy', desc: 'Ship it to production' },
+  { num: 5, title: 'Fine-tune', desc: 'Train on your own data' },
+  { num: 6, title: 'Evaluate', desc: 'Measure model quality' },
+  { num: 7, title: 'Deploy', desc: 'Ship it to production' },
 ]
 
 export default function HomePage() {
@@ -249,7 +256,7 @@ export default function HomePage() {
         style={{ textAlign: 'center', padding: '40px 0 16px' }}
       >
         <Link
-          to="/tokenize"
+          to="/what-is-ai"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -274,7 +281,7 @@ export default function HomePage() {
             e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
           }}
         >
-          Start with tokenization
+          Start learning
           <span style={{ fontSize: 18 }}>→</span>
         </Link>
       </motion.div>
