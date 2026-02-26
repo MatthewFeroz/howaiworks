@@ -29,7 +29,13 @@
       "WebFetch(domain:docs.railway.com)",
       "WebFetch(domain:blog.railway.com)",
       "WebFetch(domain:howaiworks-production.up.railway.app)",
-      "WebFetch(domain:build.nvidia.com)"
+      "WebFetch(domain:build.nvidia.com)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(which convert:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(md5:*)"
     ]
   }
 }
