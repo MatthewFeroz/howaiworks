@@ -11,7 +11,6 @@
       "Bash(npx vite build:*)",
       "Bash(node:*)",
       "Bash(findstr:*)",
-      "Bash(del \"C:\\\\Users\\\\Matthew Feroz\\\\Desktop\\\\nanochat\\\\NVIDIAGTC2026\\\\howaiworks\\\\src\\\\components\\\\TokenBlock.jsx\")",
       "mcp__ide__getDiagnostics",
       "Bash(npm install:*)",
       "Bash(dir:*)",
@@ -35,7 +34,9 @@
       "Bash(which convert:*)",
       "Bash(python3:*)",
       "Bash(pip3 install:*)",
-      "Bash(md5:*)"
+      "Bash(md5:*)",
+      "Bash(git config:*)",
+      "Bash(git:*)"
     ]
   }
 }
