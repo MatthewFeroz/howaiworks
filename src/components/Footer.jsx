@@ -1,6 +1,6 @@
 export default function Footer() {
   const linkStyle = {
-    color: 'var(--nvidia-green)',
+    color: 'var(--brand)',
     textDecoration: 'none',
   }
 

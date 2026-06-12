@@ -23,8 +23,8 @@ export default function ChatMessage({ role, content, tokens, isStreaming }) {
         maxWidth: '85%',
         padding: '12px 16px',
         borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-        background: isUser ? 'var(--nvidia-green-dim)' : 'var(--bg-elevated)',
-        border: `1px solid ${isUser ? 'rgba(118,185,0,0.25)' : 'var(--border)'}`,
+        background: isUser ? 'var(--brand-dim)' : 'var(--bg-elevated)',
+        border: `1px solid ${isUser ? 'rgba(248, 95, 0,0.25)' : 'var(--border)'}`,
         fontSize: 15,
         lineHeight: 1.6,
         color: 'var(--text-primary)',
@@ -37,7 +37,7 @@ export default function ChatMessage({ role, content, tokens, isStreaming }) {
           fontWeight: 600,
           letterSpacing: 1,
           textTransform: 'uppercase',
-          color: isUser ? 'var(--nvidia-green)' : 'var(--text-dim)',
+          color: isUser ? 'var(--brand)' : 'var(--text-dim)',
           marginBottom: 6,
         }}>
           {isUser ? 'You' : 'AI'}
@@ -62,7 +62,7 @@ export default function ChatMessage({ role, content, tokens, isStreaming }) {
                   display: 'inline-block',
                   width: 2,
                   height: '1em',
-                  background: 'var(--nvidia-green)',
+                  background: 'var(--brand)',
                   marginLeft: 2,
                   verticalAlign: 'text-bottom',
                   animation: 'blink 1s step-end infinite',

@@ -83,25 +83,25 @@ function jsonLd(path, meta) {
 function staticBody(path, meta) {
   const h1 = esc(meta.title.split(' | ')[0])
   const nav = ROUTE_ORDER.map(
-    (r) => `<a href="${r}" style="color:#76B900;text-decoration:none;margin-right:14px">${esc(NAV_LABELS[r])}</a>`,
+    (r) => `<a href="${r}" style="color:#f85f00;text-decoration:none;margin-right:14px">${esc(NAV_LABELS[r])}</a>`,
   ).join('')
 
   const sections = meta.sections
     .map(
       (s) =>
         `<h2 style="font-size:18px;margin:24px 0 8px">${esc(s.heading)}</h2>` +
-        s.paragraphs.map((p) => `<p style="line-height:1.7;margin:0 0 12px;color:#8a8a96">${esc(p)}</p>`).join(''),
+        s.paragraphs.map((p) => `<p style="line-height:1.7;margin:0 0 12px;color:#9aa0aa">${esc(p)}</p>`).join(''),
     )
     .join('')
 
   return (
-    `<div style="max-width:640px;margin:0 auto;padding:48px 24px;font-family:'Outfit',system-ui,sans-serif;color:#e8e8ed">` +
+    `<div style="max-width:640px;margin:0 auto;padding:48px 24px;font-family:'Poppins',system-ui,sans-serif;color:#dbdbdb">` +
     `<nav style="margin-bottom:32px;font-size:14px">${nav}</nav>` +
     `<h1 style="font-size:28px;line-height:1.25;margin:0 0 16px">${h1}</h1>` +
     sections +
-    `<p style="margin-top:32px;font-size:13px;color:#55555f">` +
-    `${SITE.name} is free and open source (<a href="${SITE.github}" style="color:#76B900">GitHub</a>), ` +
-    `built by <a href="${SITE.author.url}" style="color:#76B900">${esc(SITE.author.name)}</a>.</p>` +
+    `<p style="margin-top:32px;font-size:13px;color:#6b7078">` +
+    `${SITE.name} is free and open source (<a href="${SITE.github}" style="color:#f85f00">GitHub</a>), ` +
+    `built by <a href="${SITE.author.url}" style="color:#f85f00">${esc(SITE.author.name)}</a>.</p>` +
     `</div>`
   )
 }

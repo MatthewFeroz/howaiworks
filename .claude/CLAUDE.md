@@ -79,23 +79,29 @@ Endpoints: `/api/tokenize`, `/api/embed`, `/api/chat` (SSE streaming), `/api/gpu
 
 ## Design System
 
+Aligned with matthewferoz.com (same brand orange, Poppins, dark neutrals) so the two sites read as one ecosystem.
+
 ```
 Colors:
-  --bg-deep:           #0a0a0b       (page background)
-  --bg-surface:        #141416       (cards, inputs)
-  --bg-elevated:       #1c1c20       (elevated panels)
-  --nvidia-green:      #76B900       (primary accent)
-  --nvidia-green-dim:  rgba(118,185,0,0.15)
-  --text-primary:      #e8e8ed
-  --text-secondary:    #8a8a96
-  --text-dim:          #55555f
-  --border:            #2a2a30
+  --bg-deep:           #171719       (page background)
+  --bg-surface:        #1a1b1e       (cards, inputs)
+  --bg-elevated:       #25262a       (elevated panels)
+  --brand:             #f85f00       (primary accent, orange)
+  --brand-dark:        #c74b00
+  --brand-dim:         rgba(248,95,0,0.15)
+  --brand-glow:        rgba(248,95,0,0.4)
+  --text-primary:      #dbdbdb
+  --text-secondary:    #9aa0aa
+  --text-dim:          #6b7078
+  --border:            #2a2b2f
 
 Fonts:
-  Body:  'Outfit' (300-700)
+  Body:  'Poppins' (300-700)
   Mono:  'IBM Plex Mono' (400-600) — used in inputs
 
-Token colors: 12-color palette in globals.css (--token-0 through --token-11)
+Buttons: primary CTAs are pill-shaped (borderRadius 999), matching matthewferoz.com.
+Token colors: 12-color palette in globals.css (.token-color-0 through .token-color-11);
+slot 0 is brand orange.
 ```
 
 ## Key Constraints

@@ -97,7 +97,7 @@ function TooltipCard({ stepNumber, title, completed, locked }) {
         fontFamily: 'var(--font-body)',
         fontSize: 10,
         fontStyle: 'italic',
-        color: locked ? '#3a3a42' : (completed ? '#76B900' : '#55555f'),
+        color: locked ? '#3a3a42' : (completed ? '#f85f00' : '#55555f'),
       }}>
         {locked ? 'locked' : (completed ? 'completed' : 'in progress')}
       </span>
@@ -154,7 +154,7 @@ export default function Navbar() {
           fontSize: 15,
           color: 'var(--text-primary)',
         }}>
-          howaiworks<span style={{ color: '#76B900' }}>.io</span>
+          howaiworks<span style={{ color: '#f85f00' }}>.io</span>
         </Link>
 
         {/* Center: Nav links */}
@@ -217,8 +217,8 @@ export default function Navbar() {
                     position: 'absolute',
                     inset: 0,
                     borderRadius: '50%',
-                    background: '#76B900',
-                    boxShadow: '0 0 6px rgba(118,185,0,0.4)',
+                    background: '#f85f00',
+                    boxShadow: '0 0 6px rgba(248, 95, 0,0.4)',
                   }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
@@ -229,13 +229,13 @@ export default function Navbar() {
                     width: DOT_SIZE,
                     height: DOT_SIZE,
                     borderRadius: '50%',
-                    background: isLocked ? '#1c1c20' : (isCompleted ? '#76B900' : '#2a2a30'),
+                    background: isLocked ? '#1c1c20' : (isCompleted ? '#f85f00' : '#2a2a30'),
                     border: isLocked ? '1px dashed #2a2a30' : 'none',
                     boxSizing: 'border-box',
                     transition: 'background 0.2s',
                     opacity: isLocked ? 1 : (isCompleted ? 0.6 : 1),
                   }}
-                  onMouseEnter={(e) => { if (!isLocked && !isCompleted) e.currentTarget.style.background = '#76B900' }}
+                  onMouseEnter={(e) => { if (!isLocked && !isCompleted) e.currentTarget.style.background = '#f85f00' }}
                   onMouseLeave={(e) => { if (!isLocked && !isCompleted) e.currentTarget.style.background = '#2a2a30' }}
                 />
               )}

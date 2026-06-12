@@ -53,7 +53,7 @@ export default function CloudVsLocalPage({ webllm }) {
           letterSpacing: -0.5,
         }}>
           The same AI.{' '}
-          <span style={{ color: 'var(--nvidia-green)' }}>Two very different machines.</span>
+          <span style={{ color: 'var(--brand)' }}>Two very different machines.</span>
         </h1>
         <p style={{
           fontSize: 17,
@@ -64,7 +64,7 @@ export default function CloudVsLocalPage({ webllm }) {
           lineHeight: 1.5,
         }}>
           <span style={{ color: '#6ec0e8' }}>Cloud</span>: a GPU cluster in a data center.{' '}
-          <span style={{ color: 'var(--nvidia-green)' }}>Local</span>: your own computer. Watch them race.
+          <span style={{ color: 'var(--brand)' }}>Local</span>: your own computer. Watch them race.
         </p>
       </motion.div>
 
@@ -136,12 +136,12 @@ export default function CloudVsLocalPage({ webllm }) {
         sections={[
           {
             label: 'The Concept',
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
             defaultOpen: true,
             content: (
               <div>
                 <p style={{ marginBottom: 16 }}>
-                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>The inference pipeline</strong>
+                  <strong style={{ color: 'var(--brand)', fontSize: 15 }}>The inference pipeline</strong>
                 </p>
                 <p style={{ marginBottom: 12 }}>
                   When you send a prompt to an AI model, here's what happens in the GPU:
@@ -164,21 +164,21 @@ export default function CloudVsLocalPage({ webllm }) {
                 </div>
 
                 <p style={{ marginBottom: 16 }}>
-                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>GPU memory is the bottleneck</strong>
+                  <strong style={{ color: 'var(--brand)', fontSize: 15 }}>GPU memory is the bottleneck</strong>
                 </p>
                 <p style={{ marginBottom: 12 }}>
                   A model's parameters must all fit in GPU VRAM. At FP16 (2 bytes per parameter):
                 </p>
                 <div style={{
                   padding: '12px 16px',
-                  background: 'rgba(118,185,0,0.06)',
-                  border: '1px solid rgba(118,185,0,0.25)',
+                  background: 'rgba(248, 95, 0,0.06)',
+                  border: '1px solid rgba(248, 95, 0,0.25)',
                   borderRadius: 8,
                   fontFamily: 'var(--font-mono)',
                   fontSize: 13,
                   marginBottom: 12,
                 }}>
-                  <div>0.5B params × 2 bytes = <strong style={{ color: 'var(--nvidia-green)' }}>1 GB</strong> (runs on a Chromebook)</div>
+                  <div>0.5B params × 2 bytes = <strong style={{ color: 'var(--brand)' }}>1 GB</strong> (runs on a Chromebook)</div>
                   <div>8B params × 2 bytes = <strong style={{ color: '#6ec0e8' }}>16 GB</strong> (needs a gaming GPU)</div>
                   <div>70B params × 2 bytes = <strong style={{ color: '#e8956e' }}>140 GB</strong> (needs 2× A100 80GB)</div>
                 </div>
@@ -294,8 +294,8 @@ for chunk in response:
                       GPU usage up and down with demand — paying only for what they use.
                     </div>
                   </div>
-                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
-                    <strong style={{ color: 'var(--nvidia-green)' }}>NVIDIA DGX Spark (bridging the gap)</strong>
+                  <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid var(--brand)' }}>
+                    <strong style={{ color: 'var(--brand)' }}>NVIDIA DGX Spark (bridging the gap)</strong>
                     <div style={{ marginTop: 4, fontSize: 13 }}>
                       128GB unified memory. Runs 200B-parameter models locally. This is NVIDIA's answer to
                       "what if you could have cloud-scale AI on your desk?" It collapses the trade-off
@@ -370,7 +370,7 @@ function CopyableCommand({ command }) {
         <span style={{ color: 'var(--text-dim)' }}>$</span> {command}
       </code>
       <svg
-        fill={copied ? 'var(--nvidia-green)' : hovered ? 'var(--text-secondary)' : 'var(--text-dim)'}
+        fill={copied ? 'var(--brand)' : hovered ? 'var(--text-secondary)' : 'var(--text-dim)'}
         width="14"
         height="14"
         viewBox="0 0 32 32"
@@ -385,7 +385,7 @@ function CopyableCommand({ command }) {
           right: 36,
           fontFamily: 'var(--font-mono)',
           fontSize: 10,
-          color: 'var(--nvidia-green)',
+          color: 'var(--brand)',
         }}>
           Copied!
         </span>
@@ -406,7 +406,7 @@ function OllamaLocalCard({ connected, webllm }) {
       {/* Top accent — NVIDIA green */}
       <div style={{
         height: 2,
-        background: 'linear-gradient(90deg, transparent, var(--nvidia-green), transparent)',
+        background: 'linear-gradient(90deg, transparent, var(--brand), transparent)',
       }} />
 
       <div style={{ padding: '20px 24px' }}>
@@ -436,12 +436,12 @@ function OllamaLocalCard({ connected, webllm }) {
               alignItems: 'center',
               gap: 6,
               padding: '5px 10px',
-              background: 'rgba(118,185,0,0.1)',
-              border: '1px solid rgba(118,185,0,0.25)',
+              background: 'rgba(248, 95, 0,0.1)',
+              border: '1px solid rgba(248, 95, 0,0.25)',
               borderRadius: 6,
               fontFamily: 'var(--font-mono)',
               fontSize: 11,
-              color: 'var(--nvidia-green)',
+              color: 'var(--brand)',
               flexShrink: 0,
             }}>
               <span style={{ fontSize: 8 }}>●</span>
@@ -454,14 +454,14 @@ function OllamaLocalCard({ connected, webllm }) {
         <div style={{
           padding: '12px 16px',
           background: 'var(--bg-elevated)',
-          borderLeft: '3px solid var(--nvidia-green)',
+          borderLeft: '3px solid var(--brand)',
           borderRadius: '0 8px 8px 0',
           marginBottom: 16,
           fontSize: 13,
           lineHeight: 1.6,
           color: 'var(--text-secondary)',
         }}>
-          <strong style={{ color: 'var(--nvidia-green)' }}>Local inference</strong> runs the AI model directly
+          <strong style={{ color: 'var(--brand)' }}>Local inference</strong> runs the AI model directly
           on your computer — no internet, no API key, no data leaving your machine. The tradeoff: your hardware
           limits which models you can run. The 0.5B-parameter model here fits in ~1GB of RAM but is far smaller
           than cloud-scale models.
@@ -494,7 +494,7 @@ function OllamaLocalCard({ connected, webllm }) {
                   alignItems: 'center',
                   gap: 8,
                   padding: '10px 20px',
-                  background: 'var(--nvidia-green)',
+                  background: 'var(--brand)',
                   color: '#0a0a0b',
                   fontSize: 14,
                   fontWeight: 600,
@@ -505,7 +505,7 @@ function OllamaLocalCard({ connected, webllm }) {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-1px)'
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(118,185,0,0.3)'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(248, 95, 0,0.3)'
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)'
@@ -525,12 +525,12 @@ function OllamaLocalCard({ connected, webllm }) {
                     gap: 8,
                     padding: '10px 20px',
                     background: 'transparent',
-                    color: webllm.isReady ? 'var(--nvidia-green)' : '#6ec0e8',
+                    color: webllm.isReady ? 'var(--brand)' : '#6ec0e8',
                     fontSize: 13,
                     fontWeight: 600,
                     fontFamily: 'var(--font-body)',
                     borderRadius: 8,
-                    border: `1px solid ${webllm.isReady ? 'rgba(118,185,0,0.4)' : 'rgba(110,192,232,0.4)'}`,
+                    border: `1px solid ${webllm.isReady ? 'rgba(248, 95, 0,0.4)' : 'rgba(110,192,232,0.4)'}`,
                     cursor: webllm.isReady || webllm.status === 'loading' ? 'default' : 'pointer',
                     opacity: webllm.status === 'loading' ? 0.6 : 1,
                     transition: 'border-color 0.2s',
@@ -577,7 +577,7 @@ function WebLLMProgressBar({ progress }) {
           <span style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 11,
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
             fontWeight: 600,
           }}>
             Loading AI in your browser...
@@ -599,7 +599,7 @@ function WebLLMProgressBar({ progress }) {
           <motion.div
             style={{
               height: '100%',
-              background: 'var(--nvidia-green)',
+              background: 'var(--brand)',
               borderRadius: 2,
             }}
             initial={{ width: 0 }}
@@ -640,8 +640,8 @@ function InferenceStep({ step, title, children }) {
         width: 28,
         height: 28,
         borderRadius: '50%',
-        background: 'var(--nvidia-green-dim)',
-        color: 'var(--nvidia-green)',
+        background: 'var(--brand-dim)',
+        color: 'var(--brand)',
         fontFamily: 'var(--font-mono)',
         fontSize: 13,
         fontWeight: 700,

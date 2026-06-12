@@ -63,7 +63,7 @@ const EXPERIMENTS = [
 ]
 
 function Accent({ children }) {
-  return <em style={{ color: 'var(--nvidia-green)', fontStyle: 'normal', fontWeight: 500 }}>{children}</em>
+  return <em style={{ color: 'var(--brand)', fontStyle: 'normal', fontWeight: 500 }}>{children}</em>
 }
 
 export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllExplored }) {
@@ -107,20 +107,20 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
             particleCount: 60,
             spread: 55,
             origin: { x: 0.15, y: 0.6 },
-            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+            colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
           })
           confetti({
             particleCount: 60,
             spread: 55,
             origin: { x: 0.85, y: 0.6 },
-            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+            colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
           })
           setTimeout(() => {
             confetti({
               particleCount: 100,
               spread: 100,
               origin: { x: 0.5, y: 0.4 },
-              colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+              colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
             })
           }, 250)
         }, 400)
@@ -217,7 +217,7 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5, duration: 0.3 }}
-                    style={{ color: 'var(--nvidia-green)' }}
+                    style={{ color: 'var(--brand)' }}
                   >
                     {exp.result}
                   </motion.span>
@@ -252,7 +252,7 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
                       onClick={handleCustomSubmit}
                       style={{
                         padding: '6px 14px',
-                        background: 'var(--nvidia-green)',
+                        background: 'var(--brand)',
                         color: '#0a0a0b',
                         border: 'none',
                         borderRadius: 6,
@@ -274,7 +274,7 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
                         fontSize: 20,
                         fontWeight: 700,
                         fontFamily: 'var(--font-mono)',
-                        color: 'var(--nvidia-green)',
+                        color: 'var(--brand)',
                         padding: '4px 0',
                       }}
                     >
@@ -285,7 +285,7 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
               )}
 
               {/* Insight */}
-              <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>
+              <strong style={{ color: 'var(--brand)', fontWeight: 600 }}>
                 {exp.insight.headline}
               </strong>{' '}
               {exp.insight.body}
@@ -293,9 +293,9 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
                 <div style={{
                   marginTop: 10,
                   paddingTop: 8,
-                  borderTop: '1px solid rgba(118, 185, 0, 0.1)',
+                  borderTop: '1px solid rgba(248, 95, 0, 0.1)',
                   fontSize: 13,
-                  color: 'var(--nvidia-green)',
+                  color: 'var(--brand)',
                   fontWeight: 500,
                   opacity: 0.85,
                 }}>
@@ -319,7 +319,7 @@ export default function WordArithmetic({ embeddingData, onShowArithmetic, onAllE
           style={{
             fontFamily: 'var(--font-mono)',
             fontSize: exploredExperiments.size === EXPERIMENTS.length ? 12 : 11,
-            color: exploredExperiments.size === EXPERIMENTS.length ? 'var(--nvidia-green)' : 'var(--text-dim)',
+            color: exploredExperiments.size === EXPERIMENTS.length ? 'var(--brand)' : 'var(--text-dim)',
             paddingLeft: 4,
             marginTop: 2,
             fontWeight: exploredExperiments.size === EXPERIMENTS.length ? 600 : 400,
@@ -367,8 +367,8 @@ function WordSelect({ value, onChange }) {
         paddingRight: 24,
       }}
       onFocus={(e) => {
-        e.target.style.borderColor = 'var(--nvidia-green)'
-        e.target.style.boxShadow = '0 0 0 2px var(--nvidia-green-dim)'
+        e.target.style.borderColor = 'var(--brand)'
+        e.target.style.boxShadow = '0 0 0 2px var(--brand-dim)'
       }}
       onBlur={(e) => {
         e.target.style.borderColor = 'var(--border)'

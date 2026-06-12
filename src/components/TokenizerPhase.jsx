@@ -104,7 +104,7 @@ export default function TokenizerPhase({
           for English words but treats non-Latin scripts almost character-by-character. This means
           Arabic, Hindi, Yoruba, and other languages use more tokens for the same meaning -
           costing more money, filling up the context window faster, and getting worse model performance.
-          <span style={{ display: 'block', marginTop: 8, color: 'var(--nvidia-green)', fontWeight: 500, fontSize: 14 }}>
+          <span style={{ display: 'block', marginTop: 8, color: 'var(--brand)', fontWeight: 500, fontSize: 14 }}>
             Tokenization is where AI inequity begins.
           </span>
         </>,
@@ -246,14 +246,14 @@ export default function TokenizerPhase({
             particleCount: 60,
             spread: 55,
             origin: { x: 0.15, y: 0.6 },
-            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+            colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
           })
           // Right burst
           confetti({
             particleCount: 60,
             spread: 55,
             origin: { x: 0.85, y: 0.6 },
-            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+            colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
           })
           // Center shower after a beat
           setTimeout(() => {
@@ -261,7 +261,7 @@ export default function TokenizerPhase({
               particleCount: 100,
               spread: 100,
               origin: { x: 0.5, y: 0.4 },
-              colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+              colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
             })
           }, 250)
         }, 400)
@@ -355,8 +355,8 @@ export default function TokenizerPhase({
     padding: '16px 20px',
     background: 'var(--bg-surface)',
     border: `1px solid ${
-      focused ? 'var(--nvidia-green)'
-      : hovered ? 'rgba(118,185,0,0.45)'
+      focused ? 'var(--brand)'
+      : hovered ? 'rgba(248, 95, 0,0.45)'
       : 'var(--border)'
     }`,
     borderRadius: 12,
@@ -369,8 +369,8 @@ export default function TokenizerPhase({
     overflow: 'hidden',
     outline: 'none',
     transition: breathing && !hovered ? 'none' : 'border-color 0.2s, box-shadow 0.2s',
-    boxShadow: focused ? '0 0 0 3px var(--nvidia-green-dim)'
-      : hovered ? '0 0 0 3px rgba(118,185,0,0.15)'
+    boxShadow: focused ? '0 0 0 3px var(--brand-dim)'
+      : hovered ? '0 0 0 3px rgba(248, 95, 0,0.15)'
       : 'none',
     animation: (breathing && !hovered) ? 'breathe 2.5s ease-in-out infinite' : 'none',
   })
@@ -409,7 +409,7 @@ export default function TokenizerPhase({
       style={{ padding: '20px 0 20px' }}
     >
       {/* === BAR 1: Your text === */}
-      <div style={{ ...labelStyle, color: 'var(--nvidia-green)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ ...labelStyle, color: 'var(--brand)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>Your text</span>
         {userHasTyped && (
           <span style={{
@@ -440,7 +440,7 @@ export default function TokenizerPhase({
                 display: 'inline-block',
                 width: 2,
                 height: '1.2em',
-                background: 'var(--nvidia-green)',
+                background: 'var(--brand)',
                 marginLeft: 1,
                 verticalAlign: 'text-bottom',
                 animation: 'blink 1s step-end infinite',
@@ -495,7 +495,7 @@ export default function TokenizerPhase({
       <div style={{ padding: '12px 0' }} />
 
       {/* === BAR 2: What AI sees (IDs) === */}
-      <div style={{ ...labelStyle, color: 'var(--nvidia-green)' }}>
+      <div style={{ ...labelStyle, color: 'var(--brand)' }}>
         What AI sees
       </div>
       <div style={{ position: 'relative', marginBottom: 24 }}>
@@ -512,7 +512,7 @@ export default function TokenizerPhase({
                 display: 'inline-block',
                 width: 2,
                 height: '1.2em',
-                background: 'var(--nvidia-green)',
+                background: 'var(--brand)',
                 marginLeft: 1,
                 verticalAlign: 'text-bottom',
                 animation: 'blink 1s step-end infinite',
@@ -571,7 +571,7 @@ export default function TokenizerPhase({
             <StatLink href="https://platform.openai.com/tokenizer">Try OpenAI's Tokenizer</StatLink>
           </>}
         >
-          <span style={{ color: 'var(--nvidia-green)', fontWeight: 600, fontSize: 15 }}>
+          <span style={{ color: 'var(--brand)', fontWeight: 600, fontSize: 15 }}>
             {tokenCount}
           </span> tokens
         </StatItem>
@@ -668,7 +668,7 @@ export default function TokenizerPhase({
             active={activeNudge === nudge.key}
             insightContent={
               <>
-                <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>
+                <strong style={{ color: 'var(--brand)', fontWeight: 600 }}>
                   {nudge.insight.headline}
                 </strong>{' '}
                 {nudge.insight.body}
@@ -676,9 +676,9 @@ export default function TokenizerPhase({
                   <div style={{
                     marginTop: 10,
                     paddingTop: 8,
-                    borderTop: '1px solid rgba(118, 185, 0, 0.1)',
+                    borderTop: '1px solid rgba(248, 95, 0, 0.1)',
                     fontSize: 13,
-                    color: 'var(--nvidia-green)',
+                    color: 'var(--brand)',
                     fontWeight: 500,
                     opacity: 0.85,
                   }}>
@@ -700,7 +700,7 @@ export default function TokenizerPhase({
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: exploredNudges.size === NUDGES.length ? 12 : 11,
-              color: exploredNudges.size === NUDGES.length ? 'var(--nvidia-green)' : 'var(--text-dim)',
+              color: exploredNudges.size === NUDGES.length ? 'var(--brand)' : 'var(--text-dim)',
               paddingLeft: 4,
               marginTop: 2,
               fontWeight: exploredNudges.size === NUDGES.length ? 600 : 400,
@@ -722,12 +722,12 @@ export default function TokenizerPhase({
         sections={[
           {
             label: 'The Problem',
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
             defaultOpen: true,
             content: (
               <div>
                 <p style={{ marginBottom: 16 }}>
-                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>The problem: AI can't read.</strong>
+                  <strong style={{ color: 'var(--brand)', fontSize: 15 }}>The problem: AI can't read.</strong>
                 </p>
                 <p style={{ marginBottom: 12 }}>
                   Neural networks are math machines — they multiply matrices and add numbers.
@@ -767,11 +767,11 @@ export default function TokenizerPhase({
                   </div>
                   <div style={{
                     padding: '12px 16px',
-                    background: 'rgba(118,185,0,0.06)',
-                    border: '1px solid rgba(118,185,0,0.25)',
+                    background: 'rgba(248, 95, 0,0.06)',
+                    border: '1px solid rgba(248, 95, 0,0.25)',
                     borderRadius: 8,
                   }}>
-                    <strong style={{ color: 'var(--nvidia-green)' }}>Option C: Byte Pair Encoding — the sweet spot</strong>
+                    <strong style={{ color: 'var(--brand)' }}>Option C: Byte Pair Encoding — the sweet spot</strong>
                     <div style={{ marginTop: 4, fontSize: 13 }}>
                       Learn the most useful pieces from real data. Common words like "the" get their own token.
                       Rare words get broken into reusable subword pieces. A fixed vocabulary of ~100K tokens
@@ -784,7 +784,7 @@ export default function TokenizerPhase({
           },
           {
             label: 'How BPE Works',
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
             content: (
               <div>
                 <p style={{ marginBottom: 12 }}>
@@ -804,7 +804,7 @@ export default function TokenizerPhase({
                     Count how often each pair of adjacent tokens appears together.
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, marginTop: 8, color: 'var(--text-primary)' }}>
                       "th" appears 9.2 billion times{' '}
-                      <span style={{ color: 'var(--nvidia-green)' }}>← winner</span>
+                      <span style={{ color: 'var(--brand)' }}>← winner</span>
                     </div>
                   </StepBox>
                   <StepBox step={3} title="Merge the most frequent pair">
@@ -828,7 +828,7 @@ export default function TokenizerPhase({
           },
           {
             label: 'The Result',
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
             content: (
               <div>
                 <p style={{ marginBottom: 12 }}>
@@ -841,7 +841,7 @@ export default function TokenizerPhase({
                   And non-Latin scripts — Arabic, Hindi, Chinese — often get broken into even more
                   fragments, because there was less of that text in the training data.
                 </p>
-                <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(118,185,0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
+                <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(248, 95, 0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--brand)' }}>
                   <strong style={{ color: 'var(--text-primary)' }}>Key insight:</strong>{' '}
                   The tokenizer is trained <em>separately</em> from the AI model, <em>before</em> the
                   model ever sees any data. It's a preprocessing step. The neural network never sees
@@ -948,7 +948,7 @@ print(f"Arabic:  {len(ar_tokens)} tokens")  # ~12
                     </div>
                   </div>
                 </div>
-                <p style={{ marginTop: 14, fontSize: 13, color: 'var(--nvidia-green)', fontWeight: 500 }}>
+                <p style={{ marginTop: 14, fontSize: 13, color: 'var(--brand)', fontWeight: 500 }}>
                   This is where AI inequity begins — not in the model's weights, but in the very first
                   step: how text becomes numbers.
                 </p>
@@ -966,12 +966,12 @@ print(f"Arabic:  {len(ar_tokens)} tokens")  # ~12
         }
         @keyframes breathe {
           0%, 100% {
-            box-shadow: 0 0 0 2px rgba(118,185,0,0.08);
-            border-color: rgba(118,185,0,0.25);
+            box-shadow: 0 0 0 2px rgba(248, 95, 0,0.08);
+            border-color: rgba(248, 95, 0,0.25);
           }
           50% {
-            box-shadow: 0 0 0 4px rgba(118,185,0,0.2);
-            border-color: rgba(118,185,0,0.45);
+            box-shadow: 0 0 0 4px rgba(248, 95, 0,0.2);
+            border-color: rgba(248, 95, 0,0.45);
           }
         }
       `}</style>
@@ -980,7 +980,7 @@ print(f"Arabic:  {len(ar_tokens)} tokens")  # ~12
 }
 
 function Accent({ children }) {
-  return <em style={{ color: 'var(--nvidia-green)', fontStyle: 'normal', fontWeight: 500 }}>{children}</em>
+  return <em style={{ color: 'var(--brand)', fontStyle: 'normal', fontWeight: 500 }}>{children}</em>
 }
 
 function StatItem({ children, active, onEnter, tooltip }) {
@@ -989,9 +989,9 @@ function StatItem({ children, active, onEnter, tooltip }) {
       onMouseEnter={onEnter}
       style={{
         cursor: 'default',
-        borderBottom: `1px dashed ${active ? 'var(--nvidia-green)' : 'var(--text-dim)'}`,
+        borderBottom: `1px dashed ${active ? 'var(--brand)' : 'var(--text-dim)'}`,
         paddingBottom: 2,
-        color: active ? 'var(--nvidia-green)' : undefined,
+        color: active ? 'var(--brand)' : undefined,
         transition: 'color 0.2s, border-color 0.2s',
         position: 'relative',
       }}
@@ -1038,7 +1038,7 @@ function StatLink({ href, children }) {
       target="_blank"
       rel="noopener noreferrer"
       style={{
-        color: 'var(--nvidia-green)',
+        color: 'var(--brand)',
         textDecoration: 'underline',
         textUnderlineOffset: 2,
       }}
@@ -1065,8 +1065,8 @@ function StepBox({ step, title, children }) {
         width: 28,
         height: 28,
         borderRadius: '50%',
-        background: 'var(--nvidia-green-dim)',
-        color: 'var(--nvidia-green)',
+        background: 'var(--brand-dim)',
+        color: 'var(--brand)',
         fontFamily: 'var(--font-mono)',
         fontSize: 13,
         fontWeight: 700,

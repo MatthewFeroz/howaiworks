@@ -14,7 +14,7 @@ export default function NumbersPhase({ visible, tokens, inputText, showIds, onTo
       transition={{ duration: 0.6 }}
       style={{ padding: '40px 0' }}
     >
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: 'var(--nvidia-green)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: 'var(--brand)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
         Phase 02
       </div>
 
@@ -33,21 +33,21 @@ export default function NumbersPhase({ visible, tokens, inputText, showIds, onTo
         onClick={onToggleIds}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 10, padding: '10px 20px',
-          background: showIds ? 'var(--nvidia-green-dim)' : 'var(--bg-surface)',
-          border: `1px solid ${showIds ? 'var(--nvidia-green)' : 'var(--border)'}`,
-          borderRadius: 8, color: showIds ? 'var(--nvidia-green)' : 'var(--text-primary)',
+          background: showIds ? 'var(--brand-dim)' : 'var(--bg-surface)',
+          border: `1px solid ${showIds ? 'var(--brand)' : 'var(--border)'}`,
+          borderRadius: 8, color: showIds ? 'var(--brand)' : 'var(--text-primary)',
           fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 500,
           cursor: 'pointer', transition: 'all 0.3s', marginBottom: 24,
         }}
       >
         <div style={{
           width: 36, height: 20,
-          background: showIds ? 'rgba(118, 185, 0, 0.3)' : 'var(--bg-elevated)',
+          background: showIds ? 'rgba(248, 95, 0, 0.3)' : 'var(--bg-elevated)',
           borderRadius: 10, position: 'relative', transition: 'background 0.3s',
         }}>
           <div style={{
             position: 'absolute', width: 16, height: 16,
-            background: showIds ? 'var(--nvidia-green)' : 'var(--text-secondary)',
+            background: showIds ? 'var(--brand)' : 'var(--text-secondary)',
             borderRadius: '50%', top: 2, left: showIds ? 18 : 2, transition: 'all 0.3s',
           }} />
         </div>
@@ -74,10 +74,10 @@ export default function NumbersPhase({ visible, tokens, inputText, showIds, onTo
             </div>
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--nvidia-green)', marginBottom: 12 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase', color: 'var(--brand)', marginBottom: 12 }}>
               What AI sees
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, lineHeight: 1.8, color: 'var(--nvidia-green)', wordBreak: 'break-all' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, lineHeight: 1.8, color: 'var(--brand)', wordBreak: 'break-all' }}>
               {tokenIds.length > 0 ? `[${tokenIds.join(', ')}]` : '...'}
             </div>
           </div>
@@ -86,7 +86,7 @@ export default function NumbersPhase({ visible, tokens, inputText, showIds, onTo
 
       {/* Surface insight */}
       <Insight visible={showIds}>
-        <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>Think about this:</strong>{' '}
+        <strong style={{ color: 'var(--brand)', fontWeight: 600 }}>Think about this:</strong>{' '}
         When you ask ChatGPT a question, it never sees your words. It receives a sequence
         of numbers like [{tokenIds.slice(0, 5).join(', ')}{tokenIds.length > 5 ? ', ...' : ''}] and
         has to figure out what you mean from those alone. Every response it gives starts as

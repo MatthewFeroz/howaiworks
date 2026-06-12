@@ -90,8 +90,8 @@ function SetupSection({ title, accent, connected, children }) {
             width: 20,
             height: 20,
             borderRadius: '50%',
-            background: 'rgba(118,185,0,0.15)',
-            color: 'var(--nvidia-green)',
+            background: 'rgba(248, 95, 0,0.15)',
+            color: 'var(--brand)',
             fontSize: 12,
             fontWeight: 700,
             flexShrink: 0,
@@ -115,7 +115,7 @@ function SetupSection({ title, accent, connected, children }) {
           fontWeight: 600,
           letterSpacing: 1.5,
           textTransform: 'uppercase',
-          color: connected ? 'var(--nvidia-green)' : accent,
+          color: connected ? 'var(--brand)' : accent,
         }}>
           {title}
         </span>
@@ -158,7 +158,7 @@ const codeStyle = (accent) => ({
 })
 
 const cloudAccent = '#6ec0e8'
-const localAccent = 'var(--nvidia-green)'
+const localAccent = 'var(--brand)'
 
 function CloudSteps() {
   const code = codeStyle('rgba(110,192,232,0.4)')
@@ -196,17 +196,17 @@ function CloudSteps() {
 }
 
 function LocalSteps() {
-  const code = codeStyle('rgba(118,185,0,0.3)')
+  const code = codeStyle('rgba(248, 95, 0,0.3)')
   return (
     <>
-      <IntroBlock accent="#76B900">
+      <IntroBlock accent="#f85f00">
         Ollama runs AI models directly on your machine — no internet, no API key, no data leaving your computer. The model we use here is Qwen 2.5 with 500 million parameters, small enough to fit in ~1GB of RAM. It won't match cloud quality (500M vs 70B parameters), but inference starts instantly and your prompts stay private. That's the trade-off this page lets you feel.
       </IntroBlock>
 
       <SetupStep step={1} accent={localAccent} title="Install Ollama">
         Download from{' '}
         <a href="https://ollama.com" target="_blank" rel="noopener noreferrer"
-          style={{ color: 'var(--nvidia-green)', textDecoration: 'underline' }}>
+          style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
           ollama.com
         </a>. It's a runtime that manages AI models on your machine — download, load, and serve them through a local API, similar to how Docker manages containers.
       </SetupStep>

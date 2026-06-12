@@ -40,7 +40,7 @@ export default function OllamaStatus({ connected, onRetry }) {
             href="https://ollama.com"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: 'var(--nvidia-green)', textDecoration: 'underline', textUnderlineOffset: 2 }}
+            style={{ color: 'var(--brand)', textDecoration: 'underline', textUnderlineOffset: 2 }}
           >install Ollama</a> to chat live
         </span>
       </div>

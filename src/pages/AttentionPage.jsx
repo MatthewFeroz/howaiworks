@@ -38,8 +38,8 @@ function SectionCard({ badge, title, explanation, children }) {
           display: 'inline-block',
           padding: '3px 10px',
           borderRadius: 6,
-          background: 'var(--nvidia-green-dim)',
-          color: 'var(--nvidia-green)',
+          background: 'var(--brand-dim)',
+          color: 'var(--brand)',
           fontFamily: 'var(--font-mono)',
           fontSize: 12,
           fontWeight: 600,
@@ -139,9 +139,9 @@ function AttentionHeatmap() {
           const weight = weights ? weights[i] : 0
           const bgOpacity = isSelected ? 0.3 : weight * 0.8
           const borderColor = isSelected
-            ? 'var(--nvidia-green)'
+            ? 'var(--brand)'
             : weight > 0.2
-              ? `rgba(118, 185, 0, ${weight})`
+              ? `rgba(248, 95, 0, ${weight})`
               : 'var(--border)'
 
           return (
@@ -156,9 +156,9 @@ function AttentionHeatmap() {
               style={{
                 padding: '8px 12px',
                 borderRadius: 8,
-                background: `rgba(118, 185, 0, ${bgOpacity})`,
+                background: `rgba(248, 95, 0, ${bgOpacity})`,
                 border: `2px solid ${borderColor}`,
-                color: isSelected ? 'var(--nvidia-green)' : 'var(--text-primary)',
+                color: isSelected ? 'var(--brand)' : 'var(--text-primary)',
                 fontFamily: 'var(--font-mono)',
                 fontSize: 15,
                 fontWeight: isSelected ? 700 : 400,
@@ -182,7 +182,7 @@ function AttentionHeatmap() {
                       transform: 'translateX(-50%)',
                       fontSize: 10,
                       fontFamily: 'var(--font-mono)',
-                      color: weight > 0.2 ? 'var(--nvidia-green)' : 'var(--text-dim)',
+                      color: weight > 0.2 ? 'var(--brand)' : 'var(--text-dim)',
                       whiteSpace: 'nowrap',
                     }}
                   >
@@ -215,26 +215,26 @@ function AttentionHeatmap() {
             <span style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.6 }}>
               {selectedWord === 'it' ? (
                 <>
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"it"</strong> pays 55% attention to{' '}
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"animal"</strong> — the model figured out
+                  <strong style={{ color: 'var(--brand)' }}>"it"</strong> pays 55% attention to{' '}
+                  <strong style={{ color: 'var(--brand)' }}>"animal"</strong> — the model figured out
                   that "it" refers to the animal, not the street. No one programmed this rule.
                 </>
               ) : selectedWord === 'cross' ? (
                 <>
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"cross"</strong> attends most to{' '}
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"street"</strong> (35%) — it's looking
+                  <strong style={{ color: 'var(--brand)' }}>"cross"</strong> attends most to{' '}
+                  <strong style={{ color: 'var(--brand)' }}>"street"</strong> (35%) — it's looking
                   at what it's crossing.
                 </>
               ) : selectedWord === 'tired' ? (
                 <>
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"tired"</strong> attends to{' '}
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"animal"</strong> (25%) and{' '}
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"it"</strong> (20%) — connecting
+                  <strong style={{ color: 'var(--brand)' }}>"tired"</strong> attends to{' '}
+                  <strong style={{ color: 'var(--brand)' }}>"animal"</strong> (25%) and{' '}
+                  <strong style={{ color: 'var(--brand)' }}>"it"</strong> (20%) — connecting
                   the tiredness back to the subject.
                 </>
               ) : (
                 <>
-                  <strong style={{ color: 'var(--nvidia-green)' }}>"{selectedWord}"</strong> distributes
+                  <strong style={{ color: 'var(--brand)' }}>"{selectedWord}"</strong> distributes
                   attention across the sentence. The brightest words are what the model considers most
                   relevant for understanding this word in context.
                 </>
@@ -261,7 +261,7 @@ const HEADS = [
   },
   {
     name: 'Coreference',
-    color: '#76B900',
+    color: '#f85f00',
     description: 'Resolves what pronouns refer to',
     connections: [
       { from: 'it', to: 'animal', label: 'pronoun → referent' },
@@ -475,7 +475,7 @@ function TransformerStack() {
   const [activeLayer, setActiveLayer] = useState(null)
   const LAYERS = [
     { name: 'Input Embeddings', desc: 'Convert tokens to vectors (you learned this in Understand)', color: '#6ec0e8' },
-    { name: 'Self-Attention', desc: 'Each word looks at every other word to gather context', color: '#76B900' },
+    { name: 'Self-Attention', desc: 'Each word looks at every other word to gather context', color: '#f85f00' },
     { name: 'Add & Normalize', desc: 'Add the original input back (residual connection) and normalize', color: '#8a8a96' },
     { name: 'Feed-Forward', desc: 'Two matrix multiplications with an activation — where knowledge is stored', color: '#e8956e' },
     { name: 'Add & Normalize', desc: 'Another residual connection and normalization', color: '#8a8a96' },
@@ -617,7 +617,7 @@ function TransformerStack() {
           <motion.circle
             cx={arrowX}
             r={5}
-            fill="#76B900"
+            fill="#f85f00"
             opacity={0.9}
             filter="url(#glow)"
             animate={{ cy: [pulseStartY, pulseEndY] }}
@@ -815,7 +815,7 @@ function RNNvsTransformerInner() {
                     key={`tarc-${ai}`}
                     d={d}
                     fill="none"
-                    stroke="#76B900"
+                    stroke="#f85f00"
                     strokeWidth={sw}
                     strokeLinecap="round"
                     initial={{ pathLength: 0, opacity: 0 }}
@@ -838,7 +838,7 @@ function RNNvsTransformerInner() {
                 fontSize={12}
                 fontWeight={phase >= 3 ? 600 : 400}
                 animate={{
-                  fill: phase >= 3 ? '#76B900' : '#55555f',
+                  fill: phase >= 3 ? '#f85f00' : '#55555f',
                 }}
                 transition={{ duration: 0.4, delay: phase >= 3 ? i * 0.04 : 0 }}
               >
@@ -853,7 +853,7 @@ function RNNvsTransformerInner() {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              style={{ fontSize: 12, color: '#76B900', fontFamily: 'var(--font-mono)', marginTop: 4 }}
+              style={{ fontSize: 12, color: '#f85f00', fontFamily: 'var(--font-mono)', marginTop: 4 }}
             >
               Every word directly accesses every other word
             </motion.div>
@@ -904,7 +904,7 @@ function QKVDiagram() {
         {/* Branching lines to Q, K, V */}
         <line x1={150} y1={34} x2={50} y2={62} stroke="#6ec0e8" strokeWidth={1.5} />
         <line x1={150} y1={34} x2={150} y2={62} stroke="#e8956e" strokeWidth={1.5} />
-        <line x1={150} y1={34} x2={250} y2={62} stroke="#76B900" strokeWidth={1.5} />
+        <line x1={150} y1={34} x2={250} y2={62} stroke="#f85f00" strokeWidth={1.5} />
 
         {/* Q box */}
         <rect x={22} y={62} width={56} height={26} rx={6} fill="#6ec0e822" stroke="#6ec0e8" strokeWidth={1} />
@@ -915,8 +915,8 @@ function QKVDiagram() {
         <text x={150} y={79} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize={12} fontWeight={600} fill="#e8956e">K</text>
 
         {/* V box */}
-        <rect x={222} y={62} width={56} height={26} rx={6} fill="#76B90022" stroke="#76B900" strokeWidth={1} />
-        <text x={250} y={79} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize={12} fontWeight={600} fill="#76B900">V</text>
+        <rect x={222} y={62} width={56} height={26} rx={6} fill="#f85f0022" stroke="#f85f00" strokeWidth={1} />
+        <text x={250} y={79} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize={12} fontWeight={600} fill="#f85f00">V</text>
 
         {/* Q and K converge to dot product box */}
         <line x1={50} y1={88} x2={110} y2={112} stroke="#6ec0e8" strokeWidth={1.5} />
@@ -932,8 +932,8 @@ function QKVDiagram() {
 
         {/* × V = Output */}
         <line x1={125} y1={159} x2={125} y2={169} stroke="#55555f" strokeWidth={1} />
-        <line x1={250} y1={88} x2={170} y2={172} stroke="#76B900" strokeWidth={1.5} strokeDasharray="3 2" />
-        <text x={150} y={176} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize={10} fill="#76B900">× V = Output</text>
+        <line x1={250} y1={88} x2={170} y2={172} stroke="#f85f00" strokeWidth={1.5} strokeDasharray="3 2" />
+        <text x={150} y={176} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize={10} fill="#f85f00">× V = Output</text>
       </svg>
     </div>
   )
@@ -952,12 +952,12 @@ const NUDGE_ITEMS = [
           humans instantly know "it" = the animal. But how does a model figure this out?
         </p>
         <p style={{ margin: '0 0 12px' }}>
-          <strong style={{ color: 'var(--nvidia-green)' }}>Before attention:</strong> Models like RNNs
+          <strong style={{ color: 'var(--brand)' }}>Before attention:</strong> Models like RNNs
           processed words left-to-right. By the time they reached "it," the information about "animal"
           had faded — like trying to remember the start of a long sentence.
         </p>
         <p style={{ margin: 0 }}>
-          <strong style={{ color: 'var(--nvidia-green)' }}>With attention:</strong> The model can look
+          <strong style={{ color: 'var(--brand)' }}>With attention:</strong> The model can look
           directly back at "animal" when processing "it." No forgetting, no fading. It computes a
           relevance score between every pair of words simultaneously.
         </p>
@@ -977,7 +977,7 @@ const NUDGE_ITEMS = [
         </p>
         <p style={{ margin: '0 0 12px' }}>
           A single attention pattern can only capture one type of relationship. Multiple heads
-          let the model track all of them in parallel — typically <strong style={{ color: 'var(--nvidia-green)' }}>12-96 heads</strong> per
+          let the model track all of them in parallel — typically <strong style={{ color: 'var(--brand)' }}>12-96 heads</strong> per
           layer, each learning a different pattern.
         </p>
         <p style={{ margin: 0 }}>
@@ -999,7 +999,7 @@ const NUDGE_ITEMS = [
         </p>
         <div style={{ margin: '0 0 12px', paddingLeft: 12, borderLeft: '2px solid var(--border)' }}>
           <div style={{ marginBottom: 6 }}><strong style={{ color: '#6ec0e8' }}>Early layers</strong> — basic syntax, word boundaries, part-of-speech</div>
-          <div style={{ marginBottom: 6 }}><strong style={{ color: 'var(--nvidia-green)' }}>Middle layers</strong> — semantic relationships, coreference, facts</div>
+          <div style={{ marginBottom: 6 }}><strong style={{ color: 'var(--brand)' }}>Middle layers</strong> — semantic relationships, coreference, facts</div>
           <div><strong style={{ color: '#e8956e' }}>Late layers</strong> — task-specific reasoning, output formatting</div>
         </div>
         <p style={{ margin: 0 }}>
@@ -1031,7 +1031,7 @@ export default function AttentionPage() {
               particleCount: 60,
               spread: 55,
               origin: { y: 0.7 },
-              colors: ['#76B900', '#e8e8ed', '#8a8a96'],
+              colors: ['#f85f00', '#e8e8ed', '#8a8a96'],
             })
           }, 200)
         }
@@ -1057,7 +1057,7 @@ export default function AttentionPage() {
           letterSpacing: -0.5,
         }}>
           How AI{' '}
-          <span style={{ color: 'var(--nvidia-green)' }}>pays attention.</span>
+          <span style={{ color: 'var(--brand)' }}>pays attention.</span>
         </h1>
         <p style={{
           fontSize: 17,
@@ -1130,7 +1130,7 @@ export default function AttentionPage() {
             textDecoration: 'none',
             transition: 'border-color 0.2s',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--nvidia-green)'}
+          onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--brand)'}
           onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
         >
           <span style={{ fontSize: 12 }}>📄</span>
@@ -1183,7 +1183,7 @@ export default function AttentionPage() {
         sections={[
           {
             label: 'The Concept',
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
             defaultOpen: true,
             content: (
               <div style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
@@ -1204,9 +1204,9 @@ export default function AttentionPage() {
                   <div style={{ color: 'var(--text-dim)', marginBottom: 8 }}>For each word:</div>
                   <div><span style={{ color: '#6ec0e8' }}>Q</span> = word × W_query    <span style={{ color: 'var(--text-dim)' }}>// "what am I looking for?"</span></div>
                   <div><span style={{ color: '#e8956e' }}>K</span> = word × W_key      <span style={{ color: 'var(--text-dim)' }}>// "what do I contain?"</span></div>
-                  <div><span style={{ color: '#76B900' }}>V</span> = word × W_value    <span style={{ color: 'var(--text-dim)' }}>// "what info do I carry?"</span></div>
+                  <div><span style={{ color: '#f85f00' }}>V</span> = word × W_value    <span style={{ color: 'var(--text-dim)' }}>// "what info do I carry?"</span></div>
                   <div style={{ marginTop: 12, color: 'var(--text-dim)' }}>Attention score:</div>
-                  <div>score = softmax(<span style={{ color: '#6ec0e8' }}>Q</span> · <span style={{ color: '#e8956e' }}>K</span>ᵀ / √d) × <span style={{ color: '#76B900' }}>V</span></div>
+                  <div>score = softmax(<span style={{ color: '#6ec0e8' }}>Q</span> · <span style={{ color: '#e8956e' }}>K</span>ᵀ / √d) × <span style={{ color: '#f85f00' }}>V</span></div>
                 </div>
                 <p style={{ margin: 0 }}>
                   The dot product Q·K measures how relevant each key is to each query. Dividing by √d
@@ -1296,8 +1296,8 @@ def softmax(x):
                     ("le chat" → "the cat") without rigid word-by-word mapping.
                   </div>
                 </div>
-                <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
-                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 14 }}>Code Completion</strong>
+                <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid var(--brand)' }}>
+                  <strong style={{ color: 'var(--brand)', fontSize: 14 }}>Code Completion</strong>
                   <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-secondary)' }}>
                     When Copilot suggests code, attention lets it look back at your function signatures,
                     variable names, and imports — all at once — to write contextually correct code.
@@ -1340,23 +1340,23 @@ def softmax(x):
             alignItems: 'center',
             gap: 10,
             padding: '14px 28px',
-            background: 'var(--nvidia-green)',
+            background: 'var(--brand)',
             color: '#0a0a0b',
             fontSize: 15,
             fontWeight: 600,
             fontFamily: 'var(--font-body)',
-            borderRadius: 10,
+            borderRadius: 999,
             textDecoration: 'none',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+            boxShadow: '0 0 20px rgba(248, 95, 0, 0.3)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+            e.currentTarget.style.boxShadow = '0 4px 30px rgba(248, 95, 0, 0.5)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(248, 95, 0, 0.3)'
           }}
         >
           See where AI runs

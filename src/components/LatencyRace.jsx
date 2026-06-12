@@ -297,7 +297,7 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
             : localInferenceMode === 'webllm' ? 'WebGPU · In-Browser'
             : 'Not connected'
           }
-          accentColor="var(--nvidia-green)"
+          accentColor="var(--brand)"
           tokens={localTokens}
           done={localDone}
           ttft={localTTFT}
@@ -329,7 +329,7 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
             transition: 'border-color 0.2s',
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = 'var(--nvidia-green)'
+            e.target.style.borderColor = 'var(--brand)'
           }}
           onBlur={(e) => {
             e.target.style.borderColor = 'var(--border)'
@@ -340,7 +340,7 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
           disabled={isRacing || !prompt.trim()}
           style={{
             padding: '12px 20px',
-            background: isRacing ? 'var(--border)' : 'var(--nvidia-green)',
+            background: isRacing ? 'var(--border)' : 'var(--brand)',
             color: '#0a0a0b',
             border: 'none',
             borderRadius: 10,

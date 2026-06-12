@@ -213,7 +213,7 @@ export default function RunLocalPage() {
               transition: 'background 0.2s',
               cursor: 'pointer',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--nvidia-green)'}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--brand)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--border)'}
           />
         </Link>
@@ -221,7 +221,7 @@ export default function RunLocalPage() {
           width: 8,
           height: 8,
           borderRadius: '50%',
-          background: 'var(--nvidia-green)',
+          background: 'var(--brand)',
         }} />
       </div>
 
@@ -242,7 +242,7 @@ export default function RunLocalPage() {
           marginBottom: 12,
           letterSpacing: -0.5,
         }}>
-          This AI is running on <span style={{ color: 'var(--nvidia-green)' }}>your computer.</span>
+          This AI is running on <span style={{ color: 'var(--brand)' }}>your computer.</span>
         </h1>
         <p style={{
           fontSize: 17,
@@ -312,8 +312,8 @@ export default function RunLocalPage() {
               }}
               onMouseEnter={(e) => {
                 if (!isStreaming) {
-                  e.currentTarget.style.borderColor = 'var(--nvidia-green)'
-                  e.currentTarget.style.color = 'var(--nvidia-green)'
+                  e.currentTarget.style.borderColor = 'var(--brand)'
+                  e.currentTarget.style.color = 'var(--brand)'
                 }
               }}
               onMouseLeave={(e) => {

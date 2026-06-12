@@ -18,7 +18,7 @@ export default function Hero() {
         marginBottom: 12,
         letterSpacing: -0.5,
       }}>
-        AI doesn't read words. It reads <span style={{ color: 'var(--nvidia-green)' }}>numbers.</span>
+        AI doesn't read words. It reads <span style={{ color: 'var(--brand)' }}>numbers.</span>
       </h1>
 
       <p style={{

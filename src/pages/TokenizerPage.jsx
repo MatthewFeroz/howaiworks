@@ -58,23 +58,23 @@ export default function TokenizerPage() {
             alignItems: 'center',
             gap: 10,
             padding: '14px 28px',
-            background: 'var(--nvidia-green)',
+            background: 'var(--brand)',
             color: '#0a0a0b',
             fontSize: 15,
             fontWeight: 600,
             fontFamily: 'var(--font-body)',
-            borderRadius: 10,
+            borderRadius: 999,
             textDecoration: 'none',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+            boxShadow: '0 0 20px rgba(248, 95, 0, 0.3)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+            e.currentTarget.style.boxShadow = '0 4px 30px rgba(248, 95, 0, 0.5)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(248, 95, 0, 0.3)'
           }}
         >
           Explore how AI understands

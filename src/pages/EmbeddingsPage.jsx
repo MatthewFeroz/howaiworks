@@ -219,7 +219,7 @@ export default function EmbeddingsPage() {
           letterSpacing: -0.5,
         }}>
           AI doesn't just see numbers.{' '}
-          <span style={{ color: 'var(--nvidia-green)' }}>It understands meaning.</span>
+          <span style={{ color: 'var(--brand)' }}>It understands meaning.</span>
         </h1>
         <p style={{
           fontSize: 17,
@@ -289,8 +289,8 @@ export default function EmbeddingsPage() {
                 setSelectedWord(null)
                 setNeighborLines([])
               }
-              e.target.style.borderColor = 'var(--nvidia-green)'
-              e.target.style.boxShadow = '0 0 0 3px var(--nvidia-green-dim)'
+              e.target.style.borderColor = 'var(--brand)'
+              e.target.style.boxShadow = '0 0 0 3px var(--brand-dim)'
             }}
             onBlur={(e) => {
               e.target.style.borderColor = 'var(--border)'
@@ -301,7 +301,7 @@ export default function EmbeddingsPage() {
             type="submit"
             style={{
               padding: '12px 20px',
-              background: 'var(--nvidia-green)',
+              background: 'var(--brand)',
               color: '#0a0a0b',
               border: 'none',
               borderRadius: 10,
@@ -313,7 +313,7 @@ export default function EmbeddingsPage() {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-1px)'
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(118, 185, 0, 0.3)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(248, 95, 0, 0.3)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)'
@@ -385,7 +385,7 @@ export default function EmbeddingsPage() {
         sections={[
           {
             label: 'The Concept',
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
             defaultOpen: true,
             content: (
               <div>
@@ -397,7 +397,7 @@ export default function EmbeddingsPage() {
                 </p>
 
                 <p style={{ marginBottom: 16 }}>
-                  <strong style={{ color: 'var(--nvidia-green)', fontSize: 15 }}>Why 768 numbers?</strong>
+                  <strong style={{ color: 'var(--brand)', fontSize: 15 }}>Why 768 numbers?</strong>
                 </p>
                 <p style={{ marginBottom: 12 }}>
                   Each dimension captures some aspect of meaning. No single dimension means "is an animal" or
@@ -407,12 +407,12 @@ export default function EmbeddingsPage() {
 
                 <div style={{
                   padding: '12px 16px',
-                  background: 'rgba(118,185,0,0.06)',
-                  border: '1px solid rgba(118,185,0,0.25)',
+                  background: 'rgba(248, 95, 0,0.06)',
+                  border: '1px solid rgba(248, 95, 0,0.25)',
                   borderRadius: 8,
                   marginBottom: 20,
                 }}>
-                  <strong style={{ color: 'var(--nvidia-green)' }}>Cosine similarity</strong>
+                  <strong style={{ color: 'var(--brand)' }}>Cosine similarity</strong>
                   <div style={{ marginTop: 4, fontSize: 13 }}>
                     We measure how similar two embeddings are using cosine similarity — the angle between two vectors.
                     cos(0°) = 1.0 means identical direction (identical meaning). cos(90°) = 0 means unrelated.
@@ -420,7 +420,7 @@ export default function EmbeddingsPage() {
                   </div>
                 </div>
 
-                <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(118,185,0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--nvidia-green)' }}>
+                <p style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(248, 95, 0,0.06)', borderRadius: 8, borderLeft: '3px solid var(--brand)' }}>
                   <strong style={{ color: 'var(--text-primary)' }}>Key insight:</strong>{' '}
                   Embeddings are the bridge between human language and machine computation. The tokenizer
                   converts words to IDs (Page 1). The embedding layer converts those IDs into rich meaning
@@ -552,23 +552,23 @@ result = np.array(king) - np.array(man) + np.array(woman)
             alignItems: 'center',
             gap: 10,
             padding: '14px 28px',
-            background: 'var(--nvidia-green)',
+            background: 'var(--brand)',
             color: '#0a0a0b',
             fontSize: 15,
             fontWeight: 600,
             fontFamily: 'var(--font-body)',
-            borderRadius: 10,
+            borderRadius: 999,
             textDecoration: 'none',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+            boxShadow: '0 0 20px rgba(248, 95, 0, 0.3)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+            e.currentTarget.style.boxShadow = '0 4px 30px rgba(248, 95, 0, 0.5)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(248, 95, 0, 0.3)'
           }}
         >
           See how AI pays attention

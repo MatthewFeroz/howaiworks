@@ -17,7 +17,7 @@ export default function EmbeddingTeaser({ visible }) {
         fontFamily: 'var(--font-mono)',
         fontSize: 11,
         fontWeight: 600,
-        color: 'var(--nvidia-green)',
+        color: 'var(--brand)',
         letterSpacing: 2,
         textTransform: 'uppercase',
         marginBottom: 8,

@@ -41,7 +41,7 @@ export default function AboutPage() {
           letterSpacing: -0.5,
         }}>
           About{' '}
-          howaiworks<span style={{ color: 'var(--nvidia-green)' }}>.io</span>
+          howaiworks<span style={{ color: 'var(--brand)' }}>.io</span>
         </h1>
         <p style={{
           fontSize: 17,
@@ -68,8 +68,8 @@ export default function AboutPage() {
           </p>
           <div style={{
             padding: '12px 16px',
-            background: 'rgba(118,185,0,0.06)',
-            border: '1px solid rgba(118,185,0,0.25)',
+            background: 'rgba(248, 95, 0,0.06)',
+            border: '1px solid rgba(248, 95, 0,0.25)',
             borderRadius: 8,
             marginBottom: 12,
             fontStyle: 'italic',
@@ -82,7 +82,7 @@ export default function AboutPage() {
             memory that can run 200B-parameter models on your desk.
           </p>
           <p>
-            <strong style={{ color: 'var(--nvidia-green)' }}>howaiworks.io</strong> is
+            <strong style={{ color: 'var(--brand)' }}>howaiworks.io</strong> is
             the software side. Instead of reading about tokenization, embeddings, and
             inference — you experience them. Type text and watch it become tokens.
             See words organize by meaning. Race cloud vs. local inference. No slides,

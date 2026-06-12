@@ -67,7 +67,7 @@ export default function HomePage() {
             }}
           >
             This is how AI{' '}
-            <span style={{ color: 'var(--nvidia-green)' }}>works.</span>
+            <span style={{ color: 'var(--brand)' }}>works.</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -115,7 +115,7 @@ export default function HomePage() {
           {/* Green portion for active lessons */}
           <div style={{
             width: 2,
-            background: 'var(--nvidia-green)',
+            background: 'var(--brand)',
             opacity: 0.4,
             height: `${(LESSONS.length / (LESSONS.length + LOCKED.length)) * 100}%`,
           }} />
@@ -152,8 +152,8 @@ export default function HomePage() {
                     transition: 'border-color 0.2s, box-shadow 0.2s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--nvidia-green)'
-                    e.currentTarget.style.boxShadow = '0 0 0 3px var(--nvidia-green-dim)'
+                    e.currentTarget.style.borderColor = 'var(--brand)'
+                    e.currentTarget.style.boxShadow = '0 0 0 3px var(--brand-dim)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = 'var(--border)'
@@ -168,8 +168,8 @@ export default function HomePage() {
                     width: 20,
                     height: 20,
                     borderRadius: '50%',
-                    background: completed ? 'var(--nvidia-green)' : 'var(--bg-deep)',
-                    border: `2px solid ${completed ? 'var(--nvidia-green)' : 'var(--nvidia-green)'}`,
+                    background: completed ? 'var(--brand)' : 'var(--bg-deep)',
+                    border: `2px solid ${completed ? 'var(--brand)' : 'var(--brand)'}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -181,7 +181,7 @@ export default function HomePage() {
                         fontFamily: 'var(--font-mono)',
                         fontSize: 10,
                         fontWeight: 700,
-                        color: 'var(--nvidia-green)',
+                        color: 'var(--brand)',
                       }}>
                         {lesson.num}
                       </span>
@@ -286,23 +286,23 @@ export default function HomePage() {
             alignItems: 'center',
             gap: 10,
             padding: '14px 28px',
-            background: 'var(--nvidia-green)',
+            background: 'var(--brand)',
             color: '#0a0a0b',
             fontSize: 15,
             fontWeight: 600,
             fontFamily: 'var(--font-body)',
-            borderRadius: 10,
+            borderRadius: 999,
             textDecoration: 'none',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+            boxShadow: '0 0 20px rgba(248, 95, 0, 0.3)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+            e.currentTarget.style.boxShadow = '0 4px 30px rgba(248, 95, 0, 0.5)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(248, 95, 0, 0.3)'
           }}
         >
           Start learning

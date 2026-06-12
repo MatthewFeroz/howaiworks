@@ -37,8 +37,8 @@ function EraCard({ yearRange, title, explanation, children, index, paper }) {
           display: 'inline-block',
           padding: '3px 10px',
           borderRadius: 6,
-          background: 'var(--nvidia-green-dim)',
-          color: 'var(--nvidia-green)',
+          background: 'var(--brand-dim)',
+          color: 'var(--brand)',
           fontFamily: 'var(--font-mono)',
           fontSize: 12,
           fontWeight: 600,
@@ -89,7 +89,7 @@ function EraCard({ yearRange, title, explanation, children, index, paper }) {
               transition: 'border-color 0.2s',
               maxWidth: '100%',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--nvidia-green)'}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--brand)'}
             onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
           >
             <span style={{ fontSize: 12, flexShrink: 0 }}>📄</span>
@@ -133,9 +133,9 @@ function FlowchartAnimation() {
   const nodeStyle = (active) => ({
     padding: '6px 12px',
     borderRadius: 8,
-    border: `1.5px solid ${active ? 'var(--nvidia-green)' : 'var(--border)'}`,
-    background: active ? 'var(--nvidia-green-dim)' : 'var(--bg-elevated)',
-    color: active ? 'var(--nvidia-green)' : 'var(--text-secondary)',
+    border: `1.5px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
+    background: active ? 'var(--brand-dim)' : 'var(--bg-elevated)',
+    color: active ? 'var(--brand)' : 'var(--text-secondary)',
     fontSize: 12,
     fontFamily: 'var(--font-mono)',
     fontWeight: 500,
@@ -145,7 +145,7 @@ function FlowchartAnimation() {
   })
 
   const arrowStyle = (active) => ({
-    color: active ? 'var(--nvidia-green)' : 'var(--text-dim)',
+    color: active ? 'var(--brand)' : 'var(--text-dim)',
     fontSize: 14,
     transition: 'color 0.35s ease',
     textAlign: 'center',
@@ -167,7 +167,7 @@ function FlowchartAnimation() {
         <div style={arrowStyle(step >= 3)}>↓ yes</div>
         <div style={{
           ...nodeStyle(step >= 4),
-          background: step >= 4 ? 'var(--nvidia-green)' : 'var(--bg-elevated)',
+          background: step >= 4 ? 'var(--brand)' : 'var(--bg-elevated)',
           color: step >= 4 ? '#0a0a0b' : 'var(--text-secondary)',
           fontWeight: step >= 4 ? 700 : 500,
         }}>
@@ -248,7 +248,7 @@ function ScatterPlotAnimation() {
           const cx = classified ? d.endX : d.startX
           const cy = classified ? d.endY : d.startY
           const color = classified
-            ? (d.type === 'spam' ? '#e05252' : 'var(--nvidia-green)')
+            ? (d.type === 'spam' ? '#e05252' : 'var(--brand)')
             : neutralColor
           return (
             <circle
@@ -267,7 +267,7 @@ function ScatterPlotAnimation() {
         {/* Dividing line */}
         <line
           x1={48} y1={5} x2={48} y2={75}
-          stroke="var(--nvidia-green)"
+          stroke="var(--brand)"
           strokeWidth={1.5}
           strokeDasharray="4 3"
           opacity={phase >= 3 ? 0.8 : 0}
@@ -278,7 +278,7 @@ function ScatterPlotAnimation() {
           opacity={phase >= 3 ? 0.7 : 0} style={{ transition: 'opacity 0.4s ease 0.3s', fontFamily: 'var(--font-mono)' }}>
           spam
         </text>
-        <text x={75} y={75} fill="var(--nvidia-green)" fontSize={7} textAnchor="middle"
+        <text x={75} y={75} fill="var(--brand)" fontSize={7} textAnchor="middle"
           opacity={phase >= 3 ? 0.7 : 0} style={{ transition: 'opacity 0.4s ease 0.3s', fontFamily: 'var(--font-mono)' }}>
           not spam
         </text>
@@ -336,7 +336,7 @@ function NeuralNetAnimation() {
                 key={`c${li}-${pi}-${ni}`}
                 x1={layerX(li - 1)} y1={nodeY(li - 1, pi)}
                 x2={layerX(li)} y2={nodeY(li, ni)}
-                stroke={activeLayer >= li ? 'var(--nvidia-green)' : 'var(--border)'}
+                stroke={activeLayer >= li ? 'var(--brand)' : 'var(--border)'}
                 strokeWidth={0.5}
                 opacity={activeLayer >= li ? 0.4 : 0.2}
                 style={{ transition: 'all 0.3s ease' }}
@@ -351,8 +351,8 @@ function NeuralNetAnimation() {
               key={`n${li}-${ni}`}
               cx={layerX(li)} cy={nodeY(li, ni)}
               r={3}
-              fill={activeLayer >= li ? 'var(--nvidia-green)' : 'var(--bg-elevated)'}
-              stroke={activeLayer >= li ? 'var(--nvidia-green)' : 'var(--border)'}
+              fill={activeLayer >= li ? 'var(--brand)' : 'var(--bg-elevated)'}
+              stroke={activeLayer >= li ? 'var(--brand)' : 'var(--border)'}
               strokeWidth={1}
               style={{ transition: 'all 0.3s ease' }}
             />
@@ -419,7 +419,7 @@ function NextWordAnimation() {
         <span style={{ position: 'relative', display: 'inline-block', minWidth: 40 }}>
           {wordIndex > words.length - 1 ? (
             <span style={{
-              color: 'var(--nvidia-green)',
+              color: 'var(--brand)',
               fontWeight: 700,
               transition: 'color 0.3s ease',
             }}>
@@ -449,8 +449,8 @@ function NextWordAnimation() {
           display: 'inline-block',
           padding: '2px 8px',
           borderRadius: 4,
-          background: 'var(--nvidia-green-dim)',
-          color: 'var(--nvidia-green)',
+          background: 'var(--brand-dim)',
+          color: 'var(--brand)',
           fontFamily: 'var(--font-mono)',
           fontSize: 11,
           fontWeight: 600,
@@ -500,10 +500,10 @@ export default function WhatIsAIPage() {
         if (next.size === NUDGE_ITEMS.length && prev.size < NUDGE_ITEMS.length) {
           markLessonComplete('lesson-complete-what-is-ai')
           setTimeout(() => {
-            confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 }, colors: ['#76B900', '#e8e8ed', '#8a8a96'] })
+            confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 }, colors: ['#f85f00', '#e8e8ed', '#8a8a96'] })
           }, 200)
           setTimeout(() => {
-            confetti({ particleCount: 40, spread: 65, origin: { y: 0.65, x: 0.6 }, colors: ['#76B900', '#e8e8ed'] })
+            confetti({ particleCount: 40, spread: 65, origin: { y: 0.65, x: 0.6 }, colors: ['#f85f00', '#e8e8ed'] })
           }, 500)
         }
         return next
@@ -528,7 +528,7 @@ export default function WhatIsAIPage() {
           letterSpacing: -0.5,
         }}>
           What is{' '}
-          <span style={{ color: 'var(--nvidia-green)' }}>AI?</span>
+          <span style={{ color: 'var(--brand)' }}>AI?</span>
         </h1>
         <p style={{
           fontSize: 17,
@@ -620,23 +620,23 @@ export default function WhatIsAIPage() {
             alignItems: 'center',
             gap: 10,
             padding: '14px 28px',
-            background: 'var(--nvidia-green)',
+            background: 'var(--brand)',
             color: '#0a0a0b',
             fontSize: 15,
             fontWeight: 600,
             fontFamily: 'var(--font-body)',
-            borderRadius: 10,
+            borderRadius: 999,
             textDecoration: 'none',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            boxShadow: '0 0 20px rgba(118, 185, 0, 0.3)',
+            boxShadow: '0 0 20px rgba(248, 95, 0, 0.3)',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 4px 30px rgba(118, 185, 0, 0.5)'
+            e.currentTarget.style.boxShadow = '0 4px 30px rgba(248, 95, 0, 0.5)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(248, 95, 0, 0.3)'
           }}
         >
           See how AI reads text

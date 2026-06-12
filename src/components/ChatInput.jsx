@@ -48,7 +48,7 @@ export default function ChatInput({ onSend, disabled, placeholder }) {
             minHeight: 52,
             padding: '14px 20px',
             background: 'var(--bg-surface)',
-            border: `1px solid ${focused ? 'var(--nvidia-green)' : 'var(--border)'}`,
+            border: `1px solid ${focused ? 'var(--brand)' : 'var(--border)'}`,
             borderRadius: 12,
             color: 'var(--text-primary)',
             fontFamily: 'var(--font-mono)',
@@ -58,7 +58,7 @@ export default function ChatInput({ onSend, disabled, placeholder }) {
             overflow: 'hidden',
             outline: 'none',
             transition: 'border-color 0.2s, box-shadow 0.2s',
-            boxShadow: focused ? '0 0 0 3px var(--nvidia-green-dim)' : 'none',
+            boxShadow: focused ? '0 0 0 3px var(--brand-dim)' : 'none',
             opacity: disabled ? 0.5 : 1,
           }}
         />
@@ -71,7 +71,7 @@ export default function ChatInput({ onSend, disabled, placeholder }) {
           height: 48,
           borderRadius: 12,
           border: 'none',
-          background: value.trim() && !disabled ? 'var(--nvidia-green)' : 'var(--bg-elevated)',
+          background: value.trim() && !disabled ? 'var(--brand)' : 'var(--bg-elevated)',
           color: value.trim() && !disabled ? '#0a0a0b' : 'var(--text-dim)',
           fontSize: 20,
           cursor: value.trim() && !disabled ? 'pointer' : 'default',

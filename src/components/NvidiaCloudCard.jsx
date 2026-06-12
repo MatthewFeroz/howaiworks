@@ -99,13 +99,13 @@ export default function NvidiaCloudCard({ onConfigured }) {
             alignItems: 'center',
             gap: 6,
             padding: '6px 12px',
-            background: 'rgba(118,185,0,0.1)',
-            border: '1px solid rgba(118,185,0,0.25)',
+            background: 'rgba(248, 95, 0,0.1)',
+            border: '1px solid rgba(248, 95, 0,0.25)',
             borderRadius: 6,
             marginBottom: 12,
             fontFamily: 'var(--font-mono)',
             fontSize: 11,
-            color: 'var(--nvidia-green)',
+            color: 'var(--brand)',
           }}>
             <span style={{ fontSize: 8 }}>●</span>
             Connected via server API key
@@ -142,7 +142,7 @@ export default function NvidiaCloudCard({ onConfigured }) {
                 onClick={handleSave}
                 style={{
                   padding: '8px 16px',
-                  background: 'var(--nvidia-green)',
+                  background: 'var(--brand)',
                   color: '#0a0a0b',
                   border: 'none',
                   borderRadius: 6,

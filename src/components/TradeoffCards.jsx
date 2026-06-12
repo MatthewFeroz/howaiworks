@@ -15,7 +15,7 @@ const TRADEOFFS = [
         travels over the internet to a data center, waits in a queue, then starts generating.
         But once it starts, powerful A100/H100 GPUs produce tokens at 80-150 tok/s.
         <br /><br />
-        <strong style={{ color: 'var(--nvidia-green)' }}>Local</strong> starts almost instantly (no network hop),
+        <strong style={{ color: 'var(--brand)' }}>Local</strong> starts almost instantly (no network hop),
         but consumer hardware generates at 10-30 tok/s. For short responses, local <em>feels</em> faster.
         For long responses, cloud pulls ahead.
       </>,
@@ -48,7 +48,7 @@ const TRADEOFFS = [
         <strong style={{ color: '#6ec0e8' }}>Cloud pricing</strong> (typical): ~$0.03 per 1K input tokens,
         ~$0.06 per 1K output tokens. A busy chatbot handling 10,000 conversations/day can cost $500-2,000/month.
         <br /><br />
-        <strong style={{ color: 'var(--nvidia-green)' }}>Local pricing</strong>: buy the hardware once, run forever.
+        <strong style={{ color: 'var(--brand)' }}>Local pricing</strong>: buy the hardware once, run forever.
         A $200 GPU can run small models. NVIDIA DGX Spark ($3,000) can run 70B-parameter models.
         After the initial investment, every token is free.
         <br /><br />
@@ -65,7 +65,7 @@ const TRADEOFFS = [
     insight: {
       headline: '500M parameters vs 8B+ parameters — size matters.',
       body: <>
-        The local model you saw (qwen2.5:0.5b) has <strong style={{ color: 'var(--nvidia-green)' }}>500 million parameters</strong>.
+        The local model you saw (qwen2.5:0.5b) has <strong style={{ color: 'var(--brand)' }}>500 million parameters</strong>.
         Cloud models like Llama 3.1 have <strong style={{ color: '#6ec0e8' }}>8 billion+ parameters</strong> — 16x more.
         <br /><br />
         More parameters means more "memory" for facts, better reasoning, and more coherent long-form text.
@@ -80,7 +80,7 @@ const TRADEOFFS = [
 ]
 
 function Accent({ children }) {
-  return <em style={{ color: 'var(--nvidia-green)', fontStyle: 'normal', fontWeight: 500 }}>{children}</em>
+  return <em style={{ color: 'var(--brand)', fontStyle: 'normal', fontWeight: 500 }}>{children}</em>
 }
 
 export default function TradeoffCards({ onAllExplored }) {
@@ -101,20 +101,20 @@ export default function TradeoffCards({ onAllExplored }) {
             particleCount: 60,
             spread: 55,
             origin: { x: 0.15, y: 0.6 },
-            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+            colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
           })
           confetti({
             particleCount: 60,
             spread: 55,
             origin: { x: 0.85, y: 0.6 },
-            colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+            colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
           })
           setTimeout(() => {
             confetti({
               particleCount: 100,
               spread: 100,
               origin: { x: 0.5, y: 0.4 },
-              colors: ['#76B900', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
+              colors: ['#f85f00', '#00b4d8', '#e0aaff', '#ffd166', '#ef476f', '#06d6a0'],
             })
           }, 250)
         }, 400)
@@ -147,7 +147,7 @@ export default function TradeoffCards({ onAllExplored }) {
           active={activeCard === card.key}
           insightContent={
             <>
-              <strong style={{ color: 'var(--nvidia-green)', fontWeight: 600 }}>
+              <strong style={{ color: 'var(--brand)', fontWeight: 600 }}>
                 {card.insight.headline}
               </strong>{' '}
               {card.insight.body}
@@ -167,7 +167,7 @@ export default function TradeoffCards({ onAllExplored }) {
           style={{
             fontFamily: 'var(--font-mono)',
             fontSize: exploredCards.size === TRADEOFFS.length ? 12 : 11,
-            color: exploredCards.size === TRADEOFFS.length ? 'var(--nvidia-green)' : 'var(--text-dim)',
+            color: exploredCards.size === TRADEOFFS.length ? 'var(--brand)' : 'var(--text-dim)',
             paddingLeft: 4,
             marginTop: 2,
             fontWeight: exploredCards.size === TRADEOFFS.length ? 600 : 400,

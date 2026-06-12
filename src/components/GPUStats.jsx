@@ -40,8 +40,8 @@ export default function GPUStats({ model, gpuInfo, ollamaConnected }) {
               width: 6,
               height: 6,
               borderRadius: '50%',
-              background: ollamaConnected ? 'var(--nvidia-green)' : '#ef476f',
-              boxShadow: ollamaConnected ? '0 0 6px var(--nvidia-green)' : 'none',
+              background: ollamaConnected ? 'var(--brand)' : '#ef476f',
+              boxShadow: ollamaConnected ? '0 0 6px var(--brand)' : 'none',
             }} />
             {ollamaConnected ? 'Connected' : 'Demo Mode'}
           </span>

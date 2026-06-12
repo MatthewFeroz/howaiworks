@@ -369,8 +369,8 @@ export default function MeaningMap({ words, onWordClick, selectedWord, neighborL
               transition: 'color 0.2s, border-color 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--nvidia-green)'
-              e.currentTarget.style.borderColor = 'var(--nvidia-green)'
+              e.currentTarget.style.color = 'var(--brand)'
+              e.currentTarget.style.borderColor = 'var(--brand)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = 'var(--text-dim)'
@@ -453,7 +453,7 @@ export default function MeaningMap({ words, onWordClick, selectedWord, neighborL
                     y1={ys(line.y1)}
                     x2={xs(line.x2)}
                     y2={ys(line.y2)}
-                    stroke="var(--nvidia-green)"
+                    stroke="var(--brand)"
                     strokeWidth={1.2 / transform.k}
                     strokeOpacity={0.5}
                     strokeDasharray={`${4 / transform.k} ${4 / transform.k}`}
@@ -467,7 +467,7 @@ export default function MeaningMap({ words, onWordClick, selectedWord, neighborL
                   y1={ys(from.spreadY)}
                   x2={xs(to.spreadX)}
                   y2={ys(to.spreadY)}
-                  stroke="var(--nvidia-green)"
+                  stroke="var(--brand)"
                   strokeWidth={1.2 / transform.k}
                   strokeOpacity={0.5}
                   strokeDasharray={`${4 / transform.k} ${4 / transform.k}`}
@@ -562,16 +562,16 @@ export default function MeaningMap({ words, onWordClick, selectedWord, neighborL
               const ly = match ? match.spreadY : liveWord.y
               return (
                 <g transform={`translate(${xs(lx)}, ${ys(ly)})`}>
-                  <circle r={16 / transform.k} fill="var(--nvidia-green)" opacity={0.08}>
+                  <circle r={16 / transform.k} fill="var(--brand)" opacity={0.08}>
                     <animate attributeName="r" values={`${12 / transform.k};${20 / transform.k};${12 / transform.k}`} dur="2s" repeatCount="indefinite" />
                     <animate attributeName="opacity" values="0.12;0.04;0.12" dur="2s" repeatCount="indefinite" />
                   </circle>
-                  <circle r={8 / transform.k} fill="var(--nvidia-green)" opacity={0.15} />
-                  <circle r={4.5 / transform.k} fill="var(--nvidia-green)" opacity={0.9} />
+                  <circle r={8 / transform.k} fill="var(--brand)" opacity={0.15} />
+                  <circle r={4.5 / transform.k} fill="var(--brand)" opacity={0.9} />
                   <text
                     y={-12 / transform.k}
                     textAnchor="middle"
-                    fill="var(--nvidia-green)"
+                    fill="var(--brand)"
                     fontSize={`${13 / transform.k}px`}
                     fontFamily="var(--font-mono)"
                     fontWeight={700}

@@ -114,7 +114,7 @@ export default function ResourcesPage() {
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color: 'var(--nvidia-green)',
+                color: 'var(--brand)',
                 fontSize: 15,
                 fontWeight: 500,
                 textDecoration: 'none',
@@ -223,7 +223,7 @@ export default function ResourcesPage() {
                       rel="noopener noreferrer"
                       style={{
                         fontSize: 13,
-                        color: 'var(--nvidia-green)',
+                        color: 'var(--brand)',
                         textDecoration: 'none',
                         fontWeight: 500,
                         transition: 'opacity 0.2s',

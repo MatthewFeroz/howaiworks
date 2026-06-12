@@ -1,15 +1,17 @@
+/* Brand tokens aligned with matthewferoz.com (Poppins, orange #f85f00, dark #171719) */
 :root {
-  --bg-deep: #0a0a0b;
-  --bg-surface: #141416;
-  --bg-elevated: #1c1c20;
-  --nvidia-green: #76B900;
-  --nvidia-green-dim: rgba(118, 185, 0, 0.15);
-  --nvidia-green-glow: rgba(118, 185, 0, 0.4);
-  --text-primary: #e8e8ed;
-  --text-secondary: #8a8a96;
-  --text-dim: #55555f;
-  --border: #2a2a30;
-  --font-body: 'Outfit', system-ui, sans-serif;
+  --bg-deep: #171719;
+  --bg-surface: #1a1b1e;
+  --bg-elevated: #25262a;
+  --brand: #f85f00;
+  --brand-dark: #c74b00;
+  --brand-dim: rgba(248, 95, 0, 0.15);
+  --brand-glow: rgba(248, 95, 0, 0.4);
+  --text-primary: #dbdbdb;
+  --text-secondary: #9aa0aa;
+  --text-dim: #6b7078;
+  --border: #2a2b2f;
+  --font-body: 'Poppins', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'Fira Code', monospace;
 }
 
@@ -34,8 +36,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(118, 185, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(118, 185, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(248, 95, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(248, 95, 0, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
   pointer-events: none;
   z-index: 0;
@@ -47,9 +49,9 @@ body::before {
 }
 
 /* ── TOKEN COLORS ── */
-.token-color-0  { background: rgba(118,185,0,0.12);  border-color: rgba(118,185,0,0.3);  color: #a8d86e; }
+.token-color-0  { background: rgba(248,95,0,0.12);   border-color: rgba(248,95,0,0.3);   color: #ffa873; }
 .token-color-1  { background: rgba(0,163,255,0.12);  border-color: rgba(0,163,255,0.3);  color: #6ec0e8; }
-.token-color-2  { background: rgba(255,107,53,0.12);  border-color: rgba(255,107,53,0.3);  color: #e8956e; }
+.token-color-2  { background: rgba(118,185,0,0.12);  border-color: rgba(118,185,0,0.3);  color: #a8d86e; }
 .token-color-3  { background: rgba(189,85,236,0.12); border-color: rgba(189,85,236,0.3); color: #c58ee8; }
 .token-color-4  { background: rgba(255,198,0,0.12);  border-color: rgba(255,198,0,0.3);  color: #e8d06e; }
 .token-color-5  { background: rgba(0,210,178,0.12);  border-color: rgba(0,210,178,0.3);  color: #6ee8cc; }

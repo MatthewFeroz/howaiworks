@@ -7,8 +7,8 @@ export default function Nudge({ icon, children, onClick, delay = 0, explored = f
       style={{
         borderRadius: 10,
         overflow: 'hidden',
-        border: `1px solid ${active ? 'var(--nvidia-green)' : explored ? 'rgba(118,185,0,0.3)' : 'var(--border)'}`,
-        background: active ? 'var(--nvidia-green-dim)' : 'var(--bg-surface)',
+        border: `1px solid ${active ? 'var(--brand)' : explored ? 'rgba(248, 95, 0,0.3)' : 'var(--border)'}`,
+        background: active ? 'var(--brand-dim)' : 'var(--bg-surface)',
         transition: 'border-color 0.3s, background 0.3s',
         width: '100%',
       }}
@@ -33,13 +33,13 @@ export default function Nudge({ icon, children, onClick, delay = 0, explored = f
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.color = 'var(--text-primary)'
-          e.currentTarget.parentElement.style.borderColor = 'var(--nvidia-green)'
-          e.currentTarget.parentElement.style.background = 'var(--nvidia-green-dim)'
+          e.currentTarget.parentElement.style.borderColor = 'var(--brand)'
+          e.currentTarget.parentElement.style.background = 'var(--brand-dim)'
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.color = active ? 'var(--text-primary)' : explored ? 'var(--text-dim)' : 'var(--text-secondary)'
-          e.currentTarget.parentElement.style.borderColor = active ? 'var(--nvidia-green)' : explored ? 'rgba(118,185,0,0.3)' : 'var(--border)'
-          e.currentTarget.parentElement.style.background = active ? 'var(--nvidia-green-dim)' : 'var(--bg-surface)'
+          e.currentTarget.parentElement.style.borderColor = active ? 'var(--brand)' : explored ? 'rgba(248, 95, 0,0.3)' : 'var(--border)'
+          e.currentTarget.parentElement.style.background = active ? 'var(--brand-dim)' : 'var(--bg-surface)'
         }}
       >
         <span style={{ fontSize: 16, flexShrink: 0 }}>
@@ -51,7 +51,7 @@ export default function Nudge({ icon, children, onClick, delay = 0, explored = f
           transition={{ duration: 0.25 }}
           style={{
             fontSize: 12,
-            color: active ? 'var(--nvidia-green)' : 'var(--text-dim)',
+            color: active ? 'var(--brand)' : 'var(--text-dim)',
             flexShrink: 0,
             marginLeft: 8,
           }}
@@ -76,7 +76,7 @@ export default function Nudge({ icon, children, onClick, delay = 0, explored = f
               fontSize: 14,
               lineHeight: 1.65,
               color: 'var(--text-secondary)',
-              borderTop: '1px solid rgba(118, 185, 0, 0.12)',
+              borderTop: '1px solid rgba(248, 95, 0, 0.12)',
               marginTop: 0,
               paddingTop: 12,
             }}>

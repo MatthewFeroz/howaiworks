@@ -20,13 +20,13 @@ const TOKEN_COLORS = [
 ]
 
 const TOKEN_BGS = [
-  'rgba(118,185,0,0.12)', 'rgba(0,163,255,0.12)', 'rgba(255,107,53,0.12)', 'rgba(189,85,236,0.12)',
+  'rgba(248, 95, 0,0.12)', 'rgba(0,163,255,0.12)', 'rgba(255,107,53,0.12)', 'rgba(189,85,236,0.12)',
   'rgba(255,198,0,0.12)', 'rgba(0,210,178,0.12)', 'rgba(255,82,119,0.12)', 'rgba(130,148,255,0.12)',
   'rgba(255,159,243,0.12)', 'rgba(162,221,90,0.12)', 'rgba(255,138,101,0.12)', 'rgba(73,190,255,0.12)',
 ]
 
 const TOKEN_BORDERS = [
-  'rgba(118,185,0,0.3)', 'rgba(0,163,255,0.3)', 'rgba(255,107,53,0.3)', 'rgba(189,85,236,0.3)',
+  'rgba(248, 95, 0,0.3)', 'rgba(0,163,255,0.3)', 'rgba(255,107,53,0.3)', 'rgba(189,85,236,0.3)',
   'rgba(255,198,0,0.3)', 'rgba(0,210,178,0.3)', 'rgba(255,82,119,0.3)', 'rgba(130,148,255,0.3)',
   'rgba(255,159,243,0.3)', 'rgba(162,221,90,0.3)', 'rgba(255,138,101,0.3)', 'rgba(73,190,255,0.3)',
 ]
@@ -106,7 +106,7 @@ export default function HeroTokenDemo() {
       <div style={{
         position: 'absolute',
         inset: -40,
-        background: 'radial-gradient(ellipse at center, rgba(118,185,0,0.06) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse at center, rgba(248, 95, 0,0.06) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
@@ -159,7 +159,7 @@ export default function HeroTokenDemo() {
                   display: 'inline-block',
                   width: 2,
                   height: 20,
-                  background: 'var(--nvidia-green)',
+                  background: 'var(--brand)',
                   borderRadius: 1,
                   animation: 'blink-cursor 1s step-end infinite',
                   marginLeft: 2,

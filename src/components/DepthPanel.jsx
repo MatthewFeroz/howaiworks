@@ -217,7 +217,7 @@ export default function DepthPanel({ sections, visible, delay = 0, onOpen }) {
           width: '100%',
           padding: '14px 20px',
           background: isOpen ? 'var(--bg-elevated)' : 'var(--bg-surface)',
-          border: `1px solid ${isOpen ? 'rgba(118,185,0,0.3)' : 'var(--border)'}`,
+          border: `1px solid ${isOpen ? 'rgba(248, 95, 0,0.3)' : 'var(--border)'}`,
           borderRadius: isOpen ? '12px 12px 0 0' : 12,
           color: 'var(--text-primary)',
           fontFamily: 'var(--font-body)',
@@ -251,7 +251,7 @@ export default function DepthPanel({ sections, visible, delay = 0, onOpen }) {
           >
             <div style={{
               background: 'var(--bg-elevated)',
-              border: '1px solid rgba(118,185,0,0.15)',
+              border: '1px solid rgba(248, 95, 0,0.15)',
               borderTop: 'none',
               borderRadius: '0 0 12px 12px',
               padding: '16px 24px 24px',
