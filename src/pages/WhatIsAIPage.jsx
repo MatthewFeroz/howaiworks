@@ -5,6 +5,7 @@ import confetti from 'canvas-confetti'
 import Nudge from '../components/Nudge'
 import Footer from '../components/Footer'
 import DeeperDive from '../components/DeeperDive'
+import FunnelCTA from '../components/FunnelCTA'
 import { markLessonComplete } from '../components/Navbar'
 
 // ─── Era card wrapper ───────────────────────────────────────────────────
@@ -684,6 +685,8 @@ export default function WhatIsAIPage() {
       }} />
 
       <DeeperDive path="/what-is-ai" />
+
+      <FunnelCTA path="/what-is-ai" />
 
       <Footer />
     </div>

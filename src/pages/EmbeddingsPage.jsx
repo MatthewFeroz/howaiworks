@@ -6,6 +6,7 @@ import WordArithmetic from '../components/WordArithmetic'
 import DepthPanel, { PythonCode } from '../components/DepthPanel'
 import Footer from '../components/Footer'
 import DeeperDive from '../components/DeeperDive'
+import FunnelCTA from '../components/FunnelCTA'
 import { markLessonComplete } from '../components/Navbar'
 import embeddingData from '../data/embeddingMap.json'
 
@@ -583,6 +584,8 @@ result = np.array(king) - np.array(man) + np.array(woman)
       }} />
 
       <DeeperDive path="/understand" />
+
+      <FunnelCTA path="/understand" />
 
       <Footer />
     </div>

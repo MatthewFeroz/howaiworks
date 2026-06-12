@@ -6,6 +6,7 @@ import Nudge from '../components/Nudge'
 import DepthPanel from '../components/DepthPanel'
 import Footer from '../components/Footer'
 import DeeperDive from '../components/DeeperDive'
+import FunnelCTA from '../components/FunnelCTA'
 import { markLessonComplete } from '../components/Navbar'
 
 // ─── Section card wrapper ──────────────────────────────────────────────
@@ -1371,6 +1372,8 @@ def softmax(x):
       }} />
 
       <DeeperDive path="/attention" />
+
+      <FunnelCTA path="/attention" />
 
       <Footer />
     </div>

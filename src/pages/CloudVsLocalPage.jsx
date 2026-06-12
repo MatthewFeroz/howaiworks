@@ -6,6 +6,7 @@ import DepthPanel from '../components/DepthPanel'
 import SetupGuide from '../components/SetupGuide'
 import Footer from '../components/Footer'
 import DeeperDive from '../components/DeeperDive'
+import FunnelCTA from '../components/FunnelCTA'
 import { markLessonComplete } from '../components/Navbar'
 
 export default function CloudVsLocalPage({ webllm }) {
@@ -291,6 +292,8 @@ for chunk in response:
       }} />
 
       <DeeperDive path="/run" />
+
+      <FunnelCTA path="/run" />
 
       <Footer />
 

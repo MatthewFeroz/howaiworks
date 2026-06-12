@@ -5,6 +5,7 @@ import Hero from '../components/Hero'
 import TokenizerPhase from '../components/TokenizerPhase'
 import Footer from '../components/Footer'
 import DeeperDive from '../components/DeeperDive'
+import FunnelCTA from '../components/FunnelCTA'
 import { useTokenizer } from '../hooks/useTokenizer'
 
 export default function TokenizerPage() {
@@ -90,6 +91,8 @@ export default function TokenizerPage() {
       }} />
 
       <DeeperDive path="/tokenize" />
+
+      <FunnelCTA path="/tokenize" />
 
       <Footer />
     </div>

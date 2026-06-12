@@ -10,7 +10,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { SITE, ROUTES, ROUTE_ORDER, LESSON_ROUTES } from '../src/seo/seoData.js'
+import { SITE, ROUTES, ROUTE_ORDER, LESSON_ROUTES, FUNNEL_CTAS } from '../src/seo/seoData.js'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const dist = join(root, 'dist')
@@ -94,11 +94,18 @@ function staticBody(path, meta) {
     )
     .join('')
 
+  const cta = FUNNEL_CTAS[path]
+  const ctaHtml = cta
+    ? `<p style="margin-top:24px;line-height:1.7;color:#9aa0aa">${esc(cta.headline)} ` +
+      `<a href="${cta.buttonUrl}" style="color:#f85f00">${esc(cta.buttonText)}</a></p>`
+    : ''
+
   return (
     `<div style="max-width:640px;margin:0 auto;padding:48px 24px;font-family:'Poppins',system-ui,sans-serif;color:#dbdbdb">` +
     `<nav style="margin-bottom:32px;font-size:14px">${nav}</nav>` +
     `<h1 style="font-size:28px;line-height:1.25;margin:0 0 16px">${h1}</h1>` +
     sections +
+    ctaHtml +
     `<p style="margin-top:32px;font-size:13px;color:#6b7078">` +
     `${SITE.name} is free and open source (<a href="${SITE.github}" style="color:#f85f00">GitHub</a>), ` +
     `built by <a href="${SITE.author.url}" style="color:#f85f00">${esc(SITE.author.name)}</a>.</p>` +

@@ -181,6 +181,54 @@ export const ROUTES = {
   },
 }
 
+// Funnel CTAs shown at the end of each lesson — contextual next steps into
+// the wider ecosystem (matthewferoz.com + community). UTM params identify
+// which lesson converts.
+const utm = (path) => `utm_source=howaiworks.io&utm_medium=lesson-cta&utm_campaign=${path.slice(1)}`
+
+export const FUNNEL_CTAS = {
+  '/what-is-ai': {
+    headline: 'You just got the 30,000-foot view.',
+    body: 'Want to know where AI actually fits in your work? Take the free 100 Hours Back AI Roadmap quiz — two minutes, and you get a personalized plan for what to learn and automate first.',
+    buttonText: 'Get my AI roadmap',
+    buttonUrl: `https://matthewferoz.com/roadmap/?${utm('/what-is-ai')}`,
+    secondaryText: 'or join the How AI Works Community — it’s where these lessons get discussed',
+    secondaryUrl: 'https://www.skool.com/feroz-academy-1644',
+  },
+  '/tokenize': {
+    headline: 'Now you know what AI actually sees.',
+    body: 'Most professionals never learn this — and it’s why their prompts underperform. Keep going: join the How AI Works Community for live sessions, prompt breakdowns, and people learning the same way you just did.',
+    buttonText: 'Join the community',
+    buttonUrl: 'https://www.skool.com/feroz-academy-1644',
+    secondaryText: 'or get a personalized plan with the free AI Roadmap quiz',
+    secondaryUrl: `https://matthewferoz.com/roadmap/?${utm('/tokenize')}`,
+  },
+  '/understand': {
+    headline: 'Embeddings power half the AI tools you use.',
+    body: 'Semantic search, RAG, recommendations — you now understand the engine behind them. The free 100 Hours Back AI Roadmap quiz turns that understanding into a concrete plan for your own work.',
+    buttonText: 'Get my AI roadmap',
+    buttonUrl: `https://matthewferoz.com/roadmap/?${utm('/understand')}`,
+    secondaryText: 'or join the How AI Works Community',
+    secondaryUrl: 'https://www.skool.com/feroz-academy-1644',
+  },
+  '/attention': {
+    headline: 'You understand transformers better than most people using them.',
+    body: 'This is exactly the kind of thing we go deep on in the How AI Works Community — live workshops, real builds, and straight answers about what’s actually working.',
+    buttonText: 'Join the community',
+    buttonUrl: 'https://www.skool.com/feroz-academy-1644',
+    secondaryText: 'or see upcoming live workshops',
+    secondaryUrl: `https://matthewferoz.com/events/?${utm('/attention')}`,
+  },
+  '/run': {
+    headline: 'You’ve now seen the whole pipeline.',
+    body: 'Tokens, meaning, attention, inference — that’s how AI works. The next question is how it works for you. Matt coaches professionals 1:1 on putting AI to work — book a free call and find out what’s possible.',
+    buttonText: 'Book a free call',
+    buttonUrl: `https://matthewferoz.com/coaching/?${utm('/run')}`,
+    secondaryText: 'not ready? Start with the free AI Roadmap quiz',
+    secondaryUrl: `https://matthewferoz.com/roadmap/?${utm('/run')}`,
+  },
+}
+
 // Ordered list used for sitemap generation and prev/next navigation.
 export const ROUTE_ORDER = ['/', '/what-is-ai', '/tokenize', '/understand', '/attention', '/run', '/about', '/resources']
 
