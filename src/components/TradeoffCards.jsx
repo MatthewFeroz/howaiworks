@@ -49,7 +49,7 @@ const TRADEOFFS = [
         ~$0.06 per 1K output tokens. A busy chatbot handling 10,000 conversations/day can cost $500-2,000/month.
         <br /><br />
         <strong style={{ color: 'var(--brand)' }}>Local pricing</strong>: buy the hardware once, run forever.
-        A $200 GPU can run small models. NVIDIA DGX Spark ($3,000) can run 70B-parameter models.
+        A $200 GPU can run small models; a high-end AI workstation can run 70B-parameter models.
         After the initial investment, every token is free.
         <br /><br />
         <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>
@@ -73,7 +73,7 @@ const TRADEOFFS = [
         that's an A100 or a high-end consumer GPU.
         <br /><br />
         The future is trending toward smaller, more efficient models (distillation, quantization)
-        that close this gap. NVIDIA's DGX Spark is designed to bring larger models to your desk.
+        that close this gap, and new hardware keeps bringing larger models to your desk.
       </>,
     },
   },

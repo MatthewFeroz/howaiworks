@@ -1,15 +1,14 @@
 # howaiworks.io
 
-*Interactive AI education for the NVIDIA GTC 2026 Golden Ticket Competition*
+*Learn how AI works — interactively, in your browser*
 
 ### What Does AI Actually See?
 
-An open-source, interactive lesson where students discover how AI really works — by typing their own words and watching what happens. No videos, no lectures — type and discover.
+An open-source, interactive learning platform where you discover how AI really works — by typing your own words and watching what happens. No videos, no lectures — type and discover.
 
-> *"What's the hardest part about ensuring AI literacy for future generations? Are tools like DGX Spark going to be available for schools or is this more of a software education not keeping up issue?"*
-> — Matt Feroz, [NVIDIA Developer Livestream](https://www.youtube.com/watch?v=nRo-tQC-mEY) (04:12)
+> *"Most people use AI every day — almost nobody knows what's actually happening inside."*
 
-NVIDIA said DGX Spark would democratize AI hardware. **howaiworks.io is the open-source software side of that equation.**
+howaiworks.io is the open-source fix for that.
 
 ---
 
@@ -17,30 +16,34 @@ NVIDIA said DGX Spark would democratize AI hardware. **howaiworks.io is the open
 
 Every AI education tool today is passive — videos, slides, static animations. Students watch *about* AI but never interact *with* it. Meanwhile, millions of people use ChatGPT daily without understanding what's actually happening underneath.
 
-## The Solution
+## The Lessons
 
-howaiworks.io is an interactive lesson with three progressive stages:
+**What is AI? — Four eras in four minutes** (`/what-is-ai`)
+An animated tour from Turing's 1950 question to today's generative models — symbolic rules, machine learning, deep learning, and transformers, with the landmark paper from each era.
 
-**Stage 1 — Tokenize: "Your words aren't words"** (`/tokenize`)
+**Tokenize — "Your words aren't words"** (`/tokenize`)
 Type anything. Watch it shatter into tokens in real-time. Try "strawberry." Try your name. Try Arabic. Discover that AI never sees your words — only fragments mapped to numbers. Uses GPT-4's actual tokenizer (cl100k_base) running entirely in your browser.
 
-**Stage 2 — Understand: "The Map of Meaning"** (`/understand`)
+**Understand — "The Map of Meaning"** (`/understand`)
 Explore a 2D map where words are plotted by their meaning. "Love" and "hate" are neighbors. "Paris" clusters with "Tokyo." Try vector arithmetic: king - man + woman = queen. See how AI represents meaning as geometry.
 
-**Stage 3 — Run: "See AI Think"** (`/run`)
-Chat with an AI model running directly in your browser via WebGPU — no server needed. Compare cloud inference (NVIDIA NIM) vs. local inference side-by-side. See latency, watch tokens stream, understand the tradeoffs.
+**Attention — "How AI knows what 'it' means"** (`/attention`)
+In "The animal didn't cross the street because it was tired," what does "it" refer to? Watch self-attention figure it out, then go deeper into heads, layers, and the transformer architecture.
+
+**Run — "See AI Think"** (`/run`)
+Chat with an AI model running directly in your browser via WebGPU — no server needed. Race cloud vs. local inference side-by-side. See latency, watch tokens stream, understand the tradeoffs.
 
 ---
 
 ## Quick Start
 
-### Frontend only (Stages 1-2 work fully client-side)
+### Frontend only (core lessons work fully client-side)
 
 ```bash
-git clone https://github.com/mattferoz/howaiworks.git
+git clone https://github.com/MatthewFeroz/howaiworks.git
 cd howaiworks
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Open http://localhost:3000 and start typing.
@@ -49,8 +52,8 @@ Open http://localhost:3000 and start typing.
 
 ```bash
 # Terminal 1 — Frontend
-npm install
-npm run dev
+bun install
+bun run dev
 
 # Terminal 2 — Backend
 pip install -r requirements.txt
@@ -69,30 +72,22 @@ docker compose up
 
 Starts frontend (:3000), backend (:8000), and Ollama (:11434) with GPU passthrough.
 
-### Environment Variables
-
-Copy `.env.example` and add your NVIDIA NIM API key for cloud inference on the `/run` page:
-
-```
-NVIDIA_NIM_KEY=nvapi-xxx
-```
-
-Get a free key (10K requests) at https://build.nvidia.com.
-
 ---
 
 ## Architecture
 
-**React 19 + Vite 6 single-page app.** Client-side tokenization via js-tiktoken means zero backend required for the core experience. Backend is optional for embeddings and chat.
+**React 19 + Vite 6 single-page app with per-route static prerendering for SEO.** Client-side tokenization via js-tiktoken means zero backend required for the core experience. Backend is optional for embeddings and chat.
 
 ### Routes
 
 | Path | Page | Backend Required |
 |------|------|-----------------|
 | `/` | Home — landing page | No |
+| `/what-is-ai` | Four-era animated AI history | No |
 | `/tokenize` | Tokenizer — the hero experience | No |
 | `/understand` | Embeddings — MeaningMap + WordArithmetic | Pre-generated data included; API optional |
-| `/run` | Chat — cloud vs. local inference | Optional (WebLLM works in-browser) |
+| `/attention` | Self-attention, interactively | No |
+| `/run` | Cloud vs. local inference race | Optional (WebLLM works in-browser) |
 | `/about` | About the project | No |
 | `/resources` | Learning resources | No |
 
@@ -100,8 +95,9 @@ Get a free key (10K requests) at https://build.nvidia.com.
 
 - **js-tiktoken client-side:** GPT-4's actual tokenizer (cl100k_base, ~3MB) loads once and runs synchronously. No API calls for tokenization.
 - **Overlay pattern:** A transparent `<textarea>` sits over a colored `<div>`. Users type in what feels like a normal input but see colored tokens. Avoids contentEditable cursor/selection bugs.
-- **WebLLM for in-browser inference:** Loads `Qwen2.5-0.5B-Instruct` via WebGPU. Falls back to demo replay when WebGPU is unavailable.
-- **Progressive reveal:** The tokenizer page uses a state machine — type, discover nudges, explore all three, unlock the next stage. Designed for a 60-second judge experience.
+- **WebLLM for in-browser inference:** Loads `Qwen2.5-0.5B-Instruct` via WebGPU. Falls back to a simulated replay when WebGPU is unavailable.
+- **Simulated cloud lane:** The /run race replays typical data-center timing (longer time-to-first-token, faster streaming) so the latency lesson works with zero setup or API keys.
+- **Prerendered SEO:** `scripts/prerender.mjs` runs after each build and emits per-route static HTML with unique meta tags, JSON-LD, and crawlable lesson prose, plus `sitemap.xml`.
 
 ### Backend (main.py — FastAPI)
 
@@ -110,10 +106,6 @@ Get a free key (10K requests) at https://build.nvidia.com.
 | `/api/tokenize` | POST | Server-side tokenization |
 | `/api/embed` | POST | Embeddings via Ollama |
 | `/api/chat` | POST | Streaming chat via Ollama (SSE) |
-| `/api/cloud-chat` | POST | Proxy to NVIDIA NIM API (SSE) |
-| `/api/cloud-health` | POST | Cloud endpoint health check |
-| `/api/cloud-status` | GET | Check if NIM key is configured |
-| `/api/gpu-info` | GET | NVIDIA GPU detection via nvidia-smi |
 | `/api/health` | GET | Server + Ollama health check |
 
 ---
@@ -128,10 +120,9 @@ Get a free key (10K requests) at https://build.nvidia.com.
 | Animations | Framer Motion 12 |
 | Visualizations | D3.js 7 |
 | Backend | FastAPI (Python) |
-| Cloud inference | NVIDIA NIM API |
 | Local inference | Ollama |
 | Embeddings | nomic-embed-text via Ollama |
-| Fonts | Outfit (body), IBM Plex Mono (code) |
+| Fonts | Poppins (body), IBM Plex Mono (code) |
 
 ---
 
@@ -139,7 +130,7 @@ Get a free key (10K requests) at https://build.nvidia.com.
 
 | Platform | What it runs | Config |
 |----------|-------------|--------|
-| Vercel | Frontend (static SPA) | `vercel.json` |
+| Vercel | Frontend (static SPA + prerendered routes) | `vercel.json` |
 | Railway | Backend (FastAPI) | `railway.json` |
 | Docker Compose | Full stack (frontend + backend + Ollama) | `docker-compose.yml` |
 
@@ -147,11 +138,11 @@ Get a free key (10K requests) at https://build.nvidia.com.
 
 ## For Teachers
 
-1. Deploy howaiworks.io on any machine (DGX Spark, laptop with RTX, or cloud)
+1. Deploy howaiworks.io on any machine (a laptop or the cloud) — or just use the live site
 2. Students connect via browser — no installs needed
-3. Stages 1-2 run entirely client-side, no GPU required
-4. The lesson takes ~5 minutes and teaches tokenization, encoding, embeddings, and inference
-5. One DGX Spark, 30 student browsers, a classroom that actually understands AI
+3. The core lessons run entirely client-side, no GPU required
+4. Each lesson takes ~5 minutes and teaches tokenization, embeddings, attention, and inference
+5. One deployment, 30 student browsers, a classroom that actually understands AI
 
 ---
 
@@ -159,11 +150,9 @@ Get a free key (10K requests) at https://build.nvidia.com.
 
 - [js-tiktoken](https://github.com/dqbd/tiktoken) — Client-side BPE tokenization (GPT-4's actual tokenizer)
 - [WebLLM](https://github.com/mlc-ai/web-llm) — In-browser LLM inference via WebGPU
-- [NVIDIA NIM](https://build.nvidia.com) — Cloud inference APIs
 - [Ollama](https://ollama.com) — Local model inference
 - [D3.js](https://d3js.org) — Embedding visualizations
 - [Framer Motion](https://www.framer.com/motion/) — Animations
-- Designed for [NVIDIA DGX Spark](https://www.nvidia.com/en-us/products/workstations/dgx-spark/)
 
 ---
 
@@ -173,4 +162,4 @@ MIT — use it, fork it, teach with it.
 
 ---
 
-**howaiworks.io** by Matt Feroz
+**howaiworks.io** by [Matt Feroz](https://matthewferoz.com)

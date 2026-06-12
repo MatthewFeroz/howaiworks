@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { CLOUD_DEMO_RESPONSES, simulateCloudStream } from './CloudDemoReplay'
+import { DEMO_CONVERSATIONS, simulateTokenStream } from './DemoReplay'
 
 const TOKEN_COLORS = [
   '#a8d86e', '#6ec0e8', '#e8956e', '#c58ee8', '#e8d06e', '#6ee8cc',
@@ -7,7 +9,7 @@ const TOKEN_COLORS = [
 
 const DEFAULT_PROMPT = 'What is artificial intelligence?'
 
-export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete, webllm, localInferenceMode }) {
+export default function LatencyRace({ ollamaConnected, onRaceComplete, webllm, localInferenceMode }) {
   const [prompt, setPrompt] = useState('')
   const [isRacing, setIsRacing] = useState(false)
   const [hasRaced, setHasRaced] = useState(false)
@@ -34,16 +36,13 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
   const cloudTokenCountRef = useRef(0)
   const localTokenCountRef = useRef(0)
 
-  // Derive readiness
-  const cloudReady = !!(nimConfig?.apiKey || nimConfig?.serverKey)
   const localReady = localInferenceMode !== 'simulated'
 
-  // Auto-race on mount only if at least one side is connected
+  // Auto-race on mount — the cloud lane is always simulated, so the race
+  // always has something to show
   useEffect(() => {
-    if (cloudReady || localReady) {
-      const timer = setTimeout(() => startRace(DEFAULT_PROMPT), 800)
-      return () => clearTimeout(timer)
-    }
+    const timer = setTimeout(() => startRace(DEFAULT_PROMPT), 800)
+    return () => clearTimeout(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetState = () => {
@@ -69,95 +68,38 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
     if (localCancelRef.current) localCancelRef.current()
     resetState()
 
-    const cReady = !!(nimConfig?.apiKey || nimConfig?.serverKey)
     const currentLocalMode = localInferenceMode || (ollamaConnected ? 'ollama' : 'simulated')
-    const lReady = currentLocalMode !== 'simulated'
-
-    if (!cReady && !lReady) return
 
     setIsRacing(true)
     const now = Date.now()
 
-    // ── CLOUD COLUMN ──
-    if (cReady) {
-      setCloudStartTime(now)
-      ;(async () => {
-        try {
-          const apiBase = import.meta.env.VITE_API_BASE_URL || ''
-          const res = await fetch(`${apiBase}/api/cloud-chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              prompt: racePrompt,
-              apiKey: nimConfig.apiKey || '',
-              endpoint: nimConfig.endpoint || 'https://integrate.api.nvidia.com/v1',
-              model: nimConfig.modelId || 'nvidia/llama-3.3-nemotron-super-49b-v1',
-            }),
-          })
-
-          if (!res.ok) {
-            let errMsg = res.status === 401 ? 'Invalid API key'
-              : res.status === 429 ? 'Rate limit exceeded'
-              : `Backend error (${res.status})`
-            try {
-              const errBody = await res.json()
-              errMsg = errBody.detail || errBody.error || errMsg
-            } catch {}
-            setCloudError(errMsg)
-            setCloudDone(true)
-            checkRaceComplete()
-            return
+    // ── CLOUD COLUMN — always a simulated replay of typical data-center
+    // timing: longer time-to-first-token (network hop) but faster streaming ──
+    setCloudStartTime(now)
+    {
+      const match = CLOUD_DEMO_RESPONSES.find(
+        (r) => r.prompt.toLowerCase() === racePrompt.toLowerCase(),
+      )
+      const cloudText = (match || CLOUD_DEMO_RESPONSES[0]).response
+      let firstTokenTime = null
+      cloudCancelRef.current = simulateCloudStream(
+        cloudText,
+        (token) => {
+          if (!firstTokenTime) {
+            firstTokenTime = Date.now()
+            setCloudFirstToken(firstTokenTime)
+            setCloudTTFT(firstTokenTime - now)
           }
-
-          const reader = res.body.getReader()
-          const decoder = new TextDecoder()
-          let buffer = ''
-          let firstTokenTime = null
-
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            buffer += decoder.decode(value, { stream: true })
-            const lines = buffer.split('\n')
-            buffer = lines.pop() || ''
-
-            for (const line of lines) {
-              if (!line.startsWith('data: ')) continue
-              const data = line.slice(6).trim()
-              if (data === '[DONE]') break
-              try {
-                const parsed = JSON.parse(data)
-                if (parsed.error) {
-                  setCloudError(parsed.error)
-                  continue
-                }
-                const token = parsed.token || parsed.content || ''
-                if (token) {
-                  if (!firstTokenTime) {
-                    firstTokenTime = Date.now()
-                    setCloudFirstToken(firstTokenTime)
-                    setCloudTTFT(firstTokenTime - now)
-                  }
-                  cloudTokenCountRef.current++
-                  setCloudTokens(prev => [...prev, token])
-                  const elapsed = (Date.now() - firstTokenTime) / 1000
-                  if (elapsed > 0) setCloudTPS(Math.round(cloudTokenCountRef.current / elapsed))
-                }
-              } catch { /* skip malformed SSE lines */ }
-            }
-          }
-          if (cloudTokenCountRef.current === 0) {
-            setCloudError('No response received from API')
-          }
+          cloudTokenCountRef.current++
+          setCloudTokens(prev => [...prev, token])
+          const elapsed = (Date.now() - firstTokenTime) / 1000
+          if (elapsed > 0) setCloudTPS(Math.round(cloudTokenCountRef.current / elapsed))
+        },
+        () => {
           setCloudDone(true)
           checkRaceComplete()
-        } catch (err) {
-          console.error('Cloud race error:', err)
-          setCloudError('Backend unavailable — make sure the FastAPI server is running')
-          setCloudDone(true)
-          checkRaceComplete()
-        }
-      })()
+        },
+      )
     }
 
     // ── LOCAL COLUMN ──
@@ -240,8 +182,35 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
         },
       })
       localCancelRef.current = abort
+    } else {
+      // Simulated local: near-instant first token (no network), slower streaming
+      setLocalStartTime(now)
+      const match = DEMO_CONVERSATIONS.find(
+        (c) => c.prompt.toLowerCase() === racePrompt.toLowerCase(),
+      )
+      const localText = (match || DEMO_CONVERSATIONS[0]).response
+      let firstTokenTime = null
+      localCancelRef.current = simulateTokenStream(
+        localText,
+        (token) => {
+          if (!firstTokenTime) {
+            firstTokenTime = Date.now()
+            setLocalFirstToken(firstTokenTime)
+            setLocalTTFT(firstTokenTime - now)
+          }
+          localTokenCountRef.current++
+          setLocalTokens(prev => [...prev, token])
+          const elapsed = (Date.now() - firstTokenTime) / 1000
+          if (elapsed > 0) setLocalTPS(Math.round(localTokenCountRef.current / elapsed))
+        },
+        () => {
+          setLocalDone(true)
+          checkRaceComplete()
+        },
+        { initialDelay: 80 + Math.random() * 80, tokenInterval: 35 + Math.random() * 15 },
+      )
     }
-  }, [ollamaConnected, nimConfig, localInferenceMode, webllm]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ollamaConnected, localInferenceMode, webllm]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkRaceComplete = () => {
     setTimeout(() => {
@@ -278,7 +247,7 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
         {/* Cloud column */}
         <RaceColumn
           label="CLOUD"
-          sublabel={cloudReady ? `NVIDIA NIM · ${(nimConfig?.modelId || 'nemotron-super-49b').split('/').pop()}` : 'Not connected'}
+          sublabel="Simulated · data-center GPU cluster"
           accentColor="#6ec0e8"
           tokens={cloudTokens}
           done={cloudDone}
@@ -286,7 +255,6 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
           tps={cloudTPS}
           error={cloudError}
           isRacing={isRacing}
-          placeholder={!cloudReady ? 'Configure NVIDIA NIM Cloud below to race ↓' : null}
         />
 
         {/* Local column */}
@@ -295,7 +263,7 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
           sublabel={
             localInferenceMode === 'ollama' ? 'Ollama · Your Machine'
             : localInferenceMode === 'webllm' ? 'WebGPU · In-Browser'
-            : 'Not connected'
+            : 'Simulated · qwen2.5:0.5b'
           }
           accentColor="var(--brand)"
           tokens={localTokens}
@@ -303,7 +271,6 @@ export default function LatencyRace({ ollamaConnected, nimConfig, onRaceComplete
           ttft={localTTFT}
           tps={localTPS}
           isRacing={isRacing}
-          placeholder={!localReady ? 'Set up Ollama or WebGPU below to race ↓' : null}
         />
       </div>
 

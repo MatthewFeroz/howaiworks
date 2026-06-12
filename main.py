@@ -1,10 +1,10 @@
 """
 howaiworks.io Backend
-FastAPI server providing tokenization, embeddings, and GPU info.
+FastAPI server providing tokenization, embeddings, and Ollama chat.
 
-For Phase 1+2: The frontend uses js-tiktoken client-side, so this backend
-is optional for basic tokenization. But it provides accurate tiktoken
-results and will be essential for Phase 3 (embeddings via Ollama).
+The frontend uses js-tiktoken client-side, so this backend is optional for
+basic tokenization. It provides accurate tiktoken results and powers
+local inference (chat + embeddings) via Ollama on the /run page.
 
 Run: uvicorn main:app --reload --port 8000
 """
@@ -14,15 +14,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import tiktoken
-import subprocess
 import json
-import os
 import httpx
 
 app = FastAPI(title="howaiworks.io API")
-
-# NVIDIA NIM API key (optional — enables zero-config cloud inference)
-NVIDIA_NIM_KEY = os.environ.get("NVIDIA_NIM_KEY", "")
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,13 +50,6 @@ class EmbedRequest(BaseModel):
 class ChatRequest(BaseModel):
     messages: list[dict]
     model: str = "qwen2.5:0.5b"
-
-
-class CloudChatRequest(BaseModel):
-    prompt: str
-    apiKey: str = ""
-    endpoint: str = "https://integrate.api.nvidia.com/v1"
-    model: str = "nvidia/llama-3.3-nemotron-super-49b-v1"
 
 
 # ── TOKENIZATION ──
@@ -166,122 +154,6 @@ async def chat(req: ChatRequest):
             "X-Accel-Buffering": "no",
         },
     )
-
-
-# ── CLOUD CHAT (proxy to NVIDIA NIM / OpenAI-compatible API) ──
-
-@app.post("/api/cloud-chat")
-async def cloud_chat(req: CloudChatRequest):
-    """Proxy chat to NVIDIA NIM or any OpenAI-compatible endpoint. Streams SSE."""
-    # Use client-provided key, fall back to server-side NIM key
-    api_key = req.apiKey or NVIDIA_NIM_KEY
-    if not api_key:
-        async def no_key():
-            yield f"data: {json.dumps({'error': 'No API key configured. Set NVIDIA_NIM_KEY env var or provide a key in the UI.'})}\n\n"
-        return StreamingResponse(no_key(), media_type="text/event-stream")
-
-    async def generate():
-        try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                async with client.stream(
-                    "POST",
-                    f"{req.endpoint.rstrip('/')}/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": req.model,
-                        "messages": [{"role": "user", "content": req.prompt}],
-                        "stream": True,
-                    },
-                ) as response:
-                    response.raise_for_status()
-                    async for line in response.aiter_lines():
-                        if not line or not line.startswith("data: "):
-                            continue
-                        data_str = line[6:]
-                        if data_str.strip() == "[DONE]":
-                            yield "data: [DONE]\n\n"
-                            break
-                        try:
-                            data = json.loads(data_str)
-                            token = (
-                                data.get("choices", [{}])[0]
-                                .get("delta", {})
-                                .get("content", "")
-                            )
-                            if token:
-                                yield f"data: {json.dumps({'token': token})}\n\n"
-                        except (json.JSONDecodeError, IndexError):
-                            continue
-        except httpx.ConnectError:
-            yield f"data: {json.dumps({'error': 'Cannot connect to cloud endpoint'})}\n\n"
-        except Exception as e:
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
-    return StreamingResponse(
-        generate(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
-
-
-# ── CLOUD HEALTH ──
-
-class CloudHealthRequest(BaseModel):
-    apiKey: str = ""
-    endpoint: str = "https://integrate.api.nvidia.com/v1"
-
-@app.post("/api/cloud-health")
-async def cloud_health(req: CloudHealthRequest):
-    """Check if a cloud endpoint (NIM or other) is reachable."""
-    api_key = req.apiKey or NVIDIA_NIM_KEY
-    if not api_key:
-        return {"ok": False, "serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            r = await client.get(
-                f"{req.endpoint.rstrip('/')}/models",
-                headers={"Authorization": f"Bearer {api_key}"},
-            )
-            return {"ok": r.status_code == 200, "serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
-    except Exception:
-        return {"ok": False, "serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
-
-@app.get("/api/cloud-status")
-async def cloud_status():
-    """Quick check if server-side NIM key is configured (no external call)."""
-    return {"serverKeyConfigured": bool(NVIDIA_NIM_KEY)}
-
-
-# ── GPU INFO ──
-
-@app.get("/api/gpu-info")
-async def gpu_info():
-    """Detect NVIDIA GPU via nvidia-smi."""
-    try:
-        result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
-             "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=5,
-        )
-        if result.returncode == 0:
-            parts = result.stdout.strip().split(", ")
-            return {
-                "available": True,
-                "name": parts[0] if len(parts) > 0 else "Unknown",
-                "memory_mb": int(parts[1]) if len(parts) > 1 else 0,
-                "driver": parts[2] if len(parts) > 2 else "Unknown",
-            }
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
-
-    return {"available": False, "name": None, "memory_mb": 0, "driver": None}
 
 
 # ── HEALTH ──

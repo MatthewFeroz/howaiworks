@@ -64,7 +64,7 @@ export default function AboutPage() {
         <div style={headingStyle}>The Story</div>
         <div style={bodyStyle}>
           <p style={{ marginBottom: 12 }}>
-            During an NVIDIA Developer Livestream, Matt Feroz asked:
+            howaiworks.io started with a simple observation:
           </p>
           <div style={{
             padding: '12px 16px',
@@ -75,15 +75,16 @@ export default function AboutPage() {
             fontStyle: 'italic',
             color: 'var(--text-primary)',
           }}>
-            "Is AI literacy a hardware problem or a software education problem?"
+            "Most people use AI every day — almost nobody knows what's actually
+            happening inside."
           </div>
           <p style={{ marginBottom: 12 }}>
-            NVIDIA's answer: DGX Spark solves the hardware side — 128GB of unified
-            memory that can run 200B-parameter models on your desk.
+            Reading about it doesn't fix that. Slides and lectures don't either.
+            Experiencing it does.
           </p>
           <p>
             <strong style={{ color: 'var(--brand)' }}>howaiworks.io</strong> is
-            the software side. Instead of reading about tokenization, embeddings, and
+            built on that idea. Instead of reading about tokenization, embeddings, and
             inference — you experience them. Type text and watch it become tokens.
             See words organize by meaning. Race cloud vs. local inference. No slides,
             no lectures. Just the machine, made visible.

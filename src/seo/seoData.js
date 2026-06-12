@@ -143,7 +143,7 @@ export const ROUTES = {
         heading: 'Cloud vs. local: the real tradeoffs',
         paragraphs: [
           'Cloud models like GPT-4 and Claude are enormous, fast, and always up to date — but you pay per token and your data leaves your machine. Local models are private, free to run, and work offline — but you trade away model size and speed. The Latency Race demo on this page makes the difference visceral, and the tradeoff cards break down when each option wins: privacy-sensitive work, cost-sensitive scale, and offline use favor local; frontier capability favors the cloud.',
-          'This tradeoff is becoming central to how AI is deployed — from phones running on-device assistants to workstations like NVIDIA’s DGX Spark designed to run 200-billion-parameter models at your desk.',
+          'This tradeoff is becoming central to how AI is deployed — from phones running on-device assistants to AI workstations with unified memory designed to run very large models at your desk.',
         ],
       },
     ],
@@ -158,7 +158,7 @@ export const ROUTES = {
       {
         heading: 'Why howaiworks.io exists',
         paragraphs: [
-          'howaiworks.io started with a question Matt Feroz asked during an NVIDIA developer livestream: is AI literacy a hardware problem or a software education problem? Hardware is being solved — machines like DGX Spark can run 200-billion-parameter models on a desk. This site is the education side: instead of slides and lectures, every lesson is something you do. Type and watch text become tokens. Drag through a map of meaning. Run a model on your own GPU.',
+          'howaiworks.io started with a simple observation: most people use AI every day, but almost nobody knows what is actually happening inside. Reading about it does not fix that — experiencing it does. So instead of slides and lectures, every lesson here is something you do. Type and watch text become tokens. Drag through a map of meaning. Run a model on your own GPU.',
           'The entire platform is open source under the MIT license, free to use in classrooms, and built by Matt Feroz, an AI coach and engineer who helps professionals put AI to work. The project is part of a broader learning ecosystem including live workshops, a learning community, and 1:1 coaching at matthewferoz.com.',
         ],
       },

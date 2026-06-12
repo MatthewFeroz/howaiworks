@@ -381,7 +381,7 @@ export default function EmbeddingsPage() {
       <DepthPanel
         visible={true}
         delay={0.5}
-        onOpen={() => { setHasViewedDepth(true); markLessonComplete('lesson-complete-understand') }}
+        onOpen={() => markLessonComplete('lesson-complete-understand')}
         sections={[
           {
             label: 'The Concept',

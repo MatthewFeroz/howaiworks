@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import LatencyRace from '../components/LatencyRace'
 import TradeoffCards from '../components/TradeoffCards'
 import DepthPanel from '../components/DepthPanel'
-import NvidiaCloudCard from '../components/NvidiaCloudCard'
 import SetupGuide from '../components/SetupGuide'
 import Footer from '../components/Footer'
 import DeeperDive from '../components/DeeperDive'
@@ -11,14 +10,6 @@ import { markLessonComplete } from '../components/Navbar'
 
 export default function CloudVsLocalPage({ webllm }) {
   const [ollamaConnected, setOllamaConnected] = useState(false)
-  const [nimConfig, setNimConfig] = useState(() => {
-    const key = localStorage.getItem('nimApiKey')
-    return key ? {
-      apiKey: key,
-      endpoint: 'https://integrate.api.nvidia.com/v1',
-      modelId: 'nvidia/llama-3.3-nemotron-super-49b-v1'
-    } : null
-  })
   const [allTradeoffsExplored, setAllTradeoffsExplored] = useState(false)
 
   // Check Ollama
@@ -31,10 +22,6 @@ export default function CloudVsLocalPage({ webllm }) {
   }, [])
 
   const localInferenceMode = ollamaConnected ? 'ollama' : webllm?.isReady ? 'webllm' : 'simulated'
-
-  const handleNimConfigured = useCallback((config) => {
-    setNimConfig(config)
-  }, [])
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
@@ -68,9 +55,8 @@ export default function CloudVsLocalPage({ webllm }) {
         </p>
       </motion.div>
 
-      {/* Setup Guide — shows when backends are disconnected */}
+      {/* Setup Guide — shows when local inference is not connected */}
       <SetupGuide
-        cloudConnected={!!nimConfig}
         localConnected={ollamaConnected}
         webllm={webllm}
         localInferenceMode={localInferenceMode}
@@ -91,21 +77,10 @@ export default function CloudVsLocalPage({ webllm }) {
       >
         <LatencyRace
           ollamaConnected={ollamaConnected}
-          nimConfig={nimConfig}
           onRaceComplete={() => {}}
           webllm={webllm}
           localInferenceMode={localInferenceMode}
         />
-      </motion.div>
-
-      {/* NVIDIA NIM Cloud Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.25 }}
-        style={{ marginTop: 24 }}
-      >
-        <NvidiaCloudCard onConfigured={handleNimConfigured} />
       </motion.div>
 
       {/* Ollama Local Card */}
@@ -132,7 +107,7 @@ export default function CloudVsLocalPage({ webllm }) {
       <DepthPanel
         visible={true}
         delay={0.55}
-        onOpen={() => { setHasViewedDepth(true); markLessonComplete('lesson-complete-run') }}
+        onOpen={() => markLessonComplete('lesson-complete-run')}
         sections={[
           {
             label: 'The Concept',
@@ -207,16 +182,15 @@ export default function CloudVsLocalPage({ webllm }) {
                 whiteSpace: 'pre',
                 color: 'var(--text-secondary)',
               }}>
-{`# Cloud inference (NVIDIA NIM API)
+{`# Cloud inference (any OpenAI-compatible API)
 import openai
 
 client = openai.OpenAI(
-    base_url="https://integrate.api.nvidia.com/v1",
-    api_key="nvapi-your-key-here"
+    api_key="sk-your-key-here"
 )
 
 response = client.chat.completions.create(
-    model="nvidia/llama-3.3-nemotron-super-49b-v1",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": "What is AI?"}],
     stream=True
 )
@@ -260,8 +234,8 @@ for chunk in response:
                   parameter is 2 bytes, what's the largest model it can hold? What about at 4-bit quantization?
                 </p>
                 <p style={{ marginBottom: 8, paddingLeft: 16 }}>
-                  <strong style={{ color: '#e8d06e' }}>2.</strong> NVIDIA's DGX Spark has 128GB of unified memory.
-                  How does this change what models can run locally?
+                  <strong style={{ color: '#e8d06e' }}>2.</strong> Some workstations now ship with 128GB of
+                  unified memory shared between CPU and GPU. How does this change what models can run locally?
                 </p>
                 <p style={{ paddingLeft: 16 }}>
                   <strong style={{ color: '#e8d06e' }}>3.</strong> Why does cloud have higher time-to-first-token
@@ -295,11 +269,11 @@ for chunk in response:
                     </div>
                   </div>
                   <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid var(--brand)' }}>
-                    <strong style={{ color: 'var(--brand)' }}>NVIDIA DGX Spark (bridging the gap)</strong>
+                    <strong style={{ color: 'var(--brand)' }}>On-device AI (bridging the gap)</strong>
                     <div style={{ marginTop: 4, fontSize: 13 }}>
-                      128GB unified memory. Runs 200B-parameter models locally. This is NVIDIA's answer to
-                      "what if you could have cloud-scale AI on your desk?" It collapses the trade-off
-                      between capability and privacy.
+                      Phones and laptops now ship with neural processors and unified memory built for local
+                      models, and AI workstations can run 100B+ parameter models at your desk. The hardware
+                      is steadily collapsing the trade-off between capability and privacy.
                     </div>
                   </div>
                 </div>
@@ -403,7 +377,7 @@ function OllamaLocalCard({ connected, webllm }) {
       borderRadius: 12,
       overflow: 'hidden',
     }}>
-      {/* Top accent — NVIDIA green */}
+      {/* Top accent */}
       <div style={{
         height: 2,
         background: 'linear-gradient(90deg, transparent, var(--brand), transparent)',

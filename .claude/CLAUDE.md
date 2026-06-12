@@ -71,7 +71,7 @@ The largest component. Orchestrates the tokenizer experience:
 
 ### CloudVsLocalPage — Chat Interface
 
-Receives `webllm` prop. Includes `CloudDemoReplay.jsx`, `DemoReplay.jsx`, `LatencyRace.jsx`, `NvidiaCloudCard.jsx`, `BrevDeployCard.jsx`, `SetupGuide.jsx`, and `TradeoffCards.jsx`.
+Receives `webllm` prop. Includes `LatencyRace.jsx`, `SetupGuide.jsx`, and `TradeoffCards.jsx`. The cloud lane of the race is always simulated (via `CloudDemoReplay.jsx`); the local lane uses Ollama or WebLLM when available, falling back to a simulated stream (`DemoReplay.jsx`).
 
 ### Backend (main.py — optional FastAPI)
 

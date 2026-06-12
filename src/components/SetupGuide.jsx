@@ -157,43 +157,7 @@ const codeStyle = (accent) => ({
   borderRadius: 4,
 })
 
-const cloudAccent = '#6ec0e8'
 const localAccent = 'var(--brand)'
-
-function CloudSteps() {
-  const code = codeStyle('rgba(110,192,232,0.4)')
-  return (
-    <>
-      <IntroBlock accent={cloudAccent}>
-        NVIDIA NIM is a cloud inference API. Your prompt travels over the internet to a data center with clusters of A100 and H100 GPUs, runs through a 70-billion-parameter model called Nemotron, and streams the answer back token by token. It's the same infrastructure behind production AI services — and NVIDIA gives you 1,000 free API calls to try it.
-      </IntroBlock>
-
-      <SetupStep step={1} accent={cloudAccent} title="Create an NVIDIA account">
-        Go to{' '}
-        <a href="https://build.nvidia.com" target="_blank" rel="noopener noreferrer"
-          style={{ color: cloudAccent, textDecoration: 'underline' }}>
-          build.nvidia.com
-        </a>. The free tier gives you access to dozens of models without a credit card.
-      </SetupStep>
-
-      <SetupStep step={2} accent={cloudAccent} title="Pick a model">
-        We use <code style={code}>nemotron-super-49b</code>, a 49-billion-parameter model NVIDIA trained for instruction following. At FP16 that's ~98GB of weights — too large for any consumer GPU. That's why cloud exists.
-      </SetupStep>
-
-      <SetupStep step={3} accent={cloudAccent} title="Generate an API key">
-        Your key starts with <code style={code}>nvapi-</code>. This authenticates your requests so NVIDIA can track your free-tier usage.
-      </SetupStep>
-
-      <SetupStep step={4} accent={cloudAccent} title="Paste it below">
-        After your first race, an NVIDIA Cloud card appears further down this page. Paste your key there. It stays in your browser — never touches any server.
-      </SetupStep>
-
-      <SetupStep step={5} accent={cloudAccent} title="Or set an env var">
-        Running the backend? Set <code style={code}>NVIDIA_NIM_KEY</code> in <code style={code}>.env</code>. The server picks it up automatically.
-      </SetupStep>
-    </>
-  )
-}
 
 function LocalSteps() {
   const code = codeStyle('rgba(248, 95, 0,0.3)')
@@ -234,12 +198,10 @@ function LocalSteps() {
   )
 }
 
-export default function SetupGuide({ cloudConnected, localConnected, webllm, localInferenceMode }) {
+export default function SetupGuide({ localConnected, webllm, localInferenceMode }) {
   const localActive = localConnected || localInferenceMode === 'webllm'
 
-  if (cloudConnected && localActive) return null
-
-  const bothDisconnected = !cloudConnected && !localActive
+  if (localActive) return null
 
   const localTitle = localActive
     ? 'Local — WebLLM Active (Ollama recommended)'
@@ -295,27 +257,14 @@ export default function SetupGuide({ cloudConnected, localConnected, webllm, loc
               lineHeight: 1.5,
               margin: 0,
             }}>
-              {bothDisconnected
-                ? 'Both sides are simulated — connect real backends to see the difference.'
-                : cloudConnected
-                  ? 'Local side is simulated — connect Ollama to run AI on your machine.'
-                  : localActive
-                    ? 'Cloud side is simulated — add an NVIDIA NIM key to use real cloud inference.'
-                    : 'Cloud side is simulated — add an NVIDIA NIM key to use real cloud inference.'
-              }
+              The race below is simulated to show typical timing — the cloud lane
+              replays data-center behavior (slower first token, faster streaming).
+              Set up Ollama or WebGPU to run the local side for real.
             </p>
           </div>
 
           {/* Sections */}
           <div style={{ padding: '0 16px 8px' }}>
-            <SetupSection
-              title="Connect Cloud — NVIDIA NIM"
-              accent={cloudAccent}
-              connected={cloudConnected}
-            >
-              <CloudSteps />
-            </SetupSection>
-
             <SetupSection
               title={localTitle}
               accent={localAccent}
