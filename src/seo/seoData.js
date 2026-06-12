@@ -3,7 +3,9 @@
 // scripts/prerender.mjs — keep this file plain JS with string content only (no JSX).
 
 export const SITE = {
-  origin: 'https://howaiworks.io',
+  // Vercel's production domain is www; the apex 307-redirects to it.
+  // Canonical URLs must point at the served domain, not the redirect.
+  origin: 'https://www.howaiworks.io',
   name: 'howaiworks.io',
   tagline: 'Learn How AI Works, Interactively',
   ogImage: '/og.png',
