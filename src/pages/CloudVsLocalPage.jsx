@@ -6,6 +6,7 @@ import DepthPanel from '../components/DepthPanel'
 import NvidiaCloudCard from '../components/NvidiaCloudCard'
 import SetupGuide from '../components/SetupGuide'
 import Footer from '../components/Footer'
+import DeeperDive from '../components/DeeperDive'
 import { markLessonComplete } from '../components/Navbar'
 
 export default function CloudVsLocalPage({ webllm }) {
@@ -314,6 +315,8 @@ for chunk in response:
         background: 'linear-gradient(90deg, transparent, var(--border), transparent)',
         margin: '40px 0',
       }} />
+
+      <DeeperDive path="/run" />
 
       <Footer />
 

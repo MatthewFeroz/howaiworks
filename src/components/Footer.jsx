@@ -23,6 +23,10 @@ export default function Footer() {
         <a href="https://howaiworks.io" style={linkStyle}>
           howaiworks.io
         </a>
+        <span>·</span>
+        <a href="https://matthewferoz.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>
+          Built by Matt Feroz
+        </a>
       </div>
 
       <div style={{ fontSize: 12 }}>

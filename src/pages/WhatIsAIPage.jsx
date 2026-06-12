@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import Nudge from '../components/Nudge'
 import Footer from '../components/Footer'
+import DeeperDive from '../components/DeeperDive'
 import { markLessonComplete } from '../components/Navbar'
 
 // ─── Era card wrapper ───────────────────────────────────────────────────
@@ -681,6 +682,8 @@ export default function WhatIsAIPage() {
         background: 'linear-gradient(90deg, transparent, var(--border), transparent)',
         margin: '40px 0',
       }} />
+
+      <DeeperDive path="/what-is-ai" />
 
       <Footer />
     </div>

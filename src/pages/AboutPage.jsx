@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import Footer from '../components/Footer'
+import DeeperDive from '../components/DeeperDive'
 
 const sectionStyle = {
   background: 'var(--bg-surface)',
@@ -95,6 +96,8 @@ export default function AboutPage() {
         background: 'linear-gradient(90deg, transparent, var(--border), transparent)',
         margin: '24px 0 40px',
       }} />
+
+      <DeeperDive path="/about" />
 
       <Footer />
     </div>

@@ -25,6 +25,13 @@ const NAV_ITEMS = [
     completionKey: 'lesson-complete-understand',
   },
   {
+    path: '/attention',
+    label: 'Attention',
+    title: 'Attention',
+    preview: 'How AI focuses',
+    completionKey: 'lesson-complete-attention',
+  },
+  {
     path: '/run',
     label: 'Run Local',
     title: 'Run',

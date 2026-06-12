@@ -5,6 +5,7 @@ import MeaningMap from '../components/MeaningMap'
 import WordArithmetic from '../components/WordArithmetic'
 import DepthPanel, { PythonCode } from '../components/DepthPanel'
 import Footer from '../components/Footer'
+import DeeperDive from '../components/DeeperDive'
 import { markLessonComplete } from '../components/Navbar'
 import embeddingData from '../data/embeddingMap.json'
 
@@ -528,15 +529,24 @@ result = np.array(king) - np.array(man) + np.array(woman)
         ]}
       />
 
-      {/* CTA to Page 3 */}
+      {/* CTA to Attention */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
         style={{ padding: '32px 0 16px', textAlign: 'center' }}
       >
+        <p style={{
+          fontSize: 15,
+          color: 'var(--text-secondary)',
+          marginBottom: 20,
+          lineHeight: 1.6,
+        }}>
+          Words have meaning. But how does the model know which meanings matter
+          for each prediction? That's where attention comes in.
+        </p>
         <Link
-          to="/run"
+          to="/attention"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -561,7 +571,7 @@ result = np.array(king) - np.array(man) + np.array(woman)
             e.currentTarget.style.boxShadow = '0 0 20px rgba(118, 185, 0, 0.3)'
           }}
         >
-          See where AI runs
+          See how AI pays attention
           <span style={{ fontSize: 18 }}>→</span>
         </Link>
       </motion.div>
@@ -571,6 +581,8 @@ result = np.array(king) - np.array(man) + np.array(woman)
         background: 'linear-gradient(90deg, transparent, var(--border), transparent)',
         margin: '24px 0 40px',
       }} />
+
+      <DeeperDive path="/understand" />
 
       <Footer />
     </div>

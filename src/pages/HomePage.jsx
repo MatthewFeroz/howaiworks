@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Footer from '../components/Footer'
+import DeeperDive from '../components/DeeperDive'
+import HeroTokenDemo from '../components/HeroTokenDemo'
 
 const LESSONS = [
   {
@@ -26,6 +28,13 @@ const LESSONS = [
   },
   {
     num: 4,
+    title: 'Attention',
+    desc: 'See how transformers focus on what matters',
+    path: '/attention',
+    completionKey: 'lesson-complete-attention',
+  },
+  {
+    num: 5,
     title: 'Run',
     desc: 'Race cloud vs local inference',
     path: '/run',
@@ -34,45 +43,60 @@ const LESSONS = [
 ]
 
 const LOCKED = [
-  { num: 5, title: 'Fine-tune', desc: 'Train on your own data' },
-  { num: 6, title: 'Evaluate', desc: 'Measure model quality' },
-  { num: 7, title: 'Deploy', desc: 'Ship it to production' },
+  { num: 6, title: 'Fine-tune', desc: 'Train on your own data' },
+  { num: 7, title: 'Evaluate', desc: 'Measure model quality' },
+  { num: 8, title: 'Deploy', desc: 'Ship it to production' },
 ]
 
 export default function HomePage() {
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
+    <div>
       {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{ textAlign: 'center', padding: '56px 0 48px' }}
-      >
-        <h1 style={{
-          fontSize: 'clamp(28px, 6vw, 44px)',
-          fontWeight: 700,
-          lineHeight: 1.15,
-          marginBottom: 16,
-          letterSpacing: -0.5,
-        }}>
-          This is how AI{' '}
-          <span style={{ color: 'var(--nvidia-green)' }}>works.</span>
-        </h1>
-        <p style={{
-          fontSize: 17,
-          color: 'var(--text-secondary)',
-          fontWeight: 400,
-          maxWidth: 420,
-          margin: '0 auto',
-          lineHeight: 1.6,
-        }}>
-          Don't read about AI. Experience it. Type, see, and understand
-          what happens inside the machine.
-        </p>
-      </motion.div>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ textAlign: 'center', padding: '80px 0 56px' }}>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              fontSize: 'clamp(40px, 8vw, 64px)',
+              fontWeight: 700,
+              lineHeight: 1.1,
+              marginBottom: 16,
+              letterSpacing: -1,
+            }}
+          >
+            This is how AI{' '}
+            <span style={{ color: 'var(--nvidia-green)' }}>works.</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              fontSize: 'clamp(18px, 2.5vw, 22px)',
+              color: 'var(--text-secondary)',
+              fontWeight: 400,
+              maxWidth: 560,
+              margin: '0 auto',
+              lineHeight: 1.6,
+            }}
+          >
+            Don't read about AI. Experience it. Type, see, and understand
+            what happens inside the machine.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <HeroTokenDemo />
+          </motion.div>
+        </div>
+      </div>
 
       {/* Timeline */}
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px' }}>
       <div style={{ position: 'relative', paddingLeft: 32 }}>
         {/* Vertical line — active portion */}
         <motion.div
@@ -292,7 +316,10 @@ export default function HomePage() {
         margin: '40px 0',
       }} />
 
+      <DeeperDive path="/" />
+
       <Footer />
+      </div>
     </div>
   )
 }

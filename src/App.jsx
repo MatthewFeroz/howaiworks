@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage'
 import TokenizerPage from './pages/TokenizerPage'
 import EmbeddingsPage from './pages/EmbeddingsPage'
 import CloudVsLocalPage from './pages/CloudVsLocalPage'
+import AttentionPage from './pages/AttentionPage'
 import AboutPage from './pages/AboutPage'
 import ResourcesPage from './pages/ResourcesPage'
 import WhatIsAIPage from './pages/WhatIsAIPage'
@@ -25,6 +26,7 @@ export default function App() {
               <Route path="/what-is-ai" element={<WhatIsAIPage />} />
               <Route path="/tokenize" element={<TokenizerPage />} />
               <Route path="/understand" element={<EmbeddingsPage />} />
+              <Route path="/attention" element={<AttentionPage />} />
               <Route path="/run" element={<CloudVsLocalPage webllm={webllm} />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/resources" element={<ResourcesPage />} />

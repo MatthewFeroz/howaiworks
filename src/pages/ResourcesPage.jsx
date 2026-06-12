@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion'
 import Footer from '../components/Footer'
+import DeeperDive from '../components/DeeperDive'
 
 const TRUSTED_VOICES = [
   {
     name: 'Andrew Ng',
     role: 'Co-founder of Coursera, founder of DeepLearning.AI',
-    photo: 'https://pbs.twimg.com/profile_images/1851634748498673664/Rjl5D4c0_400x400.jpg',
+    photo: '/andrew-ng.jpg',
     desc: 'Stanford professor and former head of Google Brain. His free courses on machine learning and deep learning are the gold standard for getting started.',
     links: [
       { label: 'DeepLearning.AI', href: 'https://www.deeplearning.ai/' },
@@ -20,25 +21,6 @@ const TRUSTED_VOICES = [
     links: [
       { label: 'YouTube', href: 'https://www.youtube.com/@AndrejKarpathy' },
       { label: 'Zero to Hero', href: 'https://karpathy.ai/zero-to-hero.html' },
-    ],
-  },
-  {
-    name: '3Blue1Brown (Grant Sanderson)',
-    role: 'Math & ML educator',
-    photo: 'https://pbs.twimg.com/profile_images/1603443713498820608/KDaMR36Y_400x400.jpg',
-    desc: 'Beautiful visual explanations of neural networks, transformers, and the math behind them. If you want to build intuition, start here.',
-    links: [
-      { label: 'YouTube', href: 'https://www.youtube.com/@3blue1brown' },
-      { label: 'Neural Networks Series', href: 'https://www.3blue1brown.com/topics/neural-networks' },
-    ],
-  },
-  {
-    name: 'Yannic Kilcher',
-    role: 'ML researcher & paper explainer',
-    photo: 'https://pbs.twimg.com/profile_images/1612547532254187520/LmMVCkKN_400x400.jpg',
-    desc: 'Deep, honest breakdowns of the latest AI papers. Great for understanding what\'s actually new vs. hype.',
-    links: [
-      { label: 'YouTube', href: 'https://www.youtube.com/@YannicKilcher' },
     ],
   },
   {
@@ -264,6 +246,8 @@ export default function ResourcesPage() {
         background: 'linear-gradient(90deg, transparent, var(--border), transparent)',
         margin: '40px 0',
       }} />
+
+      <DeeperDive path="/resources" />
 
       <Footer />
     </div>

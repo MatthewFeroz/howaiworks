@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Hero from '../components/Hero'
 import TokenizerPhase from '../components/TokenizerPhase'
 import Footer from '../components/Footer'
+import DeeperDive from '../components/DeeperDive'
 import { useTokenizer } from '../hooks/useTokenizer'
 
 export default function TokenizerPage() {
@@ -87,6 +88,8 @@ export default function TokenizerPage() {
         background: 'linear-gradient(90deg, transparent, var(--border), transparent)',
         margin: '24px 0 40px',
       }} />
+
+      <DeeperDive path="/tokenize" />
 
       <Footer />
     </div>
